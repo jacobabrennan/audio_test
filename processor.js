@@ -51,16 +51,18 @@ const RATE_SAMPLE = 8000
 const TAU = Math.PI*2;
 const BPM_DEFAULT = 100;
 
+//-- Module State --------------------------------
+const channel = [];
+
 //-- Main Processor ------------------------------
 registerProcessor('processor', class extends AudioWorkletProcessor {
-    channel = []
     constructor() {
         super();
-        this.channel[0] = new Channel(waveSquare);
-        this.channel[1] = new Channel(waveSquare);
-        this.channel[2] = new Channel(waveSaw);
-        this.channel[3] = new Channel(waveTriangle);
-        this.channel[4] = new Channel(waveNoise);
+        channel[0] = new Channel(waveSquare);
+        channel[1] = new Channel(waveSquare);
+        channel[2] = new Channel(waveSaw);
+        channel[3] = new Channel(waveTriangle);
+        channel[4] = new Channel(waveNoise);
         this.playSong(new Song(
             [
                 [100,200,0.5,8000],
@@ -76,16 +78,8 @@ registerProcessor('processor', class extends AudioWorkletProcessor {
         // if(!this.songCurrent) { return true;}
         const output = outputs[0][0];
         let bufferLength = output.length;
-        let c0 = this.channel[0];
-        let c1 = this.channel[1];
-        let c2 = this.channel[2];
-        let c3 = this.channel[3];
-        let c4 = this.channel[4];
-        let sample;
         for(let index=0; index < bufferLength; index++) {
-            sample = this.songCurrent.sample(this.channel);
-            // sample = c0.sample()+c1.sample()+c2.sample()+c3.sample()+c4.sample();
-            output[index] = sample;//Math.max(-1, Math.min(1, sample));
+            output[index] = this.songCurrent.sample();
         }
         return true;
     }
@@ -115,28 +109,28 @@ class Song extends AudioProcessor {
         this.indexRow = 0;
         this.indexSample = 0;
     }
-    sample(channels) {
+    sample() {
         if(!(this.indexSample%this.samplesPerRow)) {
-            this.playRow(this.indexRow, channels);
+            this.playRow(this.indexRow);
             this.indexRow++;
         }
         this.indexSample++;
         return (
-            channels[0].sample() +
-            channels[1].sample() +
-            channels[2].sample() +
-            channels[3].sample() +
-            channels[4].sample()
+            channel[0].sample() +
+            channel[1].sample() +
+            channel[2].sample() +
+            channel[3].sample() +
+            channel[4].sample()
         );
     }
-    playRow(rowIndex, channels) {
+    playRow(rowIndex) {
         let dataPattern = this.pattern[this.indexPattern]
         let offsetCell = rowIndex*5;
-        channels[0].playCell(dataPattern[  offsetCell], this);
-        channels[1].playCell(dataPattern[++offsetCell], this);
-        channels[2].playCell(dataPattern[++offsetCell], this);
-        channels[3].playCell(dataPattern[++offsetCell], this);
-        channels[4].playCell(dataPattern[++offsetCell], this);
+        channel[0].playCell(dataPattern[  offsetCell], this);
+        channel[1].playCell(dataPattern[++offsetCell], this);
+        channel[2].playCell(dataPattern[++offsetCell], this);
+        channel[3].playCell(dataPattern[++offsetCell], this);
+        channel[4].playCell(dataPattern[++offsetCell], this);
     }
 }
 
