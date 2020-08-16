@@ -27,6 +27,7 @@ const MASK_CELL_FLAG_VOLUME = 0b01000000000000000000000000000000;
 const MASK_CELL_FLAG_UNUSED = 0b00100000000000000000000000000000;
 const MASK_CELL_NOTE_WIDTH = 6;
 const MASK_CELL_NOTE_OFFSET = 23;
+const MASK_CELL_NOTE_STOP = Math.pow(2, MASK_CELL_NOTE_WIDTH)-1
 const MASK_CELL_INSTRUMENT_WIDTH = 5;
 const MASK_CELL_INSTRUMENT_OFFSET = 18;
 const MASK_CELL_VOLUME_WIDTH = 6;
@@ -117,6 +118,11 @@ class Song extends AudioProcessor {
                     volume / (Math.pow(2, MASK_CELL_VOLUME_WIDTH)-1)
                 );
             }
+            if(note === MASK_CELL_NOTE_STOP) {
+                channel[indexChannel].noteEnd();
+                console.log('Cell end')
+                return;
+            }
             instrument.notePlay(note, indexChannel);
         }
     }
@@ -137,8 +143,10 @@ class Channel extends AudioProcessor {
         return this.wave.sample() * this.volume * this.instrument.sample(this);
     }
     noteEnd() {
-        if(!this.instrument) { return;}
-        this.instrument.noteEnd();
+        if(this.instrument) {
+            this.ADSRMode = 3;
+            this.ADSRTime = this.instrument.envelope[3];
+        }
     }
     volumeSet(volumeNew) {
         this.volume = volumeNew;
@@ -315,7 +323,10 @@ for(let I = 0; I < 256; I++) {
     const note = Math.floor(Math.random()*24)+24;
     testPattern[I*CHANNELS_NUMBER] = cell(note,0,32,0);
     if(!(I%2)) {
+        testPattern[I*CHANNELS_NUMBER+1] = cell(note-7,0,32,0);
         testPattern[I*CHANNELS_NUMBER+4] = cell(1,1,63,0);
+    } else {
+        testPattern[I*CHANNELS_NUMBER] = cell(MASK_CELL_NOTE_STOP,0,null,0);
     }
     if(!(I%4)) {
         testPattern[(I*CHANNELS_NUMBER)+4] = cell(5,2,63,0);
