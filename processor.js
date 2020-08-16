@@ -2,39 +2,6 @@
 
 //==============================================================================
 
-//------------------------------------------------
-function cell(note, instrument, volume, effect) {
-    let R = (
-        (1          << 31) |
-        (note       << 23) |
-        (instrument << 18) |
-        (volume     << 12) |
-        (effect     <<  0)
-    );
-    return R;
-}
-function empty() {
-    return 0;
-}
-function pattern(rows, channels) {
-    return new Uint32Array(rows*channels);
-}
-const testPattern = pattern(256, 5);
-for(let I = 0; I < 256; I++) {
-    const note = Math.floor(Math.random()*16)+24;
-    testPattern[I*5] = cell(note,0,32,0);
-    if(!(I%2)) {
-        testPattern[I*5+4] = cell(1,3,63,0);
-    }
-    if(!(I%4)) {
-        testPattern[(I*5)+4] = cell(5,4,63,0);
-        testPattern[(I*5)+3] = cell(28,4,63,0);
-    }
-}
-
-
-//==============================================================================
-
 //-- Notes ---------------------------------------
     // A-O·II·VV·EEE
     // A-O: Note name (A) and octave (O)
@@ -47,9 +14,25 @@ for(let I = 0; I < 256; I++) {
         // Three Nibbles
 
 //-- Constants -----------------------------------
-const RATE_SAMPLE = 8000
+// Generic geometric and physical constants
 const TAU = Math.PI*2;
-const BPM_DEFAULT = 100;
+// Audio parameters
+const RATE_SAMPLE = 8000;
+const BPM_DEFAULT = 500;
+const CHANNELS_NUMBER = 5;
+// Pattern cell data masking
+// 0b 000 NNNNNN IIIII VVVVVV EEEEEEEEEEEE 
+const MASK_CELL_FLAG_DATA   = 0b10000000000000000000000000000000;
+const MASK_CELL_FLAG_VOLUME = 0b01000000000000000000000000000000;
+const MASK_CELL_FLAG_UNUSED = 0b00100000000000000000000000000000;
+const MASK_CELL_NOTE_WIDTH = 6;
+const MASK_CELL_NOTE_OFFSET = 23;
+const MASK_CELL_INSTRUMENT_WIDTH = 5;
+const MASK_CELL_INSTRUMENT_OFFSET = 18;
+const MASK_CELL_VOLUME_WIDTH = 6;
+const MASK_CELL_VOLUME_OFFSET = 12;
+const MASK_CELL_EFFECT_WIDTH = 12;
+const MASK_CELL_EFFECT_OFFSET = 0;
 
 //-- Module State --------------------------------
 const channel = [];
@@ -65,11 +48,9 @@ registerProcessor('processor', class extends AudioWorkletProcessor {
         channel[4] = new Channel(waveNoise);
         this.playSong(new Song(
             [
-                [100,200,0.5,8000],
-                [100,200,0.5,8000],
-                [100,200,0.5,8000],
-                [25,25,1,500],
-                [25,75,1,1000],
+                [100,200,0.5,8000, true],
+                [25,25,1,500, false],
+                [25,75,1,1000, false],
             ],
             [testPattern],
         ));
@@ -125,42 +106,42 @@ class Song extends AudioProcessor {
     }
     playRow(rowIndex) {
         let dataPattern = this.pattern[this.indexPattern]
-        let offsetCell = rowIndex*5;
-        channel[0].playCell(dataPattern[  offsetCell], this);
-        channel[1].playCell(dataPattern[++offsetCell], this);
-        channel[2].playCell(dataPattern[++offsetCell], this);
-        channel[3].playCell(dataPattern[++offsetCell], this);
-        channel[4].playCell(dataPattern[++offsetCell], this);
+        let offsetCell = rowIndex*CHANNELS_NUMBER;
+        for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
+            let cell = dataPattern[offsetCell+indexChannel];
+            if(!cell) { continue;}
+            let [note, indexInstrument, volume, effect] = cellParse(cell);
+            let instrument = this.instrument[indexInstrument];
+            if(cell&MASK_CELL_FLAG_VOLUME) {
+                channel[indexChannel].volumeSet(
+                    volume / (Math.pow(2, MASK_CELL_VOLUME_WIDTH)-1)
+                );
+            }
+            instrument.notePlay(note, indexChannel);
+        }
     }
 }
 
 //-- Channel -------------------------------------
 class Channel extends AudioProcessor {
+    volume = 1
+    ADSRTime = 0
+    ADSRMode = 4
+    // ADSRSustain = false
     constructor(waveForm) {
         super();
         this.wave = new waveForm();
     }
     sample() {
         if(!this.instrument) { return 0;}
-        return this.wave.sample() * this.instrument.sample() * this.volume;
-    }
-    playCell(cell, song) {
-        if(!cell) { return;}
-        const note       = (cell & 0b00011111100000000000000000000000) >> 23;
-        const instrument = (cell & 0b00000000011111000000000000000000) >> 18;
-        const volume     = (cell & 0b00000000000000111111000000000000) >> 12;
-        const effect     = (cell & 0b00000000000000000000111111111111) >>  0;
-        this.volume = volume / 63;
-        this.note(note, song.instrument[instrument], false);
-    }
-    note(note, instrument, sustain) {
-        this.instrument = instrument;
-        this.wave.setNote(note);
-        this.instrument.note(note, sustain);
+        return this.wave.sample() * this.volume * this.instrument.sample(this);
     }
     noteEnd() {
         if(!this.instrument) { return;}
         this.instrument.noteEnd();
+    }
+    volumeSet(volumeNew) {
+        this.volume = volumeNew;
     }
 }
 
@@ -174,7 +155,7 @@ class wavePhase extends AudioProcessor{
         super();
         this.setFrequency(1);
     }
-    setNote(note) {
+    noteSet(note) {
         this.setFrequency(55*Math.pow(2, note/12));
     }
     setFrequency(frequencyNew) {
@@ -237,7 +218,7 @@ class waveNoise extends wavePhase { // 16 "frequencies" available, 1=high, 16=lo
     //     // this.phaseOffset = Math.floor(RATE_SAMPLE / timerPeriod[this.frequency]);
     // }
     sr = 1
-    setNote(note) {
+    noteSet(note) {
         this.frequency = note;
     }
     sample() {
@@ -257,33 +238,31 @@ class Instrument extends AudioProcessor {
         S: Sustain volume
         R: Time to "release" to 0 volume
     */
-    time = 0
-    mode = 4
-    sustain = false;
-    constructor(timeAttack, timeDecay, volumeSustain, timeRelease) {
+    constructor(timeAttack, timeDecay, volumeSustain, timeRelease, sustain) {
         super();
         this.envelope = [timeAttack, timeDecay, volumeSustain, timeRelease];
+        this.sustain = sustain;
     }
-    sample() {
-        switch(this.mode) {
+    sample(playChannel) {
+        switch(playChannel.ADSRMode) {
             case 4:
                 return 0;
             case 2:
                 if(this.sustain) {
-                    this.envelope[2];
+                    return this.envelope[2];
                 } else {
-                    this.mode++;
-                    this.time = this.envelope[3]
+                    playChannel.ADSRMode++;
+                    playChannel.ADSRTime = this.envelope[3]
                 }
                 break;
             default:
-                if(this.time--) { break;}
-                this.mode++;
-                this.time = this.envelope[this.mode]
+                if(playChannel.ADSRTime--) { break;}
+                playChannel.ADSRMode++;
+                playChannel.ADSRTime = this.envelope[playChannel.ADSRMode]
                 break;
         }
-        const P = this.time/this.envelope[this.mode];
-        switch(this.mode) {
+        const P = playChannel.ADSRTime/this.envelope[playChannel.ADSRMode];
+        switch(playChannel.ADSRMode) {
             case 0:
                 return 1-P;
             case 1:
@@ -292,13 +271,54 @@ class Instrument extends AudioProcessor {
                 return P*this.envelope[2];
         }
     }
-    note(frequency, sustain) {
-        this.frequency = frequency;
-        this.mode = 0;
-        this.time = this.envelope[0];
-        this.sustain = sustain;
+    notePlay(note, indexChannel) {
+        let playChannel = channel[indexChannel];
+        playChannel.wave.noteSet(note);
+        playChannel.instrument = this;
+        playChannel.ADSRMode = 0;
+        playChannel.ADSRTime = this.envelope[0];
+        playChannel.ADSRSustain = true;
     }
-    noteEnd() {
-        this.sustain = false;
+}
+
+
+//== Pattern Building ==========================================================
+
+//------------------------------------------------
+function cell(note, instrument, volume, effect) {
+    let R = (
+        MASK_CELL_FLAG_DATA |
+        (Number.isFinite(volume)? MASK_CELL_FLAG_VOLUME : 0) |
+        (note       << MASK_CELL_NOTE_OFFSET      ) |
+        (instrument << MASK_CELL_INSTRUMENT_OFFSET) |
+        (volume     << MASK_CELL_VOLUME_OFFSET    ) |
+        (effect     << MASK_CELL_EFFECT_OFFSET    )
+    );
+    return R;
+}
+function cellParse(cellData32Bit) {
+    return [
+        (cellData32Bit >> MASK_CELL_NOTE_OFFSET      ) & (Math.pow(2,MASK_CELL_NOTE_WIDTH      )-1),
+        (cellData32Bit >> MASK_CELL_INSTRUMENT_OFFSET) & (Math.pow(2,MASK_CELL_INSTRUMENT_WIDTH)-1),
+        (cellData32Bit >> MASK_CELL_VOLUME_OFFSET    ) & (Math.pow(2,MASK_CELL_VOLUME_WIDTH    )-1),
+        (cellData32Bit >> MASK_CELL_EFFECT_OFFSET    ) & (Math.pow(2,MASK_CELL_EFFECT_WIDTH    )-1),
+    ];
+}
+function empty() {
+    return 0;
+}
+function pattern(rows, channels) {
+    return new Uint32Array(rows*channels);
+}
+const testPattern = pattern(256, CHANNELS_NUMBER);
+for(let I = 0; I < 256; I++) {
+    const note = Math.floor(Math.random()*24)+24;
+    testPattern[I*CHANNELS_NUMBER] = cell(note,0,32,0);
+    if(!(I%2)) {
+        testPattern[I*CHANNELS_NUMBER+4] = cell(1,1,63,0);
+    }
+    if(!(I%4)) {
+        testPattern[(I*CHANNELS_NUMBER)+4] = cell(5,2,63,0);
+        testPattern[(I*CHANNELS_NUMBER)+3] = cell(28,2,63,0);
     }
 }
