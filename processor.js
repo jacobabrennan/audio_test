@@ -2,17 +2,6 @@
 
 //==============================================================================
 
-//-- Notes ---------------------------------------
-    // A-O·II·VV·EEE
-    // A-O: Note name (A) and octave (O)
-        // 2 Nibbles
-    // I: Instrument
-        // 1 Nibble
-    // V: Volume
-        // Byte
-    // E: Effects
-        // Three Nibbles
-
 //-- Constants -----------------------------------
 // Generic geometric and physical constants
 const TAU = Math.PI*2;
@@ -37,6 +26,7 @@ const MASK_CELL_EFFECT_OFFSET = 0;
 
 //-- Module State --------------------------------
 const channel = [];
+let songCurrent;
 
 //-- Main Processor ------------------------------
 registerProcessor('processor', class extends AudioWorkletProcessor {
@@ -47,26 +37,23 @@ registerProcessor('processor', class extends AudioWorkletProcessor {
         channel[2] = new Channel(waveSaw);
         channel[3] = new Channel(waveTriangle);
         channel[4] = new Channel(waveNoise);
-        this.playSong(new Song(
+        songCurrent = new Song(
             [
                 [100,200,0.5,8000, true],
                 [25,25,1,500, false],
                 [25,75,1,1000, false],
             ],
             [testPattern],
-        ));
+        );
     }
     process(inputs, outputs, parameters) {
         // if(!this.songCurrent) { return true;}
         const output = outputs[0][0];
         let bufferLength = output.length;
         for(let index=0; index < bufferLength; index++) {
-            output[index] = this.songCurrent.sample();
+            output[index] = songCurrent.sample();
         }
         return true;
-    }
-    playSong(songNew) {
-        this.songCurrent = songNew;
     }
 });
 
@@ -326,7 +313,7 @@ for(let I = 0; I < 256; I++) {
         testPattern[I*CHANNELS_NUMBER+1] = cell(note-7,0,32,0);
         testPattern[I*CHANNELS_NUMBER+4] = cell(1,1,63,0);
     } else {
-        testPattern[I*CHANNELS_NUMBER] = cell(MASK_CELL_NOTE_STOP,0,null,0);
+        // testPattern[I*CHANNELS_NUMBER] = cell(MASK_CELL_NOTE_STOP,0,null,0);
     }
     if(!(I%4)) {
         testPattern[(I*CHANNELS_NUMBER)+4] = cell(5,2,63,0);
