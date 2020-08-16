@@ -4,59 +4,103 @@
 
 //-- Constants -----------------------------------
 // Generic geometric and physical constants
-const TAU = Math.PI*2;
+export const TAU = Math.PI*2;
 // Audio parameters
-const RATE_SAMPLE = 8000;
-const BPM_DEFAULT = 500;
-const CHANNELS_NUMBER = 5;
+export const RATE_SAMPLE = 8000;
+export const BPM_DEFAULT = 500;
+export const CHANNELS_NUMBER = 5;
 // Pattern cell data masking
 // 0b 000 NNNNNN IIIII VVVVVV EEEEEEEEEEEE 
-const MASK_CELL_FLAG_DATA   = 0b10000000000000000000000000000000;
-const MASK_CELL_FLAG_VOLUME = 0b01000000000000000000000000000000;
-const MASK_CELL_FLAG_UNUSED = 0b00100000000000000000000000000000;
-const MASK_CELL_NOTE_WIDTH = 6;
-const MASK_CELL_NOTE_OFFSET = 23;
-const MASK_CELL_NOTE_STOP = Math.pow(2, MASK_CELL_NOTE_WIDTH)-1
-const MASK_CELL_INSTRUMENT_WIDTH = 5;
-const MASK_CELL_INSTRUMENT_OFFSET = 18;
-const MASK_CELL_VOLUME_WIDTH = 6;
-const MASK_CELL_VOLUME_OFFSET = 12;
-const MASK_CELL_EFFECT_WIDTH = 12;
-const MASK_CELL_EFFECT_OFFSET = 0;
+export const MASK_CELL_FLAG_DATA   = 0b10000000000000000000000000000000;
+export const MASK_CELL_FLAG_VOLUME = 0b01000000000000000000000000000000;
+export const MASK_CELL_FLAG_UNUSED = 0b00100000000000000000000000000000;
+export const MASK_CELL_NOTE_WIDTH = 6;
+export const MASK_CELL_NOTE_OFFSET = 23;
+export const MASK_CELL_NOTE_STOP = Math.pow(2, MASK_CELL_NOTE_WIDTH)-1
+export const MASK_CELL_INSTRUMENT_WIDTH = 5;
+export const MASK_CELL_INSTRUMENT_OFFSET = 18;
+export const MASK_CELL_VOLUME_WIDTH = 6;
+export const MASK_CELL_VOLUME_OFFSET = 12;
+export const MASK_CELL_EFFECT_WIDTH = 12;
+export const MASK_CELL_EFFECT_OFFSET = 0;
+// Client Actions
+let INDEX = 1;
+export const ACTION_READY = INDEX++;
+export const ACTION_PATTERN = INDEX++;
+export const ACTION_PLAYBACK_PLAY = INDEX++;
+export const ACTION_PLAYBACK_STOP = INDEX++;
 
 //-- Module State --------------------------------
+let worklet;
 const channel = [];
 let songCurrent;
 
-//-- Main Processor ------------------------------
-registerProcessor('processor', class extends AudioWorkletProcessor {
-    constructor() {
-        super();
-        channel[0] = new Channel(waveSquare);
-        channel[1] = new Channel(waveSquare);
-        channel[2] = new Channel(waveSaw);
-        channel[3] = new Channel(waveTriangle);
-        channel[4] = new Channel(waveNoise);
-        songCurrent = new Song(
-            [
-                [100,200,0.5,8000, true],
-                [25,25,1,500, false],
-                [25,75,1,1000, false],
-            ],
-            [testPattern],
-        );
-    }
-    process(inputs, outputs, parameters) {
-        // if(!this.songCurrent) { return true;}
-        const output = outputs[0][0];
-        let bufferLength = output.length;
-        for(let index=0; index < bufferLength; index++) {
-            output[index] = songCurrent.sample();
-        }
-        return true;
-    }
-});
 
+//-- Setup ---------------------------------------
+function setup() {
+    channel[0] = new Channel(waveSquare);
+    channel[1] = new Channel(waveSquare);
+    channel[2] = new Channel(waveSaw);
+    channel[3] = new Channel(waveTriangle);
+    channel[4] = new Channel(waveNoise);
+}
+
+
+//== Worklet Interface =========================================================
+
+//-- Connection ----------------------------------
+if(typeof registerProcessor !== 'undefined') {
+    registerProcessor('processor', class extends AudioWorkletProcessor {
+        constructor() {
+            super();
+            worklet = this;
+            this.port.onmessage = function (eventMessage) {
+                messageReceive(eventMessage.data.action, eventMessage.data.data);
+            }
+            setup();
+            messageSend(ACTION_READY, {});
+        }
+        process(inputs, outputs, parameters) {
+            if(!songCurrent) { return true;}
+            const output = outputs[0][0];
+            let bufferLength = output.length;
+            for(let index=0; index < bufferLength; index++) {
+                output[index] = songCurrent.sample();
+            }
+            return true;
+        }
+    });
+}
+
+//-- Messaging -----------------------------------
+function messageSend(action, data) {
+    worklet.port.postMessage({
+        action: action,
+        data: data,
+    });
+}
+function messageReceive(action, data) {
+    switch(action) {
+        case ACTION_PLAYBACK_PLAY:
+            if(!songCurrent) { break;}
+            songCurrent.play();
+            break;
+        case ACTION_PLAYBACK_STOP:
+            if(!songCurrent) { break;}
+            songCurrent.pause();
+            break;
+        case ACTION_PATTERN:
+            songCurrent = new Song(
+                [
+                    [100,200,0.5,8000, true],
+                    [25,25,1,500, false],
+                    [25,75,1,1000, false],
+                ],
+                [data],
+            );
+            break;
+    }
+}
 
 //== Audio Processors ==========================================================
 
@@ -68,6 +112,7 @@ class AudioProcessor {
 //-- Song Playing --------------------------------
 class Song extends AudioProcessor {
     samplesPerRow = (RATE_SAMPLE*60)/BPM_DEFAULT
+    playing = false
     constructor(instruments, patterns) {
         super();
         this.instrument = instruments.map(function (envelope) {
@@ -79,6 +124,7 @@ class Song extends AudioProcessor {
         this.indexSample = 0;
     }
     sample() {
+        if(!this.playing) { return 0;}
         if(!(this.indexSample%this.samplesPerRow)) {
             this.playRow(this.indexRow);
             this.indexRow++;
@@ -107,10 +153,18 @@ class Song extends AudioProcessor {
             }
             if(note === MASK_CELL_NOTE_STOP) {
                 channel[indexChannel].noteEnd();
-                console.log('Cell end')
                 return;
             }
             instrument.notePlay(note, indexChannel);
+        }
+    }
+    play() {
+        this.playing = true;
+    }
+    pause() {
+        this.playing = false;
+        for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
+            channel[indexChannel].noteEnd();
         }
     }
 }
@@ -280,7 +334,7 @@ class Instrument extends AudioProcessor {
 //== Pattern Building ==========================================================
 
 //------------------------------------------------
-function cell(note, instrument, volume, effect) {
+export function cell(note, instrument, volume, effect) {
     let R = (
         MASK_CELL_FLAG_DATA |
         (Number.isFinite(volume)? MASK_CELL_FLAG_VOLUME : 0) |
@@ -291,7 +345,7 @@ function cell(note, instrument, volume, effect) {
     );
     return R;
 }
-function cellParse(cellData32Bit) {
+export function cellParse(cellData32Bit) {
     return [
         (cellData32Bit >> MASK_CELL_NOTE_OFFSET      ) & (Math.pow(2,MASK_CELL_NOTE_WIDTH      )-1),
         (cellData32Bit >> MASK_CELL_INSTRUMENT_OFFSET) & (Math.pow(2,MASK_CELL_INSTRUMENT_WIDTH)-1),
@@ -299,24 +353,9 @@ function cellParse(cellData32Bit) {
         (cellData32Bit >> MASK_CELL_EFFECT_OFFSET    ) & (Math.pow(2,MASK_CELL_EFFECT_WIDTH    )-1),
     ];
 }
-function empty() {
+export function empty() {
     return 0;
 }
-function pattern(rows, channels) {
+export function pattern(rows, channels) {
     return new Uint32Array(rows*channels);
-}
-const testPattern = pattern(256, CHANNELS_NUMBER);
-for(let I = 0; I < 256; I++) {
-    const note = Math.floor(Math.random()*24)+24;
-    testPattern[I*CHANNELS_NUMBER] = cell(note,0,32,0);
-    if(!(I%2)) {
-        testPattern[I*CHANNELS_NUMBER+1] = cell(note-7,0,32,0);
-        testPattern[I*CHANNELS_NUMBER+4] = cell(1,1,63,0);
-    } else {
-        // testPattern[I*CHANNELS_NUMBER] = cell(MASK_CELL_NOTE_STOP,0,null,0);
-    }
-    if(!(I%4)) {
-        testPattern[(I*CHANNELS_NUMBER)+4] = cell(5,2,63,0);
-        testPattern[(I*CHANNELS_NUMBER)+3] = cell(28,2,63,0);
-    }
 }
