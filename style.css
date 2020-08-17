@@ -69,8 +69,6 @@ body {
 }
 .pattern_cell, .pattern_row_indicator, .pattern_header_channel {
     padding: 0ch 1ch;
-    border-right: 2px inset grey;
-    border-left: 2px inset grey;
 }
 .pattern_cell > input {
     border: none;
