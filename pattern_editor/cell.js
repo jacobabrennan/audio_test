@@ -4,156 +4,20 @@
 
 //-- Dependencies --------------------------------
 import {
-    cell,
     cellParse,
-    CHANNELS_NUMBER,
     MASK_CELL_FLAG_DATA,
     MASK_CELL_NOTE_WIDTH,
     MASK_CELL_INSTRUMENT_WIDTH,
     MASK_CELL_VOLUME_WIDTH,
-} from './processor.js';
-
-//-- Module State --------------------------------
-let pattern;
-let currentPattern;
+} from '../processor.js';
 
 //------------------------------------------------
-export async function setup(containerId) {
-    const container = document.getElementById(containerId);
-    pattern = new Pattern(container);
-}
-export function fillData(patternData) {
-    pattern.fillData(patternData);
-}
-export function patternGet() {
-    return currentPattern;
-}
-export function patternHighlightRow(indexRow, scroll) {
-    pattern.highlightRow(indexRow, scroll);
-}
-
-//------------------------------------------------
-function editCell(row, channel, cellData) {
-    const indexCell = row*CHANNELS_NUMBER + channel;
-    currentPattern[indexCell] = cellData;
-    pattern.editCell(row, channel, cellData);
-}
-function editCellNote(row, channel, note) {
-    const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(currentPattern[indexCell]);
-    cellData = cell(note, cellData[1], cellData[2], cellData[3]);
-    editCell(row, channel, cellData);
-}
-function editCellInstrument(row, channel, instrument) {
-    const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(currentPattern[indexCell]);
-    cellData = cell(cellData[0], instrument, cellData[2], cellData[3]);
-    editCell(row, channel, cellData);
-}
-function editCellVolume(row, channel, volume) {
-    const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(currentPattern[indexCell]);
-    cellData = cell(cellData[0], cellData[1], volume, cellData[3]);
-    editCell(row, channel, cellData);
-}
-function editCellEffects(row, channel, effects) {
-    const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(currentPattern[indexCell]);
-    cellData = cell(cellData[0], cellData[1], cellData[2], effects);
-    editCell(row, channel, cellData);
-}
-
-//------------------------------------------------
-class Pattern {
-    constructor(elementContainer) {
-        this.element = document.createElement('div');
-        this.element.className = 'pattern_pattern';
-        this.rows = [];
-        elementContainer.append(this.element);
-    }
-    fillData(patternData) {
-        currentPattern = patternData;
-        const patternLength = patternData.length / CHANNELS_NUMBER;
-        let rowsDifference = patternLength - this.rows.length;
-        if(rowsDifference < 0) {
-            const rowsDead = this.rows.splice(patternLength, -rowsDifference);
-            for(let row of rowsDead) {
-                row.dispose();
-            }
-        }
-        else if(rowsDifference > 0) {
-            while(rowsDifference) {
-                rowsDifference--;
-                this.rows.push(
-                    new Row(this.element, this.rows.length)
-                );
-            }
-        }
-        for(let indexRow = 0; indexRow < patternLength; indexRow++) {
-            let row = this.rows[indexRow];
-            let rowData = patternData.slice(
-                indexRow*CHANNELS_NUMBER,
-                (indexRow+1)*CHANNELS_NUMBER,
-            );
-            row.fillData(rowData);
-        }
-    }
-    editCell(row, channel, cellData) {
-        this.rows[row].editCell(channel, cellData);
-    }
-    highlightRow(indexRow, scroll) {
-        if(Number.isFinite(this.highlightRowIndexCurrent)) {
-            this.rows[this.highlightRowIndexCurrent].highlight(false);
-        }
-        this.highlightRowIndexCurrent = indexRow;
-        this.rows[indexRow].highlight(true, scroll);
-    }
-}
-class Row {
-    constructor(elementContainer, rowNumber) {
-        this.element = document.createElement('div');
-        this.element.className = 'pattern_row';
-        this.lineIndicator = document.createElement('div');
-        this.lineIndicator.className = 'pattern_row_indicator';
-        this.lineIndicator.innerHTML = rowNumber.toString(16).padStart(2, '0');
-        this.element.append(this.lineIndicator);
-        this.cells = new Array(CHANNELS_NUMBER);
-        for(let indexCell = 0; indexCell < CHANNELS_NUMBER; indexCell++) {
-            let cellNew = new Cell(this.element, rowNumber, indexCell);
-            this.cells[indexCell] = cellNew;
-        }
-        this.element.addEventListener('click', () => patternHighlightRow(rowNumber));
-        elementContainer.append(this.element);
-    }
-    dispose() {
-        this.element.remove();
-    }
-    fillData(rowData) {
-        for(let indexCell = 0; indexCell < CHANNELS_NUMBER; indexCell++) {
-            let cellIndexed = this.cells[indexCell];
-            cellIndexed.fillData(rowData[indexCell]);
-        }
-    }
-    editCell(channel, cellData) {
-        this.cells[channel].fillData(cellData);
-    }
-    highlight(state, scroll) {
-        if(state) {
-            this.element.classList.add('highlight');
-            if(scroll) {
-                this.element.scrollIntoView(true)
-            }
-        } else {
-            this.element.classList.remove('highlight');
-        }
-    }
-}
-class Cell {
+export default class Cell {
     constructor(elementContainer, indexRow, indexChannel) {
         this.indexRow = indexRow;
         this.indexChannel = indexChannel;
         //
-        this.element = document.createElement('div');
+        this.element = document.createElement('td');
         this.element.className = 'pattern_cell';
         //
         this.elementNote = document.createElement('input');
@@ -245,7 +109,7 @@ class Cell {
     validateEffects() {}
 }
 
-//------------------------------------------------
+//-- Utilities -----------------------------------
 const noteLetters = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
 function noteFormatName(note) {
     let letter = note[0].toUpperCase();

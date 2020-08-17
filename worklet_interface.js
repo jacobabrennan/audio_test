@@ -7,13 +7,13 @@ import {
     RATE_SAMPLE,
     RESPONSE_PATTERN_ROW,
 } from './processor.js';
-import { patternHighlightRow } from './client.js';
+import { highlightRow } from './pattern_editor/index.js';
 
 //-- Module State --------------------------------
 let processor;
 
 //-- Setup Audio Context -------------------------
-export async function setup() {
+async function setup() {
     // Create audio context
     const optionsAudio = {
         sampleRate: RATE_SAMPLE,
@@ -35,16 +35,20 @@ export async function setup() {
 }
 
 //------------------------------------------------
-export function messageSend(action, data) {
+export async function messageSend(action, data) {
+    if(!processor) {
+        console.log('loading')
+        await setup();
+    }
     processor.port.postMessage({
         action: action,
         data: data,
     });
 }
-export function messageReceive(action, data) {
+export async function messageReceive(action, data) {
     switch(action) {
         case RESPONSE_PATTERN_ROW: {
-            patternHighlightRow(data, true);
+            highlightRow(data, true);
             break;
         }
     }

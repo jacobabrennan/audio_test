@@ -9,46 +9,43 @@ import {
     ACTION_PATTERN,
     ACTION_PLAYBACK_PLAY,
     ACTION_PLAYBACK_STOP,
-    RESPONSE_PATTERN_ROW,
     CHANNELS_NUMBER,
 } from './processor.js';
 import {
-    setup as setupWorklet,
     messageSend,
 } from './worklet_interface.js';
 import {
     setup as setupClient,
-    fillData,
+    patternLoad,
     patternGet,
-} from './client.js';
+} from './pattern_editor/index.js';
 
 //-- Constants -----------------------------------
 const DOM_ID_CLIENT = 'client';
+// const DOM_ID_PATTERN_EDITOR = 'pattern_editor';
 
 //------------------------------------------------
+(async function () {
+    await setupClient(DOM_ID_CLIENT);
+    test()
+    const buttonPlay = document.getElementById('playTest');
+    buttonPlay.addEventListener('click', async function () {
+        await messageSend(ACTION_PATTERN, patternGet());
+        await messageSend(ACTION_PLAYBACK_PLAY, {derp: 'herp'});
+    });
+    const buttonStop = document.getElementById('stopTest');
+    buttonStop.addEventListener('click', function () {
+        messageSend(ACTION_PLAYBACK_STOP, {derp: 'herp'});
+    });
+})();
 // Set up buttons
-const buttonStart = document.getElementById('startTest');
-buttonStart.addEventListener('click', test);
-const buttonPlay = document.getElementById('playTest');
-buttonPlay.addEventListener('click', function () {
-    messageSend(ACTION_PATTERN, patternGet());
-    messageSend(ACTION_PLAYBACK_PLAY, {derp: 'herp'});
-});
-const buttonStop = document.getElementById('stopTest');
-buttonStop.addEventListener('click', function () {
-    messageSend(ACTION_PLAYBACK_STOP, {derp: 'herp'});
-});
 
 //------------------------------------------------
 async function test() {
     //
-    buttonStart.disabled = true;
-    //
-    await setupClient(DOM_ID_CLIENT);
-    await setupWorklet();
-    //
-    const testPattern = pattern(256, CHANNELS_NUMBER);
-    for(let I = 0; I < 256; I++) {
+    const rows = 32
+    const testPattern = pattern(rows, CHANNELS_NUMBER);
+    for(let I = 0; I < rows; I++) {
         const note = Math.floor(Math.random()*24)+24;
         testPattern[I*CHANNELS_NUMBER] = cell(note,0,32,0);
         if(!(I%2)) {
@@ -62,5 +59,5 @@ async function test() {
             testPattern[(I*CHANNELS_NUMBER)+3] = cell(28,2,63,0);
         }
     }
-    fillData(testPattern);
+    patternLoad(testPattern);
 }

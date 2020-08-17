@@ -14,38 +14,57 @@ body {
     max-width: 100vw;
     max-height: 100vh;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    overflow: hidden;
+    align-items: stretch;
 }
 
 /*-- Pattern editor ----------------------------*/
-.pattern_pattern {
+#pattern_editor {
+    height: 100%;
+    overflow-y: scroll;
+    background: black;
+}
+#pattern_editor table {
     font-weight: bold;
     font-family: 'Courier New', Courier, monospace;
     color: white;
-    background: black;
-    display: flex;
-    flex-direction: column;
+    /* display: flex;
+    flex-direction: column; */
+}
+#pattern_editor tbody {
     overflow-y: scroll;
 }
+#pattern_editor thead {
+    position: sticky;
+    top: 0;
+}
+#pattern_editor tfoot {}
+.pattern_header_channel {
+    text-align: center;
+    background: inherit;
+    background: grey;
+}
 .pattern_row {
-    display: flex;
-    flex-direction: row;
+    /* display: flex;
+    flex-direction: row; */
+    height: 1em;
 }
 .pattern_row:nth-child(even) {
-    background: #222;
+    background: #111;
 }
 .pattern_row.highlight {
     background: #444;
 }
 .pattern_row_indicator {
-    color: #666;;
+    color: #666;
     display: flex;
     align-items: center;
 }
 .pattern_cell {
     color: #666;
 }
-.pattern_cell, .pattern_row_indicator {
+.pattern_cell, .pattern_row_indicator, .pattern_header_channel {
     padding: 0ch 1ch;
     border-right: 2px inset grey;
     border-left: 2px inset grey;
