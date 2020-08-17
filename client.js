@@ -86,10 +86,10 @@ class Cell {
         this.element = document.createElement('div');
         this.element.className = 'pattern_cell';
         //
-        this.elementNote = document.createElement('span');
-        this.elementInstrument = document.createElement('span');
-        this.elementVolume = document.createElement('span');
-        this.elementEffects = document.createElement('span');
+        this.elementNote = document.createElement('input');
+        this.elementInstrument = document.createElement('input');
+        this.elementVolume = document.createElement('input');
+        this.elementEffects = document.createElement('input');
         this.element.append(
             this.elementNote,
             this.elementInstrument,
@@ -103,20 +103,20 @@ class Cell {
         //
         if(!(cellUInt32 & MASK_CELL_FLAG_DATA)) {
             this.element.classList.remove('full');
-            this.elementNote.innerHTML = '---';
-            this.elementInstrument.innerHTML = '-';
-            this.elementVolume.innerHTML = '--';
-            this.elementEffects.innerHTML = '---';
+            this.elementNote.value = '---';
+            this.elementInstrument.value = '-';
+            this.elementVolume.value = '--';
+            this.elementEffects.value = '---';
             return;
         }
         //
         const cellData = cellParse(cellUInt32);
         //
         this.element.classList.add('full');
-        this.elementNote.innerHTML = noteNumberToName(cellData[0]);
-        this.elementInstrument.innerHTML = cellData[1].toString(16);
-        this.elementVolume.innerHTML = cellData[2].toString(16).padStart(2, '0');
-        this.elementEffects.innerHTML = cellData[3].toString(16).padStart(3, '0');
+        this.elementNote.value = noteNumberToName(cellData[0]);
+        this.elementInstrument.value = cellData[1].toString(16);
+        this.elementVolume.value = cellData[2].toString(16).padStart(2, '0');
+        this.elementEffects.value = cellData[3].toString(16).padStart(3, '0');
     }
 }
 
