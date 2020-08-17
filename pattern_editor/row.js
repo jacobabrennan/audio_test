@@ -16,7 +16,7 @@ export default class Row {
         this.element.className = 'pattern_row';
         this.lineIndicator = document.createElement('td');
         this.lineIndicator.className = 'pattern_row_indicator';
-        this.lineIndicator.innerHTML = rowNumber.toString(16).padStart(2, '0');
+        this.lineIndicator.innerText = rowNumber.toString(16).padStart(2, '0');
         this.element.append(this.lineIndicator);
         this.cells = new Array(CHANNELS_NUMBER);
         for(let indexCell = 0; indexCell < CHANNELS_NUMBER; indexCell++) {

@@ -15,6 +15,7 @@ export default class Pattern {
     constructor() {
         this.element = document.createElement('tbody');
         this.rows = [];
+        this.fillData(new Uint32Array(16*CHANNELS_NUMBER));
     }
     fillData(patternData) {
         this.data = patternData;

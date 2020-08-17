@@ -19,7 +19,9 @@ body {
     align-items: stretch;
 }
 
-/*-- Pattern editor ----------------------------*/
+
+/*== Pattern editor ==========================================================*/
+
 #pattern_editor {
     height: 100%;
     overflow-y: scroll;
@@ -54,7 +56,7 @@ body {
     height: 1em;
 }
 .pattern_row:nth-child(even) {
-    background: #111;
+    background: #222;
 }
 .pattern_row.highlight {
     background: #444;
@@ -93,3 +95,25 @@ body {
 .pattern_cell.full > input:nth-child(2) { color: #f88;}
 .pattern_cell.full > input:nth-child(3) { color: #08f;}
 .pattern_cell.full > input:nth-child(4) { color: #868;}
+
+
+/*== Control Groups ==========================================================*/
+
+/*-- Shared ------------------------------------*/
+#controls {
+    border-left: 3px solid grey;
+}
+.control_group {
+    margin-top: 3px;
+}
+.control_group h2 {
+    display: block;
+}
+
+/*-- Pattern -----------------------------------*/
+#pattern_selector {
+    width: 20em;
+    background: black;
+    color: white;
+    border-width: 0px;
+}

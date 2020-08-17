@@ -4,15 +4,16 @@
 
 //-- Dependencies --------------------------------
 import Pattern from './pattern.js';
-import { PATTERNS_MAX } from '../processor.js';
+import { PATTERNS_MAX, CHANNELS_NUMBER } from '../processor.js';
 
 //-- Module State --------------------------------
 let tableBody = null;
 let indexPatternCurrent = -1;
 const patterns = [];
+let patternNameCount = 0;
 
 //------------------------------------------------
-export async function setup(containerId) {
+export async function setup() {
     // Create Editor
     const editor = document.createElement('div');
     editor.id = 'pattern_editor';
@@ -24,7 +25,7 @@ export async function setup(containerId) {
     for(let channelName of [' ', 'Pulse1', 'Pulse2', 'Saw', 'Triangle', 'Noise']) {
         const channel = document.createElement('td');
         channel.className = 'pattern_header_channel';
-        channel.innerHTML = channelName;
+        channel.innerText = channelName;
         superfluousRowElement.append(channel);
     }
     channelHeader.append(superfluousRowElement);
@@ -38,22 +39,61 @@ export async function setup(containerId) {
     for(let channelName of [' ', 'Pulse1', 'Pulse2', 'Saw', 'Triangle', 'Noise']) {
         const channel = document.createElement('td');
         channel.className = 'pattern_footer_channel';
-        // channel.innerHTML = channelName;
+        // channel.innerText = channelName;
         superfluousRowElement2.append(channel);
     }
     footer.append(superfluousRowElement2);
     patternTable.append(footer);
     // Add to client
     editor.append(patternTable);
-    const container = document.getElementById(containerId);
-    container.prepend(editor);
+    return editor;
 }
+
+//-- Pattern Management --------------------------
 export function patternNew() {
     const indexPattern = patterns.length;
     if(indexPattern >= PATTERNS_MAX) { return -1;}
     patterns[indexPattern] = new Pattern();
+    patterns[indexPattern].name = `Pattern ${patternNameCount++}`;
     return indexPattern;
 }
+export function patternFromData(patternData) {
+    let indexPattern = patternNew();
+    const pattern = patterns[indexPattern];
+    pattern.fillData(patternData);
+    return indexPattern;
+}
+export function patternDelete(indexPattern) {
+    // Default to removing the current pattern
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
+    // Retreive indexed pattern
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return false;}
+    // Replace display pattern
+    if(tableBody === pattern.element) {
+        for(let indexPatternNew = 0; indexPatternNew < patterns.length; indexPatternNew++) {
+            if(indexPatternNew !== indexPattern) {
+                patternDisplay(indexPatternNew);
+                break;
+            }
+        }
+    }
+    // Create new pattern if necessary (a pattern must always be displayed)
+    if(tableBody === pattern.element) {
+        patternDisplay(patternNew());
+    }
+    // Ensure indexPatternCurrent is correct
+    if(indexPatternCurrent >= indexPattern) {
+        indexPatternCurrent--;
+    }
+    // Remove old pattern
+    patterns.splice(indexPattern, 1);
+    return true;
+}
+
+//-- Pattern Display -----------------------------
 export function patternDisplay(indexPattern) {
     const pattern = patterns[indexPattern];
     if(!pattern) { return false;}
@@ -70,24 +110,42 @@ export function highlightRow(indexRow, indexPattern, scroll) {
     let patternCurrent = patterns[indexPatternCurrent];
     patternCurrent.highlightRow(indexRow, scroll);
 }
-export function patternGet(indexPattern) {
-    const pattern = patterns[indexPattern];
-    if(!pattern) { return false;}
-    return pattern.data;
-}
-export function patternFromData(patternData) {
-    let indexPattern = patternNew();
-    const pattern = patterns[indexPattern];
-    pattern.fillData(patternData);
-    return indexPattern;
-}
+
+//-- Pattern Querying ----------------------------
 export function patternDataGet(indexPattern) {
     const pattern = patterns[indexPattern];
     if(!pattern) { return null;}
     return pattern.data;
 }
+export function patternListGet() {
+    const patternData = {
+        indexCurrent: indexPatternCurrent,
+        length: patterns.length,
+        names: patterns.map(pattern => pattern.name),
+    };
+    return patternData;
+}
 
-//------------------------------------------------
+//-- Pattern configuring --------------------------
+export function patternLengthAdjust(indexPattern, lengthDelta) {
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return false;}
+    const lengthNew = pattern.rows.length + lengthDelta;
+    return patternLengthSet(indexPattern, lengthNew);
+}
+export function patternLengthSet(indexPattern, lengthNew) {
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return false;}
+    const dataOld = pattern.data;
+    const dataNew = new Uint32Array(lengthNew*CHANNELS_NUMBER);
+    for(let indexData = 0; indexData < dataOld.length; indexData++) {
+        dataNew[indexData] = dataOld[indexData];
+    }
+    pattern.fillData(dataNew);
+    return true;
+}
+
+//-- Pattern Editing -----------------------------
 export function editCellNote(indexPattern, indexRow, indexChannel, value) {
     if(indexPattern === undefined) {
         indexPattern = indexPatternCurrent;

@@ -52,7 +52,7 @@ export async function messageReceive(action, data) {
             break;
         }
         case RESPONSE_SONG_END: {
-            console.log('Song Ended');
+            // console.log('Song Ended');
             break;
         }
     }
