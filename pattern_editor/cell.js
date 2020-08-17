@@ -10,6 +10,12 @@ import {
     MASK_CELL_INSTRUMENT_WIDTH,
     MASK_CELL_VOLUME_WIDTH,
 } from '../processor.js';
+import {
+    editCellEffects,
+    editCellNote,
+    editCellInstrument,
+    editCellVolume,
+} from './index.js';
 
 //------------------------------------------------
 export default class Cell {
@@ -88,7 +94,7 @@ export default class Cell {
             this.fillData(this.cellUInt32);
             return;
         }
-        editCellNote(this.indexRow, this.indexChannel, noteNumber);
+        editCellNote(undefined, this.indexRow, this.indexChannel, noteNumber);
     }
     validateInstrument() {
         const instrument = parseInt(this.elementInstrument.value, 16);
@@ -96,7 +102,7 @@ export default class Cell {
             this.fillData(this.cellUInt32);
             return;
         }
-        editCellInstrument(this.indexRow, this.indexChannel, instrument);
+        editCellInstrument(undefined, this.indexRow, this.indexChannel, instrument);
     }
     validateVolume() {
         const volume = parseInt(this.elementVolume.value, 16);
@@ -104,7 +110,7 @@ export default class Cell {
             this.fillData(this.cellUInt32);
             return;
         }
-        editCellVolume(this.indexRow, this.indexChannel, volume);
+        editCellVolume(undefined, this.indexRow, this.indexChannel, volume);
     }
     validateEffects() {}
 }

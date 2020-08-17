@@ -86,3 +86,33 @@ export function patternDataGet(indexPattern) {
     if(!pattern) { return null;}
     return pattern.data;
 }
+
+//------------------------------------------------
+export function editCellNote(indexPattern, indexRow, indexChannel, value) {
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
+    let pattern = patterns[indexPattern];
+    pattern.editCellNote(indexRow, indexChannel, value);
+}
+export function editCellInstrument(indexPattern, indexRow, indexChannel, value) {
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
+    let pattern = patterns[indexPattern];
+    pattern.editCellInstrument(indexRow, indexChannel, value);
+}
+export function editCellVolume(indexPattern, indexRow, indexChannel, value) {
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
+    let pattern = patterns[indexPattern];
+    pattern.editCellVolume(indexRow, indexChannel, value);
+}
+export function editCellEffects(indexPattern, indexRow, indexChannel, value) {
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
+    let pattern = patterns[indexPattern];
+    pattern.editCellEffects(indexRow, indexChannel, value);
+}
