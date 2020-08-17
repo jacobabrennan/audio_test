@@ -17,6 +17,7 @@ import {
 } from './worklet_interface.js';
 import {
     setup as setupClient,
+    fillData,
 } from './client.js';
 
 //-- Constants -----------------------------------
@@ -58,5 +59,6 @@ async function test() {
             testPattern[(I*CHANNELS_NUMBER)+3] = cell(28,2,63,0);
         }
     }
+    fillData(testPattern)
     messageSend(ACTION_PATTERN, testPattern);
 }
