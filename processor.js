@@ -26,12 +26,13 @@ export const MASK_CELL_EFFECT_WIDTH = 12;
 export const MASK_CELL_EFFECT_OFFSET = 0;
 // Client Actions
 let INDEX = 1;
-export const ACTION_READY = INDEX++;
-export const ACTION_PATTERN = INDEX++;
+export const ACTION_SONG = INDEX++;
 export const ACTION_PLAYBACK_PLAY = INDEX++;
 export const ACTION_PLAYBACK_STOP = INDEX++;
 // Processor Feedback
+export const RESPONSE_READY = INDEX++;
 export const RESPONSE_PATTERN_ROW = INDEX++;
+export const RESPONSE_SONG_END = INDEX++;
 
 //-- Module State --------------------------------
 let worklet;
@@ -61,7 +62,7 @@ if(typeof registerProcessor !== 'undefined') {
                 messageReceive(eventMessage.data.action, eventMessage.data.data);
             }
             setup();
-            messageSend(ACTION_READY, {});
+            messageSend(RESPONSE_READY, {});
         }
         process(inputs, outputs, parameters) {
             if(!songCurrent) { return true;}
@@ -92,15 +93,8 @@ function messageReceive(action, data) {
             if(!songCurrent) { break;}
             songCurrent.pause();
             break;
-        case ACTION_PATTERN:
-            songCurrent = new Song(
-                [
-                    [100,200,0.5,8000, true],
-                    [25,25,1,500, false],
-                    [25,75,1,1000, false],
-                ],
-                [data],
-            );
+        case ACTION_SONG:
+            songCurrent = new Song(data.instruments, data.patterns);
             break;
     }
 }
@@ -129,8 +123,7 @@ class Song extends AudioProcessor {
     sample() {
         if(!this.playing) { return 0;}
         if(!(this.indexSample%this.samplesPerRow)) {
-            this.playRow(this.indexRow);
-            this.indexRow++;
+            this.playRow();
         }
         this.indexSample++;
         return (
@@ -141,13 +134,23 @@ class Song extends AudioProcessor {
             channel[4].sample()
         );
     }
-    playRow(rowIndex) {
+    playRow() {
+        let patternCurrent = this.pattern[this.indexPattern];
+        if(this.indexRow >= patternCurrent.length / CHANNELS_NUMBER) {
+            this.indexPattern++;
+            patternCurrent = this.pattern[this.indexPattern];
+            this.indexRow = 0;
+        }
+        if(!patternCurrent) {
+            this.end();
+            return;
+        }
         messageSend(RESPONSE_PATTERN_ROW, {
             patternId: this.indexPattern,
-            row: rowIndex,
+            row: this.indexRow,
         });
         let dataPattern = this.pattern[this.indexPattern]
-        let offsetCell = rowIndex*CHANNELS_NUMBER;
+        let offsetCell = this.indexRow*CHANNELS_NUMBER;
         for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
             let cell = dataPattern[offsetCell+indexChannel];
             if(!cell) { continue;}
@@ -164,6 +167,7 @@ class Song extends AudioProcessor {
             }
             instrument.notePlay(note, indexChannel);
         }
+        this.indexRow++;
     }
     play() {
         this.playing = true;
@@ -173,6 +177,12 @@ class Song extends AudioProcessor {
         for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
             channel[indexChannel].noteEnd();
         }
+    }
+    end() {
+        this.playing = false;
+        this.indexPattern = 0;
+        this.indexRow = 0;
+        messageSend(RESPONSE_SONG_END, {});
     }
 }
 

@@ -59,12 +59,13 @@ export function patternDisplay(indexPattern) {
     if(!pattern) { return false;}
     indexPatternCurrent = indexPattern;
     tableBody.replaceWith(pattern.element);
+    tableBody = pattern.element;
     return true;
 }
 export function highlightRow(indexRow, indexPattern, scroll) {
     if(indexPattern !== undefined && indexPatternCurrent !== indexPattern) {
         let success = patternDisplay(indexPattern);
-        if(!success) { return false;}
+        if(!success) {return false;}
     }
     let patternCurrent = patterns[indexPatternCurrent];
     patternCurrent.highlightRow(indexRow, scroll);
