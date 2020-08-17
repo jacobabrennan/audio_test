@@ -37,7 +37,6 @@ async function setup() {
 //------------------------------------------------
 export async function messageSend(action, data) {
     if(!processor) {
-        console.log('loading')
         await setup();
     }
     processor.port.postMessage({
@@ -48,7 +47,7 @@ export async function messageSend(action, data) {
 export async function messageReceive(action, data) {
     switch(action) {
         case RESPONSE_PATTERN_ROW: {
-            highlightRow(data, true);
+            highlightRow(data.row, data.patternId, true);
             break;
         }
     }

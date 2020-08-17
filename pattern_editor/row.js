@@ -7,6 +7,7 @@ import {
     CHANNELS_NUMBER,
 } from '../processor.js';
 import Cell from './cell.js';
+import { highlightRow } from './index.js';
 
 //------------------------------------------------
 export default class Row {
@@ -22,7 +23,7 @@ export default class Row {
             let cellNew = new Cell(this.element, rowNumber, indexCell);
             this.cells[indexCell] = cellNew;
         }
-        this.element.addEventListener('click', () => patternHighlightRow(rowNumber));
+        this.element.addEventListener('click', () => highlightRow(rowNumber));
         elementContainer.append(this.element);
     }
     dispose() {

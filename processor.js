@@ -9,6 +9,7 @@ export const TAU = Math.PI*2;
 export const RATE_SAMPLE = 8000;
 export const BPM_DEFAULT = 500;
 export const CHANNELS_NUMBER = 5;
+export const PATTERNS_MAX = 16;
 // Pattern cell data masking
 // 0b DVU NNNNNN IIIII VVVVVV EEEEEEEEEEEE 
 export const MASK_CELL_FLAG_DATA   = 0b10000000000000000000000000000000;
@@ -141,7 +142,10 @@ class Song extends AudioProcessor {
         );
     }
     playRow(rowIndex) {
-        messageSend(RESPONSE_PATTERN_ROW, rowIndex)
+        messageSend(RESPONSE_PATTERN_ROW, {
+            patternId: this.indexPattern,
+            row: rowIndex,
+        });
         let dataPattern = this.pattern[this.indexPattern]
         let offsetCell = rowIndex*CHANNELS_NUMBER;
         for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {

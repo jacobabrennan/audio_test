@@ -16,8 +16,9 @@ import {
 } from './worklet_interface.js';
 import {
     setup as setupClient,
-    patternLoad,
-    patternGet,
+    patternDataGet,
+    patternFromData,
+    patternDisplay,
 } from './pattern_editor/index.js';
 
 //-- Constants -----------------------------------
@@ -30,7 +31,7 @@ const DOM_ID_CLIENT = 'client';
     test()
     const buttonPlay = document.getElementById('playTest');
     buttonPlay.addEventListener('click', async function () {
-        await messageSend(ACTION_PATTERN, patternGet());
+        await messageSend(ACTION_PATTERN, patternDataGet(0));
         await messageSend(ACTION_PLAYBACK_PLAY, {derp: 'herp'});
     });
     const buttonStop = document.getElementById('stopTest');
@@ -59,5 +60,6 @@ async function test() {
             testPattern[(I*CHANNELS_NUMBER)+3] = cell(28,2,63,0);
         }
     }
-    patternLoad(testPattern);
+    let indexPattern = patternFromData(testPattern);
+    patternDisplay(indexPattern);
 }

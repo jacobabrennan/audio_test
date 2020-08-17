@@ -34,10 +34,13 @@ body {
 }
 #pattern_editor tbody {
     overflow-y: scroll;
+    position: relative;
 }
 #pattern_editor thead {
+    display: none;
     position: sticky;
-    top: 0;
+    top: 0em;
+    z-index: 1;
 }
 #pattern_editor tfoot {}
 .pattern_header_channel {

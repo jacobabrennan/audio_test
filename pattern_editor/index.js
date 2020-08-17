@@ -4,10 +4,12 @@
 
 //-- Dependencies --------------------------------
 import Pattern from './pattern.js';
+import { PATTERNS_MAX } from '../processor.js';
 
 //-- Module State --------------------------------
 let tableBody = null;
-let patternCurrent = null;
+let indexPatternCurrent = -1;
+const patterns = [];
 
 //------------------------------------------------
 export async function setup(containerId) {
@@ -46,21 +48,40 @@ export async function setup(containerId) {
     const container = document.getElementById(containerId);
     container.prepend(editor);
 }
-export function patternLoad(patternData) {
-    patternCurrent = new Pattern();
-    patternCurrent.fillData(patternData);
-    patternDisplay(patternCurrent);
-    return patternCurrent;
+export function patternNew() {
+    const indexPattern = patterns.length;
+    if(indexPattern >= PATTERNS_MAX) { return -1;}
+    patterns[indexPattern] = new Pattern();
+    return indexPattern;
 }
-export function patternDisplay(pattern) {
+export function patternDisplay(indexPattern) {
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return false;}
+    indexPatternCurrent = indexPattern;
     tableBody.replaceWith(pattern.element);
+    return true;
 }
-export function highlightRow(indexRow, scroll) {
+export function highlightRow(indexRow, indexPattern, scroll) {
+    if(indexPattern !== undefined && indexPatternCurrent !== indexPattern) {
+        let success = patternDisplay(indexPattern);
+        if(!success) { return false;}
+    }
+    let patternCurrent = patterns[indexPatternCurrent];
     patternCurrent.highlightRow(indexRow, scroll);
 }
-// export function fillData(patternData) {
-//     pattern.fillData(patternData);
-// }
-export function patternGet() {
-    return patternCurrent.data;
+export function patternGet(indexPattern) {
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return false;}
+    return pattern.data;
+}
+export function patternFromData(patternData) {
+    let indexPattern = patternNew();
+    const pattern = patterns[indexPattern];
+    pattern.fillData(patternData);
+    return indexPattern;
+}
+export function patternDataGet(indexPattern) {
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return null;}
+    return pattern.data;
 }
