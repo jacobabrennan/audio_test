@@ -9,6 +9,7 @@ import {
     ACTION_PATTERN,
     ACTION_PLAYBACK_PLAY,
     ACTION_PLAYBACK_STOP,
+    RESPONSE_PATTERN_ROW,
     CHANNELS_NUMBER,
 } from './processor.js';
 import {

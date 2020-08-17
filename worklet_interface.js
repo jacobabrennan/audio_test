@@ -5,7 +5,9 @@
 //-- Dependencies --------------------------------
 import {
     RATE_SAMPLE,
+    RESPONSE_PATTERN_ROW,
 } from './processor.js';
+import { patternHighlightRow } from './client.js';
 
 //-- Module State --------------------------------
 let processor;
@@ -27,8 +29,8 @@ export async function setup() {
     // Connect audio graph
     processor.connect(context.destination);
     // Listen for messages
-    processor.port.onmessage = function (message) {
-        messageReceive(message.action, message.data);
+    processor.port.onmessage = function (eventMessage) {
+        messageReceive(eventMessage.data.action, eventMessage.data.data);
     }
 }
 
@@ -39,4 +41,11 @@ export function messageSend(action, data) {
         data: data,
     });
 }
-export function messageReceive(action, data) {}
+export function messageReceive(action, data) {
+    switch(action) {
+        case RESPONSE_PATTERN_ROW: {
+            patternHighlightRow(data, true);
+            break;
+        }
+    }
+}

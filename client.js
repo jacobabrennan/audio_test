@@ -28,6 +28,11 @@ export function fillData(patternData) {
 export function patternGet() {
     return currentPattern;
 }
+export function patternHighlightRow(indexRow, scroll) {
+    pattern.highlightRow(indexRow, scroll);
+}
+
+//------------------------------------------------
 function editCell(row, channel, cellData) {
     const indexCell = row*CHANNELS_NUMBER + channel;
     currentPattern[indexCell] = cellData;
@@ -96,6 +101,13 @@ class Pattern {
     editCell(row, channel, cellData) {
         this.rows[row].editCell(channel, cellData);
     }
+    highlightRow(indexRow, scroll) {
+        if(Number.isFinite(this.highlightRowIndexCurrent)) {
+            this.rows[this.highlightRowIndexCurrent].highlight(false);
+        }
+        this.highlightRowIndexCurrent = indexRow;
+        this.rows[indexRow].highlight(true, scroll);
+    }
 }
 class Row {
     constructor(elementContainer, rowNumber) {
@@ -110,6 +122,7 @@ class Row {
             let cellNew = new Cell(this.element, rowNumber, indexCell);
             this.cells[indexCell] = cellNew;
         }
+        this.element.addEventListener('click', () => patternHighlightRow(rowNumber));
         elementContainer.append(this.element);
     }
     dispose() {
@@ -123,6 +136,16 @@ class Row {
     }
     editCell(channel, cellData) {
         this.cells[channel].fillData(cellData);
+    }
+    highlight(state, scroll) {
+        if(state) {
+            this.element.classList.add('highlight');
+            if(scroll) {
+                this.element.scrollIntoView(true)
+            }
+        } else {
+            this.element.classList.remove('highlight');
+        }
     }
 }
 class Cell {

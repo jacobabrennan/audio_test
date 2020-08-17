@@ -34,6 +34,9 @@ body {
 .pattern_row:nth-child(even) {
     background: #222;
 }
+.pattern_row.highlight {
+    background: #444;
+}
 .pattern_row_indicator {
     color: #666;;
     display: flex;

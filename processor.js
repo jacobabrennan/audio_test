@@ -29,6 +29,8 @@ export const ACTION_READY = INDEX++;
 export const ACTION_PATTERN = INDEX++;
 export const ACTION_PLAYBACK_PLAY = INDEX++;
 export const ACTION_PLAYBACK_STOP = INDEX++;
+// Processor Feedback
+export const RESPONSE_PATTERN_ROW = INDEX++;
 
 //-- Module State --------------------------------
 let worklet;
@@ -139,6 +141,7 @@ class Song extends AudioProcessor {
         );
     }
     playRow(rowIndex) {
+        messageSend(RESPONSE_PATTERN_ROW, rowIndex)
         let dataPattern = this.pattern[this.indexPattern]
         let offsetCell = rowIndex*CHANNELS_NUMBER;
         for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
