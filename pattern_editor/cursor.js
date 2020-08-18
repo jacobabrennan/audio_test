@@ -15,6 +15,7 @@ import {
 import {
     cellParse,
     CHANNELS_NUMBER,
+    MASK_CELL_NOTE_STOP,
 } from '../processor.js';
 import {
     noteNumberToName,
@@ -87,8 +88,14 @@ export function handleMouseUp(eventMouse) {
 }
 export function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
-    // Handle Movement
+    // Handle Movement, and special values
     switch(key) {
+        case 'enter': {
+            const indexRow = cursorY;
+            const indexChannel = Math.floor(cursorX/CELL_WIDTH);
+            editCellNote(indexRow, indexChannel, MASK_CELL_NOTE_STOP);
+            return;
+        }
         case 'arrowup':
             cursorY = Math.max(0, cursorY-1);
             posUpX = undefined;

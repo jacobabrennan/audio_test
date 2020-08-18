@@ -18,7 +18,7 @@ export const MASK_CELL_FLAG_VOLUME     = 0b00100000000000000000000000000000;
 export const MASK_CELL_FLAG_EFFECT     = 0b00010000000000000000000000000000;
 export const MASK_CELL_NOTE_WIDTH = 6;
 export const MASK_CELL_NOTE_OFFSET = 22;
-export const MASK_CELL_NOTE_STOP = Math.pow(2, MASK_CELL_NOTE_WIDTH)-1
+export const MASK_CELL_NOTE_STOP = Math.pow(2, MASK_CELL_NOTE_WIDTH)-1;
 export const MASK_CELL_INSTRUMENT_WIDTH = 4;
 export const MASK_CELL_INSTRUMENT_OFFSET = 18;
 export const MASK_CELL_VOLUME_WIDTH = 6;
@@ -164,9 +164,8 @@ class Song extends AudioProcessor {
             }
             if(note === MASK_CELL_NOTE_STOP) {
                 channel[indexChannel].noteEnd();
-                return;
             }
-            if(instrument) {
+            else if(instrument) {
                 instrument.notePlay(note, indexChannel);
             }
         }

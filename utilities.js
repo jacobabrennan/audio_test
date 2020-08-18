@@ -4,7 +4,7 @@
 
 //-- Dependencies --------------------------------
 import {
-    MASK_CELL_NOTE_WIDTH,
+    MASK_CELL_NOTE_WIDTH, MASK_CELL_NOTE_STOP,
 } from './processor.js';
 
 //-- Constants -----------------------------------
@@ -41,6 +41,9 @@ export function noteNameToNumber(note) {
     return noteOffset;
 }
 export function noteNumberToName(note) {
+    if(note === MASK_CELL_NOTE_STOP) {
+        return '###';
+    }
     let letter = noteLetters[note%12];
     let octave = Math.floor(note/12);
     if(note%12 > 2) {

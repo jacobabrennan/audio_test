@@ -31,7 +31,7 @@ export async function setup() {
         await messageSend(ACTION_SONG, {
             patterns: patternDataCompile(),
             instruments: [
-                [100,200,0.5,8000, true],
+                [100,200,0.5,2000, true],
                 [25,25,1,500, false],
                 [25,75,1,1000, false],
             ],
