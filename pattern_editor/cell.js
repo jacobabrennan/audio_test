@@ -119,7 +119,7 @@ export default class Cell {
 const noteLetters = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
 function noteFormatName(note) {
     let letter = note[0].toUpperCase();
-    let octave = 4;
+    let octave = 2;
     if(note.length === 1) { // 'b' => 'B 4'
         return letter+' '+octave;
     }

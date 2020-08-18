@@ -112,6 +112,9 @@ export function highlightRow(indexRow, indexPattern, scroll) {
 }
 
 //-- Pattern Querying ----------------------------
+export function patternDataCompile() {
+    return patterns.map(pattern => pattern.data);
+}
 export function patternDataGet(indexPattern) {
     const pattern = patterns[indexPattern];
     if(!pattern) { return null;}

@@ -10,7 +10,7 @@ import {
     ACTION_PLAYBACK_STOP,
 } from '../processor.js';
 import {
-    patternDataGet,
+    patternDataCompile,
 } from '../pattern_editor/index.js';
 
 //------------------------------------------------
@@ -29,7 +29,7 @@ export async function setup() {
     buttonStop.innerText = 'Stop';
     buttonPlay.addEventListener('click', async function () {
         await messageSend(ACTION_SONG, {
-            patterns: [patternDataGet(0), patternDataGet(1)],
+            patterns: patternDataCompile(),
             instruments: [
                 [100,200,0.5,8000, true],
                 [25,25,1,500, false],
