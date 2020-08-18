@@ -302,6 +302,11 @@ export function patternLengthSet(lengthNew) {
 }
 
 //-- Pattern Editing -----------------------------
+export function editCell(indexRow, indexChannel, value) {
+    let pattern = patterns[indexPatternCurrent];
+    pattern.editCell(indexRow, indexChannel, value);
+    patternDisplay();
+}
 export function editCellNote(indexRow, indexChannel, value) {
     let pattern = patterns[indexPatternCurrent];
     pattern.editCellNote(indexRow, indexChannel, value);

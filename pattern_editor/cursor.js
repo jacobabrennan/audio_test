@@ -11,8 +11,10 @@ import {
     editCellInstrument,
     editCellVolume,
     editCellEffects,
+    editCell,
 } from './index.js';
 import {
+    cell,
     cellParse,
     CHANNELS_NUMBER,
     MASK_CELL_NOTE_STOP,
@@ -90,10 +92,16 @@ export function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
     // Handle Movement, and special values
     switch(key) {
+        case 'delete':
+        case 'backspace':
+            parseDeleteInput();
+            return;
         case 'enter': {
-            const indexRow = cursorY;
-            const indexChannel = Math.floor(cursorX/CELL_WIDTH);
-            editCellNote(indexRow, indexChannel, MASK_CELL_NOTE_STOP);
+            editCellNote(
+                cursorY,
+                Math.floor(cursorX/CELL_WIDTH),
+                MASK_CELL_NOTE_STOP,
+            );
             return;
         }
         case 'arrowup':
@@ -179,6 +187,28 @@ function parseNoteInput(key) {
     if(Number.isFinite(value)) {
         editCellNote(indexRow, indexChannel, value);
     }
+}
+function parseDeleteInput() {
+    const indexRow = cursorY;
+    const indexChannel = Math.floor(cursorX/CELL_WIDTH);
+    const indexDigit = cursorX%CELL_WIDTH;
+    const dataCell = patternCellGet(indexRow, indexChannel);
+    let [note, instrument, volume, effect] = cellParse(dataCell);
+    switch(indexDigit) {
+        case 0: case 1: case 2:
+            note = undefined;
+            break;
+        case 3:
+            instrument = undefined;
+            break;
+        case 4: case 5:
+            volume = undefined;
+            break;
+        case 6: case 7: case 8:
+            effect = undefined;
+            break;
+    }
+    editCell(indexRow, indexChannel, cell(note, instrument, volume, effect));
 }
 function parseCellInput(digit, posX, posY) {
     const value = parseInt(digit, 16);
