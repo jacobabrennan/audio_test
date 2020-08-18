@@ -60,7 +60,6 @@ export async function setup() {
 export function patternAdd() {
     let idPattern = patternNew();
     patternDisplay(idPattern);
-    patternListUpdate();
     return idPattern;
 }
 export function patternRemove(idPattern) {
@@ -73,7 +72,6 @@ export function patternSelect(idPattern) {
         idPattern = Number(patternSelector.value);
     }
     patternDisplay(idPattern);
-    patternListUpdate();
 }
 export function patternAugment(idPattern, amount) {
     patternLengthAdjust(idPattern, amount);
@@ -83,14 +81,14 @@ export function patternAugment(idPattern, amount) {
 //------------------------------------------------
 
 //------------------------------------------------
-function patternListUpdate() {
+export function patternListUpdate() {
     // Clear old values
     while (patternSelector.firstChild) {
         patternSelector.removeChild(patternSelector.lastChild);
     }
     // Populate with new data
     const listData = patternListGet();
-    const listElements = [];
+    const options = [];
     for(let indexPattern = 0; indexPattern < listData.length; indexPattern++) {
         const option = document.createElement('option');
         option.setAttribute('value', indexPattern);
@@ -99,11 +97,10 @@ function patternListUpdate() {
         if(indexPattern == listData.indexCurrent) {
             option.selected = true;
         }
-        listElements.push(option);
+        options.push(option);
     }
     // patternSelector.value = listData.indexCurrent;
-    patternSelector.append(...listElements);
-    //
+    patternSelector.append(...options);
     const patternLength = patternLengthGet();
     lengthLabel.innerText = `Length: ${patternLength}`;
 }

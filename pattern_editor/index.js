@@ -5,6 +5,7 @@
 //-- Dependencies --------------------------------
 import Pattern from './pattern.js';
 import { PATTERNS_MAX, CHANNELS_NUMBER } from '../processor.js';
+import { patternListUpdate } from '../controls/pattern.js';
 
 //-- Module State --------------------------------
 let tableBody = null;
@@ -100,6 +101,7 @@ export function patternDisplay(indexPattern) {
     indexPatternCurrent = indexPattern;
     tableBody.replaceWith(pattern.element);
     tableBody = pattern.element;
+    patternListUpdate();
     return true;
 }
 export function highlightRow(indexRow, indexPattern, scroll) {
