@@ -127,13 +127,28 @@ export function patternListGet() {
 }
 
 //-- Pattern configuring --------------------------
+export function patternLengthGet(indexPattern) {
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return false;}
+    return pattern.data.length / CHANNELS_NUMBER;
+}
 export function patternLengthAdjust(indexPattern, lengthDelta) {
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
     const pattern = patterns[indexPattern];
     if(!pattern) { return false;}
     const lengthNew = pattern.rows.length + lengthDelta;
     return patternLengthSet(indexPattern, lengthNew);
 }
 export function patternLengthSet(indexPattern, lengthNew) {
+    lengthNew = Math.max(1, lengthNew);
+    if(indexPattern === undefined) {
+        indexPattern = indexPatternCurrent;
+    }
     const pattern = patterns[indexPattern];
     if(!pattern) { return false;}
     const dataOld = pattern.data;
@@ -142,7 +157,7 @@ export function patternLengthSet(indexPattern, lengthNew) {
         dataNew[indexData] = dataOld[indexData];
     }
     pattern.fillData(dataNew);
-    return true;
+    return pattern.data.length / CHANNELS_NUMBER;
 }
 
 //-- Pattern Editing -----------------------------

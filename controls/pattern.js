@@ -8,10 +8,13 @@ import {
     patternDelete,
     patternListGet,
     patternDisplay,
+    patternLengthAdjust,
+    patternLengthGet,
 } from '../pattern_editor/index.js';
 
 //-- Module State --------------------------------
 let patternSelector;
+let lengthLabel;
 
 //------------------------------------------------
 export async function setup() {
@@ -38,6 +41,18 @@ export async function setup() {
     buttonGroup.append(buttonPatternAdd, buttonPatternRemove);
     containerGroup.append(buttonGroup);
     //
+    lengthLabel = document.createElement('span');
+    lengthLabel.innerText = 'Length:';
+    const lengthAdd = document.createElement('button');
+    const lengthSubtract = document.createElement('button');
+    lengthAdd.addEventListener('click', () => patternAugment(undefined, 1));
+    lengthSubtract.addEventListener('click', () => patternAugment(undefined, -1));
+    lengthAdd.innerText = '+';
+    lengthSubtract.innerText = '-';
+    const groupLength = document.createElement('div');
+    groupLength.append(lengthLabel, lengthAdd, lengthSubtract);
+    containerGroup.append(groupLength);
+    //
     return containerGroup;
 }
 
@@ -55,11 +70,17 @@ export function patternRemove(idPattern) {
 }
 export function patternSelect(idPattern) {
     if(idPattern === undefined) {
-        idPattern = patternSelector.value;
-        console.log(idPattern);
+        idPattern = Number(patternSelector.value);
     }
     patternDisplay(idPattern);
+    patternListUpdate();
 }
+export function patternAugment(idPattern, amount) {
+    patternLengthAdjust(idPattern, amount);
+    patternListUpdate();
+}
+
+//------------------------------------------------
 
 //------------------------------------------------
 function patternListUpdate() {
@@ -75,11 +96,14 @@ function patternListUpdate() {
         option.setAttribute('value', indexPattern);
         option.innerText = listData.names[indexPattern];
         option.value = indexPattern;
-        if(indexPattern === listData.indexCurrent) {
+        if(indexPattern == listData.indexCurrent) {
             option.selected = true;
         }
         listElements.push(option);
     }
-    patternSelector.value = listData.indexCurrent;
+    // patternSelector.value = listData.indexCurrent;
     patternSelector.append(...listElements);
+    //
+    const patternLength = patternLengthGet();
+    lengthLabel.innerText = `Length: ${patternLength}`;
 }
