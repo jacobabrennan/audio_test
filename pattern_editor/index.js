@@ -4,9 +4,20 @@
 
 //-- Dependencies --------------------------------
 import Pattern from './pattern.js';
-import { PATTERNS_MAX, CHANNELS_NUMBER, cellParse, MASK_CELL_FLAG_DATA, pattern } from '../processor.js';
-import { patternListUpdate } from '../controls/pattern.js';
-import { handleMouseDown, getPosCursor } from './cursor.js';
+import {
+    PATTERNS_MAX,
+    CHANNELS_NUMBER,
+    cellParse,
+    MASK_CELL_FLAG_DATA,
+} from '../processor.js';
+import {
+    patternListUpdate,
+} from '../controls/pattern.js';
+import {
+    handleMouseDown,
+    getSelection,
+    handleMouseUp,
+} from './cursor.js';
 
 //-- Constants -----------------------------------
 export const DOM_STYLE_DYNAMIC = `
@@ -19,7 +30,7 @@ export const DOM_STYLE_DYNAMIC = `
 `;
 const FONT_FAMILY = 'press_start_k_regular';
 export const FONT_SIZE = 16;
-const CELL_WIDTH = 9;
+export const CELL_WIDTH = 9;
 const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
 
 //-- Module State --------------------------------
@@ -55,6 +66,10 @@ export async function setup() {
     editor.addEventListener('mousedown', (eventMouse) => {
         let coordDown = handleMouseDown(eventMouse);
         highlightRow(coordDown.y);
+    });
+    editor.addEventListener('mouseup', (eventMouse) => {
+        let coordUp = handleMouseUp(eventMouse);
+        highlightRow(coordUp.y);
     });
     return editor;
 }
@@ -94,9 +109,14 @@ function drawGridPos(posX, posY, color='white', background='black') {
 function drawPatternGrid() {
     const pattern = patterns[indexPatternCurrent];
     const rows = pattern.data.length / CHANNELS_NUMBER;
+    const selection = getSelection();
+    const selecting = (
+        selection.posMaxX !== selection.posMinX ||
+        selection.posMaxY !== selection.posMinY
+    );
     for(let row = 0; row < rows; row++) {
         let background = (row%2)? '#222' : 'black';
-        if(row === rowHighlight) {
+        if(!selecting && row === rowHighlight) {
             background = '#606';
         }
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
@@ -112,8 +132,11 @@ function drawPatternGrid() {
             drawGridPos(offsetChannel+8, row, '#86f', background);
         }
     }
-    const coordCursor = getPosCursor();
-    drawGridPos(coordCursor.posDownX, coordCursor.posDownY, '#fff', '#c0c');
+    for(let posY = selection.posMinY; posY <= selection.posMaxY; posY++) {
+        for(let posX = selection.posMinX; posX <= selection.posMaxX; posX++) {
+            drawGridPos(posX, posY, '#fff', '#c0c');
+        }
+    }
 }
 function placeChar(char, posX, posY) {
     const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;

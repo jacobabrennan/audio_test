@@ -5,12 +5,10 @@
 //-- Dependencies --------------------------------
 import {
     FONT_SIZE,
+    CELL_WIDTH,
 } from './index.js';
 
 //-- Module State --------------------------------
-let row = 0;
-let channel = 0;
-let char = 0;
 let posDownX;
 let posDownY;
 let posUpX;
@@ -24,17 +22,33 @@ export function getPosCursor() {
     };
 }
 export function getSelection() {
+    if(posUpX === undefined) {
+        posUpX = posDownX;
+    }
+    if(posUpY === undefined) {
+        posUpY = posDownY;
+    }
+    let posMinX = Math.min(posDownX, posUpX);
+    let posMinY = Math.min(posDownY, posUpY);
+    let posMaxX = Math.max(posDownX, posUpX);
+    let posMaxY = Math.max(posDownY, posUpY);
+    if(posMinX !== posMaxX || posMinY !== posMaxY) {
+        posMinX = posMinX - posMinX%CELL_WIDTH;
+        posMaxX = posMaxX + CELL_WIDTH-(posMaxX%CELL_WIDTH)-1;
+    }
     return {
-        posDownX,
-        posDownY,
-        posUpX,
-        posUpY
+        posMinX,
+        posMinY,
+        posMaxX,
+        posMaxY,
     };
 }
 
 //-- Event Handlers ------------------------------
 export function handleMouseDown(mouseEvent) {
     const coordsMouse = getEventCoords(mouseEvent);
+    posUpX = undefined;
+    posUpY = undefined;
     posDownX = coordsMouse.x;
     posDownY = coordsMouse.y;
     return {
