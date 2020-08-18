@@ -4,19 +4,6 @@
 
 //-- Dependencies --------------------------------
 import {
-    FONT_SIZE,
-    CELL_WIDTH,
-    patternDisplay,
-} from './canvas.js'
-import {
-    patternCellGet,
-    editCellNote,
-    editCellInstrument,
-    editCellVolume,
-    editCellEffects,
-    editCell,
-} from './index.js';
-import {
     cell,
     cellParse,
     CHANNELS_NUMBER,
@@ -26,6 +13,19 @@ import {
     noteNumberToName,
     noteNameToNumber,
 } from '../utilities.js';
+import {
+    FONT_SIZE,
+    CELL_WIDTH,
+    patternDisplay,
+} from './canvas.js'
+import {
+    cellGet,
+    editCellNote,
+    editCellInstrument,
+    editCellVolume,
+    editCellEffects,
+    editCell,
+} from './pattern.js';
 
 //-- Module State --------------------------------
 let cursorX;
@@ -180,7 +180,7 @@ function parseNoteInput(key) {
     key = key.toUpperCase();
     const indexRow = cursorY;
     const indexChannel = Math.floor(cursorX/CELL_WIDTH);
-    const dataCell = patternCellGet(indexRow, indexChannel);
+    const dataCell = cellGet(indexRow, indexChannel);
     let note = cellParse(dataCell)[0];
     if(note === undefined) {
         note = noteNameToNumber('C 2');
@@ -211,7 +211,7 @@ function parseDeleteInput() {
     const indexRow = cursorY;
     const indexChannel = Math.floor(cursorX/CELL_WIDTH);
     const indexDigit = cursorX%CELL_WIDTH;
-    const dataCell = patternCellGet(indexRow, indexChannel);
+    const dataCell = cellGet(indexRow, indexChannel);
     let [note, instrument, volume, effect] = cellParse(dataCell);
     switch(indexDigit) {
         case 0: case 1: case 2:
@@ -235,7 +235,7 @@ function parseCellInput(digit, posX, posY) {
     const indexChannel = Math.floor(posX/CELL_WIDTH);
     const indexDigit = posX%CELL_WIDTH;
     //
-    const dataCell = patternCellGet(indexRow, indexChannel);
+    const dataCell = cellGet(indexRow, indexChannel);
     let [note, instrument, volume, effect] = cellParse(dataCell);
     note = note || 0;
     instrument = instrument || 0;

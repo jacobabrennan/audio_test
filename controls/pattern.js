@@ -4,14 +4,13 @@
 
 //-- Dependencies --------------------------------
 import {
+    patternListGet,
     patternNew,
     patternDelete,
-    patternListGet,
-    patternLengthAdjust,
-    patternLengthGet,
     patternSelect,
-} from '../pattern_editor/index.js';
-import { patternDisplay } from '../pattern_editor/canvas.js';
+    lengthGet,
+    lengthAdjust,
+} from '../pattern_editor/pattern.js';
 
 //-- Module State --------------------------------
 let patternSelector;
@@ -73,11 +72,9 @@ export function patternChange() {
     patternSelect(idPattern);
 }
 export function patternAugment(amount) {
-    patternLengthAdjust(amount);
+    lengthAdjust(amount);
     patternListUpdate();
 }
-
-//------------------------------------------------
 
 //------------------------------------------------
 export function patternListUpdate() {
@@ -100,6 +97,6 @@ export function patternListUpdate() {
     }
     // patternSelector.value = listData.indexCurrent;
     patternSelector.append(...options);
-    const patternLength = patternLengthGet();
+    const patternLength = lengthGet();
     lengthLabel.innerText = `Length: ${patternLength}`;
 }

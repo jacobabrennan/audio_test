@@ -7,10 +7,10 @@ import {
     cellParse,
     CHANNELS_NUMBER,
 } from '../processor.js';
-import { getSelection } from './cursor.js';
-import { patternListUpdate } from '../controls/pattern.js';
-import { patternGet } from './index.js';
 import { noteNumberToName } from '../utilities.js';
+import { patternListUpdate } from '../controls/pattern.js';
+import { getSelection } from './cursor.js';
+import { dataGet } from './pattern.js';
 
 //-- Constants -----------------------------------
 export const FONT_SIZE = 16;
@@ -52,15 +52,15 @@ export async function setup() {
 
 //-- Pattern Display -----------------------------
 export function patternDisplay() {
-    const pattern = patternGet();
-    patternGrid = new Array(pattern.data.length*CELL_WIDTH)
+    const data = dataGet();
+    patternGrid = new Array(data.length*CELL_WIDTH)
     //
-    const rows = pattern.data.length / CHANNELS_NUMBER;
+    const rows = data.length / CHANNELS_NUMBER;
     heightSet(rows);
     for(let row = 0; row < rows; row++) {
         const offsetRow = row*CHANNELS_NUMBER;
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
-            drawCell(row, channel, pattern.data[offsetRow+channel]);
+            drawCell(row, channel, data[offsetRow+channel]);
         }
     }
     //
@@ -97,8 +97,8 @@ function drawCell(row, channel, dataCell) {
 
 //-- Pattern Grid --------------------------------
 function drawPatternGrid() {
-    const pattern = patternGet();
-    const rows = pattern.data.length / CHANNELS_NUMBER;
+    const data = dataGet();
+    const rows = data.length / CHANNELS_NUMBER;
     const selection = getSelection();
     const selecting = (
         selection.posMaxX !== selection.posMinX ||
