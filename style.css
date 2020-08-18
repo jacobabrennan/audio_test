@@ -19,6 +19,10 @@ body {
     align-items: stretch;
 }
 
+canvas {
+    image-rendering: crisp-edges;
+    background: black;
+}
 
 /*== Pattern editor ==========================================================*/
 
@@ -36,7 +40,6 @@ body {
 }
 #pattern_editor tbody {
     overflow-y: scroll;
-    position: relative;
 }
 #pattern_editor thead {
     display: none;
