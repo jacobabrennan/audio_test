@@ -19,9 +19,12 @@ body {
     align-items: stretch;
 }
 
+#editor {
+    background: black;
+}
 canvas {
     image-rendering: crisp-edges;
-    background: black;
+    /* background: black; */
 }
 
 /*== Pattern editor ==========================================================*/

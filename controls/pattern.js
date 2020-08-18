@@ -10,6 +10,7 @@ import {
     patternDisplay,
     patternLengthAdjust,
     patternLengthGet,
+    patternSelect,
 } from '../pattern_editor/index.js';
 
 //-- Module State --------------------------------
@@ -28,7 +29,7 @@ export async function setup() {
     patternSelector = document.createElement('select');
     patternSelector.id = 'pattern_selector';
     patternSelector.setAttribute('size', 8);
-    patternSelector.addEventListener('change', () => patternSelect());
+    patternSelector.addEventListener('change', () => patternChange());
     containerGroup.append(patternSelector);
     //
     const buttonGroup = document.createElement('div');
@@ -45,8 +46,8 @@ export async function setup() {
     lengthLabel.innerText = 'Length:';
     const lengthAdd = document.createElement('button');
     const lengthSubtract = document.createElement('button');
-    lengthAdd.addEventListener('click', () => patternAugment(undefined, 1));
-    lengthSubtract.addEventListener('click', () => patternAugment(undefined, -1));
+    lengthAdd.addEventListener('click', () => patternAugment(1));
+    lengthSubtract.addEventListener('click', () => patternAugment(-1));
     lengthAdd.innerText = '+';
     lengthSubtract.innerText = '-';
     const groupLength = document.createElement('div');
@@ -59,22 +60,20 @@ export async function setup() {
 //------------------------------------------------
 export function patternAdd() {
     let idPattern = patternNew();
-    patternDisplay(idPattern);
+    patternSelect(idPattern);
     return idPattern;
 }
-export function patternRemove(idPattern) {
-    const success = patternDelete(idPattern);
+export function patternRemove() {
+    const success = patternDelete();
     patternListUpdate();
     return success;
 }
-export function patternSelect(idPattern) {
-    if(idPattern === undefined) {
-        idPattern = Number(patternSelector.value);
-    }
-    patternDisplay(idPattern);
+export function patternChange() {
+    const idPattern = Number(patternSelector.value);
+    patternSelect(idPattern);
 }
-export function patternAugment(idPattern, amount) {
-    patternLengthAdjust(idPattern, amount);
+export function patternAugment(amount) {
+    patternLengthAdjust(amount);
     patternListUpdate();
 }
 

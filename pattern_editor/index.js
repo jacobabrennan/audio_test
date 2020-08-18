@@ -6,7 +6,6 @@
 import Pattern from './pattern.js';
 import { PATTERNS_MAX, CHANNELS_NUMBER, cellParse, MASK_CELL_FLAG_DATA } from '../processor.js';
 import { patternListUpdate } from '../controls/pattern.js';
-import { randomPattern } from '../index.js';
 
 //-- Constants -----------------------------------
 export const DOM_STYLE_DYNAMIC = `
@@ -23,6 +22,9 @@ const DISPLAY_CHAR_WIDTH = 9*CHANNELS_NUMBER;
 
 //-- Module State --------------------------------
 let context;
+const patterns = []
+let patternNameCount = 0;
+let indexPatternCurrent = -1;
 
 //-- Setup ---------------------------------------
 export async function setup() {
@@ -46,8 +48,15 @@ export async function setup() {
     editor.id = 'editor';
     editor.append(canvas);
     //
-    drawPattern(randomPattern(16))
     return editor;
+}
+
+//-- Pattern Management --------------------------
+export function patternSelect(indexPattern) {
+    const pattern = patterns[indexPattern];
+    if(!pattern) { return false;}
+    indexPatternCurrent = indexPattern;
+    patternDisplay();
 }
 
 //-- Drawing Primitives --------------------------
@@ -57,7 +66,7 @@ export function drawChar(char, posX, posY, color='white', background='black') {
     const fillY = posY*FONT_SIZE;
     const textX = fillX;
     const textY = fillY+FONT_SIZE;
-    context.fillStyle = 'black';
+    context.fillStyle = background;
     context.fillRect(fillX, fillY, FONT_SIZE, FONT_SIZE);
     context.fillStyle = color;
     context.fillText(char, textX, textY);
@@ -74,13 +83,18 @@ function heightSet(lines) {
     context.canvas.height = lines*FONT_SIZE;
     context.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
 }
-function drawPattern(dataPattern) {
-    const rows = dataPattern.length / CHANNELS_NUMBER;
+export function patternDisplay() {
+    const pattern = patterns[indexPatternCurrent];
+    //
+    const rows = pattern.data.length / CHANNELS_NUMBER;
     heightSet(rows);
     for(let row = 0; row < rows; row++) {
         const offsetRow = row*CHANNELS_NUMBER;
-        drawRow(row, dataPattern.slice(offsetRow, offsetRow+CHANNELS_NUMBER));
+        drawRow(row, pattern.data.slice(offsetRow, offsetRow+CHANNELS_NUMBER));
     }
+    //
+    patternListUpdate();
+    return true;
 }
 function drawRow(row, dataRow) {
     for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
@@ -91,19 +105,20 @@ function drawCell(row, channel, dataCell) {
     const cellWidth = 9;
     const offsetX = channel*cellWidth;
     const offsetY = row;
+    const background = (row%2)? '#222' : 'black';
     if(!(dataCell & MASK_CELL_FLAG_DATA)) {
-        drawString('---', offsetX, offsetY, '#888');
-        drawString('-', offsetX+3, offsetY, '#844');
-        drawString('--', offsetX+4, offsetY, '#368');
-        drawString('---', offsetX+6, offsetY, '#438');
+        drawString('···', offsetX, offsetY, '#888', background);
+        drawString('·', offsetX+3, offsetY, '#844', background);
+        drawString('··', offsetX+4, offsetY, '#368', background);
+        drawString('···', offsetX+6, offsetY, '#438', background);
         return;
     }
     const [note, instrument, volume, effects] = cellParse(dataCell);
     const noteName = noteNumberToName(note);
-    drawString(noteName, offsetX, offsetY);
-    drawString(instrument.toString(16), offsetX+3, offsetY, '#f88');
-    drawString(volume.toString(16).padStart(2,'0'), offsetX+4, offsetY, '#6bf');
-    drawString(effects.toString(16).padStart(3,'0'), offsetX+6, offsetY, '#86f');
+    drawString(noteName, offsetX, offsetY, 'white', background);
+    drawString(instrument.toString(16), offsetX+3, offsetY, '#f88', background);
+    drawString(volume.toString(16).padStart(2,'0'), offsetX+4, offsetY, '#6bf', background);
+    drawString(effects.toString(16).padStart(3,'0'), offsetX+6, offsetY, '#86f', background);
 }
 
 //-- Pattern Management --------------------------
@@ -120,49 +135,30 @@ export function patternFromData(patternData) {
     pattern.fillData(patternData);
     return indexPattern;
 }
-export function patternDelete(indexPattern) {
-    // Default to removing the current pattern
-    if(indexPattern === undefined) {
-        indexPattern = indexPatternCurrent;
+export function patternDelete() {
+    patterns.splice(indexPatternCurrent, 1);
+    // Handle index still valid for pattern list
+    if(indexPatternCurrent < patterns.length) {
+        patternDisplay();
+        return true;
     }
-    // Retreive indexed pattern
-    const pattern = patterns[indexPattern];
-    if(!pattern) { return false;}
-    // Replace display pattern
-    if(tableBody === pattern.element) {
-        for(let indexPatternNew = 0; indexPatternNew < patterns.length; indexPatternNew++) {
-            if(indexPatternNew !== indexPattern) {
-                patternDisplay(indexPatternNew);
-                break;
-            }
-        }
+    // Handle valid list, invalid index
+    indexPatternCurrent--;
+    if(patterns.length) {
+        patternDisplay();
+        return true;
     }
-    // Create new pattern if necessary (a pattern must always be displayed)
-    if(tableBody === pattern.element) {
-        patternDisplay(patternNew());
-    }
-    // Ensure indexPatternCurrent is correct
-    if(indexPatternCurrent >= indexPattern) {
-        indexPatternCurrent--;
-    }
-    // Remove old pattern
-    patterns.splice(indexPattern, 1);
+    // Handle empty list
+    indexPatternCurrent = 0;
+    patternNew();
+    patternDisplay();
     return true;
 }
 
 //-- Pattern Display -----------------------------
-export function patternDisplay(indexPattern) {
-    const pattern = patterns[indexPattern];
-    if(!pattern) { return false;}
-    indexPatternCurrent = indexPattern;
-    // tableBody.replaceWith(pattern.element);
-    tableBody = pattern.element;
-    patternListUpdate();
-    return true;
-}
 export function highlightRow(indexRow, indexPattern, scroll) {
     if(indexPattern !== undefined && indexPatternCurrent !== indexPattern) {
-        let success = patternDisplay(indexPattern);
+        let success = patternSelect(indexPattern);
         if(!success) {return false;}
     }
     let patternCurrent = patterns[indexPatternCurrent];
@@ -196,28 +192,22 @@ export function patternLengthGet(indexPattern) {
     if(!pattern) { return false;}
     return pattern.data.length / CHANNELS_NUMBER;
 }
-export function patternLengthAdjust(indexPattern, lengthDelta) {
-    if(indexPattern === undefined) {
-        indexPattern = indexPatternCurrent;
-    }
-    const pattern = patterns[indexPattern];
-    if(!pattern) { return false;}
-    const lengthNew = pattern.rows.length + lengthDelta;
-    return patternLengthSet(indexPattern, lengthNew);
+export function patternLengthAdjust(lengthDelta) {
+    const pattern = patterns[indexPatternCurrent];
+    const lengthNew = (pattern.data.length / CHANNELS_NUMBER) + lengthDelta;
+    patternDisplay();
+    return patternLengthSet(lengthNew);
 }
-export function patternLengthSet(indexPattern, lengthNew) {
+export function patternLengthSet(lengthNew) {
     lengthNew = Math.max(1, lengthNew);
-    if(indexPattern === undefined) {
-        indexPattern = indexPatternCurrent;
-    }
-    const pattern = patterns[indexPattern];
-    if(!pattern) { return false;}
+    const pattern = patterns[indexPatternCurrent];
     const dataOld = pattern.data;
     const dataNew = new Uint32Array(lengthNew*CHANNELS_NUMBER);
     for(let indexData = 0; indexData < dataOld.length; indexData++) {
         dataNew[indexData] = dataOld[indexData];
     }
     pattern.fillData(dataNew);
+    patternDisplay();
     return pattern.data.length / CHANNELS_NUMBER;
 }
 
