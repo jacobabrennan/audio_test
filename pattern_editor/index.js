@@ -25,6 +25,7 @@ let context;
 const patterns = []
 let patternNameCount = 0;
 let indexPatternCurrent = -1;
+let rowHighlight = 0;
 
 //-- Setup ---------------------------------------
 export async function setup() {
@@ -105,7 +106,10 @@ function drawCell(row, channel, dataCell) {
     const cellWidth = 9;
     const offsetX = channel*cellWidth;
     const offsetY = row;
-    const background = (row%2)? '#222' : 'black';
+    let background = (row%2)? '#222' : 'black';
+    if(row === rowHighlight) {
+        background = '#444';
+    }
     if(!(dataCell & MASK_CELL_FLAG_DATA)) {
         drawString('···', offsetX, offsetY, '#888', background);
         drawString('·', offsetX+3, offsetY, '#844', background);
@@ -157,12 +161,12 @@ export function patternDelete() {
 
 //-- Pattern Display -----------------------------
 export function highlightRow(indexRow, indexPattern, scroll) {
-    if(indexPattern !== undefined && indexPatternCurrent !== indexPattern) {
-        let success = patternSelect(indexPattern);
-        if(!success) {return false;}
+    if(indexPattern !== undefined) {
+        indexPatternCurrent = indexPattern;
     }
-    let patternCurrent = patterns[indexPatternCurrent];
-    patternCurrent.highlightRow(indexRow, scroll);
+    rowHighlight = indexRow;
+    patternDisplay();
+    return true;
 }
 
 //-- Pattern Querying ----------------------------

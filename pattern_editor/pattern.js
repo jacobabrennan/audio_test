@@ -11,6 +11,7 @@ import {
 
 //------------------------------------------------
 export default class Pattern {
+    rowHighlight = 0
     constructor() {
         this.fillData(new Uint32Array(16*CHANNELS_NUMBER));
     }
@@ -19,16 +20,6 @@ export default class Pattern {
     }
     editCell(row, channel, cellData) {
         this.data[(row*CHANNELS_NUMBER)+channel] = cellData;
-    }
-    highlightRow(indexRow, scroll) {
-        // if(Number.isFinite(this.highlightRowIndexCurrent)) {
-        //     let rowOld = this.rows[this.highlightRowIndexCurrent]
-        //     if(rowOld) {
-        //         rowOld.highlight(false);
-        //     }
-        // }
-        // this.highlightRowIndexCurrent = indexRow;
-        // this.rows[indexRow].highlight(true, scroll);
     }
     editCellNote(row, channel, note) {
         const indexCell = row*CHANNELS_NUMBER + channel;
