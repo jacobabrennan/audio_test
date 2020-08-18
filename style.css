@@ -20,7 +20,7 @@ body {
 }
 
 #editor {
-    background: black;
+    /* background: green; */
 }
 canvas {
     image-rendering: crisp-edges;
@@ -30,9 +30,9 @@ canvas {
 /*== Pattern editor ==========================================================*/
 
 #pattern_editor {
-    height: 100%;
+    /* height: 100%; */
     overflow-y: scroll;
-    background: black;
+    /* background: black; */
 }
 #pattern_editor table {
     font-weight: bold;

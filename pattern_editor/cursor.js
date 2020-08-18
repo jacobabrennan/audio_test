@@ -25,11 +25,12 @@ import {
     editCellVolume,
     editCellEffects,
     editCell,
+    lengthGet,
 } from './pattern.js';
 
 //-- Module State --------------------------------
-let cursorX;
-let cursorY;
+let cursorX = 0;
+let cursorY = 0;
 let posUpX;
 let posUpY;
 
@@ -124,22 +125,34 @@ function handleKeyDown(eventKeyboard) {
             return;
         }
         case 'arrowup':
-            cursorY = Math.max(0, cursorY-1);
+            cursorY--;
+            if(cursorY < 0) {
+                cursorY = lengthGet()-1;
+            }
             posUpX = undefined;
             posUpY = undefined;
             return;
         case 'arrowdown':
             cursorY++;
+            if(cursorY >= lengthGet()) {
+                cursorY = 0;
+            }
             posUpX = undefined;
             posUpY = undefined;
             return;
         case 'arrowleft':
-            cursorX = Math.max(0, cursorX-1);
+            cursorX--;
+            if(cursorX < 0) {
+                cursorX = (CELL_WIDTH*CHANNELS_NUMBER)-1;
+            }
             posUpX = undefined;
             posUpY = undefined;
             return;
         case 'arrowright':
-            cursorX = Math.min(CELL_WIDTH*CHANNELS_NUMBER-1, cursorX+1);
+            cursorX++;
+            if(cursorX >= CELL_WIDTH*CHANNELS_NUMBER-1) {
+                cursorX = 0;
+            }
             posUpX = undefined;
             posUpY = undefined;
             return;

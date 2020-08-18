@@ -10,7 +10,7 @@ import {
 import { noteNumberToName } from '../utilities.js';
 import { patternListUpdate } from '../controls/pattern.js';
 import { getSelection } from './cursor.js';
-import { dataGet } from './pattern.js';
+import { dataGet, DEFAULT_ROWS } from './pattern.js';
 
 //-- Constants -----------------------------------
 export const FONT_SIZE = 16;
@@ -39,7 +39,7 @@ export async function setup() {
     const canvas = document.createElement('canvas');
     //
     canvas.width  = DISPLAY_CHAR_WIDTH*FONT_SIZE;
-    canvas.height = FONT_SIZE;
+    canvas.height = DEFAULT_ROWS*FONT_SIZE;
     //
     canvas.tabIndex = 1;
     // Request and configure display context
@@ -56,7 +56,6 @@ export function patternDisplay() {
     patternGrid = new Array(data.length*CELL_WIDTH)
     //
     const rows = data.length / CHANNELS_NUMBER;
-    heightSet(rows);
     for(let row = 0; row < rows; row++) {
         const offsetRow = row*CHANNELS_NUMBER;
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
@@ -136,10 +135,6 @@ function placeString(string, posX, posY) {
     for(let indexChar = 0; indexChar < string.length; indexChar++) {
         placeChar(string[indexChar], posX+indexChar, posY);
     }
-}
-function heightSet(lines) {
-    context.canvas.height = lines*FONT_SIZE;
-    context.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
 }
 
 //-- Drawing Primitives --------------------------

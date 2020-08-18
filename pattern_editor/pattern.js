@@ -13,6 +13,9 @@ import {
 } from '../processor.js';
 import { patternDisplay } from './canvas.js';
 
+//-- Constants -----------------------------------
+export const DEFAULT_ROWS = 32;
+
 //-- Module State --------------------------------
 const patterns = [];
 let patternCurrent;
@@ -45,7 +48,7 @@ export function patternNew() {
     const indexPattern = patterns.length;
     if(indexPattern >= PATTERNS_MAX) { return -1;}
     patterns[indexPattern] = {
-        data: new Uint32Array(16*CHANNELS_NUMBER),
+        data: new Uint32Array(DEFAULT_ROWS*CHANNELS_NUMBER),
         name: `Pattern ${patternNameCount++}`,
     };
     return indexPattern;
