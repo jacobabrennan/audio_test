@@ -7,11 +7,11 @@ import {
     patternNew,
     patternDelete,
     patternListGet,
-    patternDisplay,
     patternLengthAdjust,
     patternLengthGet,
     patternSelect,
 } from '../pattern_editor/index.js';
+import { patternDisplay } from '../pattern_editor/canvas.js';
 
 //-- Module State --------------------------------
 let patternSelector;

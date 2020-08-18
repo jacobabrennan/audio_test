@@ -3,12 +3,18 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import { CHANNELS_NUMBER } from '../processor.js';
-import { CELL_WIDTH } from './index.js';
+import {
+    cellParse,
+    CHANNELS_NUMBER,
+} from '../processor.js';
 import { getSelection } from './cursor.js';
+import { patternListUpdate } from '../controls/pattern.js';
+import { patternGet } from './index.js';
+import { noteNumberToName } from '../utilities.js';
 
 //-- Constants -----------------------------------
 export const FONT_SIZE = 16;
+export const CELL_WIDTH = 9;
 const DOM_STYLE_DYNAMIC = `
 @font-face {
     font-family: 'press_start_k_regular';
@@ -21,6 +27,7 @@ const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
 
 //-- Module State --------------------------------
 let patternGrid = [];
+let context;
 
 //-- Setup ---------------------------------------
 export async function setup() {
@@ -43,9 +50,54 @@ export async function setup() {
     return canvas;
 }
 
+//-- Pattern Display -----------------------------
+export function patternDisplay() {
+    const pattern = patternGet();
+    patternGrid = new Array(pattern.data.length*CELL_WIDTH)
+    //
+    const rows = pattern.data.length / CHANNELS_NUMBER;
+    heightSet(rows);
+    for(let row = 0; row < rows; row++) {
+        const offsetRow = row*CHANNELS_NUMBER;
+        for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
+            drawCell(row, channel, pattern.data[offsetRow+channel]);
+        }
+    }
+    //
+    patternListUpdate();
+    drawPatternGrid();
+    return true;
+}
+function drawCell(row, channel, dataCell) {
+    const offsetX = channel*CELL_WIDTH;
+    const offsetY = row;
+    const [note, instrument, volume, effects] = cellParse(dataCell);
+    if(note === undefined) {
+        placeString('···', offsetX, offsetY);
+    } else {
+        const noteName = noteNumberToName(note);
+        placeString(noteName, offsetX, offsetY);
+    }
+    if(instrument === undefined) {
+        placeString('·', offsetX+3, offsetY);
+    } else {
+        placeString(instrument.toString(16), offsetX+3, offsetY);
+    }
+    if(volume === undefined) {
+        placeString('··', offsetX+4, offsetY);
+    } else {
+        placeString(volume.toString(16).padStart(2,'0'), offsetX+4, offsetY);
+    }
+    if(effects === undefined) {
+        placeString('···', offsetX+6, offsetY);
+    } else {
+        placeString(effects.toString(16).padStart(3,'0'), offsetX+6, offsetY);
+    }
+}
+
 //-- Pattern Grid --------------------------------
-export function drawPatternGrid() {
-    const pattern = patterns[indexPatternCurrent];
+function drawPatternGrid() {
+    const pattern = patternGet();
     const rows = pattern.data.length / CHANNELS_NUMBER;
     const selection = getSelection();
     const selecting = (
@@ -76,14 +128,18 @@ export function drawPatternGrid() {
         }
     }
 }
-export function placeChar(char, posX, posY) {
+function placeChar(char, posX, posY) {
     const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;
     patternGrid[compoundIndex] = char;
 }
-export function placeString(string, posX, posY) {
+function placeString(string, posX, posY) {
     for(let indexChar = 0; indexChar < string.length; indexChar++) {
         placeChar(string[indexChar], posX+indexChar, posY);
     }
+}
+function heightSet(lines) {
+    context.canvas.height = lines*FONT_SIZE;
+    context.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
 }
 
 //-- Drawing Primitives --------------------------

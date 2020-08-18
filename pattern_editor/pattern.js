@@ -9,12 +9,10 @@ import {
     CHANNELS_NUMBER,
     MASK_CELL_VOLUME_WIDTH,
     MASK_CELL_NOTE_WIDTH,
-    MASK_CELL_NOTE_OFFSET,
 } from '../processor.js';
 
 //------------------------------------------------
 export default class Pattern {
-    rowHighlight = 0
     constructor() {
         this.fillData(new Uint32Array(16*CHANNELS_NUMBER));
     }

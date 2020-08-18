@@ -5,9 +5,10 @@
 //-- Dependencies --------------------------------
 import {
     FONT_SIZE,
+    CELL_WIDTH,
+    patternDisplay,
 } from './canvas.js'
 import {
-    CELL_WIDTH,
     patternCellGet,
     editCellNote,
     editCellInstrument,
@@ -32,6 +33,22 @@ let cursorY;
 let posUpX;
 let posUpY;
 
+//-- Setup ---------------------------------------
+export async function setup(editor) {
+    editor.addEventListener('mousedown', (eventMouse) => {
+        handleMouseDown(eventMouse);
+        patternDisplay();
+    });
+    editor.addEventListener('mouseup', (eventMouse) => {
+        handleMouseUp(eventMouse);
+        patternDisplay();
+    });
+    editor.addEventListener('keydown', (eventKeyboard) => {
+        handleKeyDown(eventKeyboard);
+        patternDisplay();
+    });
+}
+
 //------------------------------------------------
 export function cursorHighlight(indexRow) {
     posUpX = undefined;
@@ -39,7 +56,7 @@ export function cursorHighlight(indexRow) {
     cursorY = indexRow;
 }
 
-//------------------------------------------------
+//-- Cursor Querying -----------------------------
 export function getPosCursor() {
     return {
         cursorX,
@@ -70,7 +87,7 @@ export function getSelection() {
 }
 
 //-- Event Handlers ------------------------------
-export function handleMouseDown(eventMouse) {
+function handleMouseDown(eventMouse) {
     const coordsMouse = getEventCoords(eventMouse);
     posUpX = undefined;
     posUpY = undefined;
@@ -81,7 +98,7 @@ export function handleMouseDown(eventMouse) {
         y: cursorY,
     };
 }
-export function handleMouseUp(eventMouse) {
+function handleMouseUp(eventMouse) {
     const coordsMouse = getEventCoords(eventMouse);
     posUpX = coordsMouse.x;
     posUpY = coordsMouse.y;
@@ -90,7 +107,7 @@ export function handleMouseUp(eventMouse) {
         y: posUpY,
     };
 }
-export function handleKeyDown(eventKeyboard) {
+function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
     // Handle Movement, and special values
     switch(key) {
@@ -158,7 +175,7 @@ function getEventCoords(event) {
     };
 }
 
-//------------------------------------------------
+//-- Input Interpretors --------------------------
 function parseNoteInput(key) {
     key = key.toUpperCase();
     const indexRow = cursorY;
@@ -260,5 +277,4 @@ function parseCellInput(digit, posX, posY) {
             break;
         }
     }
-
 }

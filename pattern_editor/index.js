@@ -7,31 +7,17 @@ import Pattern from './pattern.js';
 import {
     PATTERNS_MAX,
     CHANNELS_NUMBER,
-    cellParse,
 } from '../processor.js';
 import {
-    patternListUpdate,
-} from '../controls/pattern.js';
-import {
-    handleMouseDown,
-    handleMouseUp,
-    handleKeyDown,
+    setup as setupCursor,
     cursorHighlight,
 } from './cursor.js';
 import {
-    noteNumberToName,
-} from '../utilities.js';
-import {
     setup as setupCanvas,
-    drawPatternGrid,
-    placeString,
+    patternDisplay,
 } from './canvas.js';
 
-//-- Constants -----------------------------------
-export const CELL_WIDTH = 9;
-
 //-- Module State --------------------------------
-let context;
 const patterns = []
 let patternNameCount = 0;
 let indexPatternCurrent = -1;
@@ -43,19 +29,8 @@ export async function setup() {
     editor.id = 'editor';
     //
     editor.append(await setupCanvas());
+    await setupCursor(editor);
     //
-    editor.addEventListener('mousedown', (eventMouse) => {
-        let coordDown = handleMouseDown(eventMouse);
-        drawPatternGrid();
-    });
-    editor.addEventListener('mouseup', (eventMouse) => {
-        let coordUp = handleMouseUp(eventMouse);
-        drawPatternGrid();
-    });
-    editor.addEventListener('keydown', (eventKeyboard) => {
-        handleKeyDown(eventKeyboard);
-        drawPatternGrid();
-    });
     return editor;
 }
 
@@ -65,55 +40,6 @@ export function patternSelect(indexPattern) {
     if(!pattern) { return false;}
     indexPatternCurrent = indexPattern;
     patternDisplay();
-}
-
-//-- Pattern Display -----------------------------
-function heightSet(lines) {
-    context.canvas.height = lines*FONT_SIZE;
-    context.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
-}
-export function patternDisplay() {
-    const pattern = patterns[indexPatternCurrent];
-    patternGrid = new Array(pattern.data.length*CELL_WIDTH)
-    //
-    const rows = pattern.data.length / CHANNELS_NUMBER;
-    heightSet(rows);
-    for(let row = 0; row < rows; row++) {
-        const offsetRow = row*CHANNELS_NUMBER;
-        for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
-            drawCell(row, channel, pattern.data[offsetRow+channel]);
-        }
-    }
-    //
-    patternListUpdate();
-    drawPatternGrid();
-    return true;
-}
-function drawCell(row, channel, dataCell) {
-    const offsetX = channel*CELL_WIDTH;
-    const offsetY = row;
-    const [note, instrument, volume, effects] = cellParse(dataCell);
-    if(note === undefined) {
-        placeString('···', offsetX, offsetY);
-    } else {
-        const noteName = noteNumberToName(note);
-        placeString(noteName, offsetX, offsetY);
-    }
-    if(instrument === undefined) {
-        placeString('·', offsetX+3, offsetY);
-    } else {
-        placeString(instrument.toString(16), offsetX+3, offsetY);
-    }
-    if(volume === undefined) {
-        placeString('··', offsetX+4, offsetY);
-    } else {
-        placeString(volume.toString(16).padStart(2,'0'), offsetX+4, offsetY);
-    }
-    if(effects === undefined) {
-        placeString('···', offsetX+6, offsetY);
-    } else {
-        placeString(effects.toString(16).padStart(3,'0'), offsetX+6, offsetY);
-    }
 }
 
 //-- Pattern Management --------------------------
@@ -161,6 +87,9 @@ export function highlightRow(indexRow, indexPattern, scroll) {
 }
 
 //-- Pattern Querying ----------------------------
+export function patternGet() {
+    return patterns[indexPatternCurrent];
+}
 export function patternDataCompile() {
     return patterns.map(pattern => pattern.data);
 }
