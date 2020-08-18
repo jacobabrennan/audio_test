@@ -4,7 +4,7 @@
 
 //-- Dependencies --------------------------------
 import Pattern from './pattern.js';
-import { PATTERNS_MAX, CHANNELS_NUMBER, cellParse, MASK_CELL_FLAG_DATA } from '../processor.js';
+import { PATTERNS_MAX, CHANNELS_NUMBER, cellParse, MASK_CELL_FLAG_DATA, pattern } from '../processor.js';
 import { patternListUpdate } from '../controls/pattern.js';
 import { handleMouseDown, getPosCursor } from './cursor.js';
 
@@ -52,7 +52,10 @@ export async function setup() {
     editor.id = 'editor';
     editor.append(canvas);
     //
-    editor.addEventListener('mousedown', handleMouseDown)
+    editor.addEventListener('mousedown', (eventMouse) => {
+        let coordDown = handleMouseDown(eventMouse);
+        highlightRow(coordDown.y);
+    });
     return editor;
 }
 
@@ -82,31 +85,35 @@ export function drawString(string, posX, posY, color='white', background='black'
         drawChar(string[indexChar], posX+indexChar, posY, color, background);
     }
 }
+function drawGridPos(posX, posY, color='white', background='black') {
+    const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;
+    drawChar(patternGrid[compoundIndex], posX, posY, color, background);
+}
 
 //-- Pattern Grid --------------------------------
 function drawPatternGrid() {
     const pattern = patterns[indexPatternCurrent];
     const rows = pattern.data.length / CHANNELS_NUMBER;
     for(let row = 0; row < rows; row++) {
-        const offsetRow = row*CHANNELS_NUMBER;
         let background = (row%2)? '#222' : 'black';
         if(row === rowHighlight) {
             background = '#606';
         }
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
             const offsetChannel = channel*CELL_WIDTH;
-            const offsetFull = offsetRow + offsetChannel;
-            drawChar(patternGrid[offsetFull]+0, offsetChannel+0, row, '#fff', background);
-            drawChar(patternGrid[offsetFull]+1, offsetChannel+1, row, '#fff', background);
-            drawChar(patternGrid[offsetFull]+2, offsetChannel+2, row, '#fff', background);
-            drawChar(patternGrid[offsetFull]+3, offsetChannel+3, row, '#f88', background);
-            drawChar(patternGrid[offsetFull]+4, offsetChannel+4, row, '#6bf', background);
-            drawChar(patternGrid[offsetFull]+5, offsetChannel+5, row, '#6bf', background);
-            drawChar(patternGrid[offsetFull]+6, offsetChannel+6, row, '#86f', background);
-            drawChar(patternGrid[offsetFull]+7, offsetChannel+7, row, '#86f', background);
-            drawChar(patternGrid[offsetFull]+8, offsetChannel+8, row, '#86f', background);
+            drawGridPos(offsetChannel+0, row, '#fff', background);
+            drawGridPos(offsetChannel+1, row, '#fff', background);
+            drawGridPos(offsetChannel+2, row, '#fff', background);
+            drawGridPos(offsetChannel+3, row, '#f88', background);
+            drawGridPos(offsetChannel+4, row, '#6bf', background);
+            drawGridPos(offsetChannel+5, row, '#6bf', background);
+            drawGridPos(offsetChannel+6, row, '#86f', background);
+            drawGridPos(offsetChannel+7, row, '#86f', background);
+            drawGridPos(offsetChannel+8, row, '#86f', background);
         }
     }
+    const coordCursor = getPosCursor();
+    drawGridPos(coordCursor.posDownX, coordCursor.posDownY, '#fff', '#c0c');
 }
 function placeChar(char, posX, posY) {
     const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;

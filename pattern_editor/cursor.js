@@ -37,11 +37,19 @@ export function handleMouseDown(mouseEvent) {
     const coordsMouse = getEventCoords(mouseEvent);
     posDownX = coordsMouse.x;
     posDownY = coordsMouse.y;
+    return {
+        x: posDownX,
+        y: posDownY,
+    };
 }
 export function handleMouseUp(mouseEvent) {
     const coordsMouse = getEventCoords(mouseEvent);
     posUpX = coordsMouse.x;
     posUpY = coordsMouse.y;
+    return {
+        x: posUpX,
+        y: posUpY,
+    };
 }
 
 //-- Mouse Utilities -----------------------------
