@@ -8,7 +8,7 @@ import {
     PATTERNS_MAX,
     CHANNELS_NUMBER,
     cellParse,
-    MASK_CELL_FLAG_DATA,
+    
 } from '../processor.js';
 import {
     patternListUpdate,
@@ -17,7 +17,12 @@ import {
     handleMouseDown,
     getSelection,
     handleMouseUp,
+    handleKeyDown,
+    cursorHighlight,
 } from './cursor.js';
+import {
+    noteNumberToName,
+} from '../utilities.js';
 
 //-- Constants -----------------------------------
 export const DOM_STYLE_DYNAMIC = `
@@ -38,7 +43,6 @@ let context;
 const patterns = []
 let patternNameCount = 0;
 let indexPatternCurrent = -1;
-let rowHighlight = 0;
 let patternGrid = [];
 
 //-- Setup ---------------------------------------
@@ -65,11 +69,15 @@ export async function setup() {
     //
     editor.addEventListener('mousedown', (eventMouse) => {
         let coordDown = handleMouseDown(eventMouse);
-        highlightRow(coordDown.y);
+        drawPatternGrid();
     });
     editor.addEventListener('mouseup', (eventMouse) => {
         let coordUp = handleMouseUp(eventMouse);
-        highlightRow(coordUp.y);
+        drawPatternGrid();
+    });
+    editor.addEventListener('keydown', (eventKeyboard) => {
+        handleKeyDown(eventKeyboard);
+        drawPatternGrid();
     });
     return editor;
 }
@@ -116,7 +124,7 @@ function drawPatternGrid() {
     );
     for(let row = 0; row < rows; row++) {
         let background = (row%2)? '#222' : 'black';
-        if(!selecting && row === rowHighlight) {
+        if(!selecting && row === selection.posMinY) {
             background = '#606';
         }
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
@@ -174,19 +182,28 @@ export function patternDisplay() {
 function drawCell(row, channel, dataCell) {
     const offsetX = channel*CELL_WIDTH;
     const offsetY = row;
-    if(!(dataCell & MASK_CELL_FLAG_DATA)) {
-        placeString('···', offsetX, offsetY);
-        placeString('·', offsetX+3, offsetY);
-        placeString('··', offsetX+4, offsetY);
-        placeString('···', offsetX+6, offsetY);
-        return;
-    }
     const [note, instrument, volume, effects] = cellParse(dataCell);
-    const noteName = noteNumberToName(note);
-    placeString(noteName, offsetX, offsetY);
-    placeString(instrument.toString(16), offsetX+3);
-    placeString(volume.toString(16).padStart(2,'0'));
-    placeString(effects.toString(16).padStart(3,'0'));
+    if(note === undefined) {
+        placeString('···', offsetX, offsetY);
+    } else {
+        const noteName = noteNumberToName(note);
+        placeString(noteName, offsetX, offsetY);
+    }
+    if(instrument === undefined) {
+        placeString('·', offsetX+3, offsetY);
+    } else {
+        placeString(instrument.toString(16), offsetX+3, offsetY);
+    }
+    if(volume === undefined) {
+        placeString('··', offsetX+4, offsetY);
+    } else {
+        placeString(volume.toString(16).padStart(2,'0'), offsetX+4, offsetY);
+    }
+    if(effects === undefined) {
+        placeString('···', offsetX+6, offsetY);
+    } else {
+        placeString(effects.toString(16).padStart(3,'0'), offsetX+6, offsetY);
+    }
 }
 
 //-- Pattern Management --------------------------
@@ -228,7 +245,7 @@ export function highlightRow(indexRow, indexPattern, scroll) {
     if(indexPattern !== undefined) {
         indexPatternCurrent = indexPattern;
     }
-    rowHighlight = indexRow;
+    cursorHighlight(indexRow);
     patternDisplay();
     return true;
 }
@@ -249,6 +266,11 @@ export function patternListGet() {
         names: patterns.map(pattern => pattern.name),
     };
     return patternData;
+}
+export function patternCellGet(indexRow, indexChannel) {
+    const pattern = patterns[indexPatternCurrent];
+    const compoundIndex = indexRow*CHANNELS_NUMBER+indexChannel;
+    return pattern.data[compoundIndex];
 }
 
 //-- Pattern configuring --------------------------
@@ -280,71 +302,23 @@ export function patternLengthSet(lengthNew) {
 }
 
 //-- Pattern Editing -----------------------------
-export function editCellNote(indexPattern, indexRow, indexChannel, value) {
-    if(indexPattern === undefined) {
-        indexPattern = indexPatternCurrent;
-    }
-    let pattern = patterns[indexPattern];
+export function editCellNote(indexRow, indexChannel, value) {
+    let pattern = patterns[indexPatternCurrent];
     pattern.editCellNote(indexRow, indexChannel, value);
+    patternDisplay();
 }
-export function editCellInstrument(indexPattern, indexRow, indexChannel, value) {
-    if(indexPattern === undefined) {
-        indexPattern = indexPatternCurrent;
-    }
-    let pattern = patterns[indexPattern];
+export function editCellInstrument(indexRow, indexChannel, value) {
+    let pattern = patterns[indexPatternCurrent];
     pattern.editCellInstrument(indexRow, indexChannel, value);
+    patternDisplay();
 }
-export function editCellVolume(indexPattern, indexRow, indexChannel, value) {
-    if(indexPattern === undefined) {
-        indexPattern = indexPatternCurrent;
-    }
-    let pattern = patterns[indexPattern];
+export function editCellVolume(indexRow, indexChannel, value) {
+    let pattern = patterns[indexPatternCurrent];
     pattern.editCellVolume(indexRow, indexChannel, value);
+    patternDisplay();
 }
-export function editCellEffects(indexPattern, indexRow, indexChannel, value) {
-    if(indexPattern === undefined) {
-        indexPattern = indexPatternCurrent;
-    }
-    let pattern = patterns[indexPattern];
+export function editCellEffects(indexRow, indexChannel, value) {
+    let pattern = patterns[indexPatternCurrent];
     pattern.editCellEffects(indexRow, indexChannel, value);
-}
-
-//-- Utilities -----------------------------------
-const noteLetters = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
-function noteFormatName(note) {
-    let letter = note[0].toUpperCase();
-    let octave = 2;
-    if(note.length === 1) { // 'b' => 'B 4'
-        return letter+' '+octave;
-    }
-    if(note.length === 3) { // 'bb2' => 'Bb2'
-        return letter+note[1]+note[2];
-    }
-    if(note[1] === '#' || note[1] === 'b') { // 'bb' => 'Bb4'
-        return letter+note[1]+octave;
-    }
-    return letter+' '+note[1]; // 'b4' => 'B 4'
-}
-function noteNameToNumber(note) {
-    let letter = note[0];
-    if(note[1] !== ' ') {
-        letter = note[0]+note[1];
-    }
-    let noteOffset = noteLetters.indexOf(letter);
-    let octave = parseInt(note[2]);
-    if(noteOffset > 2) { octave--}
-    if(noteOffset === -1) { return false;}
-    noteOffset += octave*12;
-    if(!Number.isFinite(noteOffset)) { return false;}
-    if(noteOffset > (Math.pow(2, MASK_CELL_NOTE_WIDTH)-1)) { return false;}
-    if(noteOffset < 0) { return false;}
-    return noteOffset;
-}
-function noteNumberToName(note) {
-    let letter = noteLetters[note%12];
-    let octave = Math.floor(note/12);
-    if(note%12 > 2) {
-        octave++;
-    }
-    return letter.padEnd(2,' ') + octave.toString();
+    patternDisplay();
 }

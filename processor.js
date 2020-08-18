@@ -11,14 +11,15 @@ export const BPM_DEFAULT = 500;
 export const CHANNELS_NUMBER = 5;
 export const PATTERNS_MAX = 16;
 // Pattern cell data masking
-// 0b DVU NNNNNN IIIII VVVVVV EEEEEEEEEEEE 
-export const MASK_CELL_FLAG_DATA   = 0b10000000000000000000000000000000;
-export const MASK_CELL_FLAG_VOLUME = 0b01000000000000000000000000000000;
-export const MASK_CELL_FLAG_UNUSED = 0b00100000000000000000000000000000;
+// 0b NIVE NNNNNN IIII VVVVVV EEEEEEEEEEEE 
+export const MASK_CELL_FLAG_NOTE       = 0b10000000000000000000000000000000;
+export const MASK_CELL_FLAG_INSTRUMENT = 0b01000000000000000000000000000000;
+export const MASK_CELL_FLAG_VOLUME     = 0b00100000000000000000000000000000;
+export const MASK_CELL_FLAG_EFFECT     = 0b00010000000000000000000000000000;
 export const MASK_CELL_NOTE_WIDTH = 6;
-export const MASK_CELL_NOTE_OFFSET = 23;
+export const MASK_CELL_NOTE_OFFSET = 22;
 export const MASK_CELL_NOTE_STOP = Math.pow(2, MASK_CELL_NOTE_WIDTH)-1
-export const MASK_CELL_INSTRUMENT_WIDTH = 5;
+export const MASK_CELL_INSTRUMENT_WIDTH = 4;
 export const MASK_CELL_INSTRUMENT_OFFSET = 18;
 export const MASK_CELL_VOLUME_WIDTH = 6;
 export const MASK_CELL_VOLUME_OFFSET = 12;
@@ -165,7 +166,9 @@ class Song extends AudioProcessor {
                 channel[indexChannel].noteEnd();
                 return;
             }
-            instrument.notePlay(note, indexChannel);
+            if(instrument) {
+                instrument.notePlay(note, indexChannel);
+            }
         }
         this.indexRow++;
     }
@@ -352,22 +355,31 @@ class Instrument extends AudioProcessor {
 
 //------------------------------------------------
 export function cell(note, instrument, volume, effect) {
-    let R = (
-        MASK_CELL_FLAG_DATA |
-        (Number.isFinite(volume)? MASK_CELL_FLAG_VOLUME : 0) |
-        (note       << MASK_CELL_NOTE_OFFSET      ) |
-        (instrument << MASK_CELL_INSTRUMENT_OFFSET) |
-        (volume     << MASK_CELL_VOLUME_OFFSET    ) |
-        (effect     << MASK_CELL_EFFECT_OFFSET    )
-    );
+    let R = 0;
+    if(Number.isFinite(note)) {
+        R |= MASK_CELL_FLAG_NOTE | note << MASK_CELL_NOTE_OFFSET;
+    }
+    if(Number.isFinite(instrument)) {
+        R |= MASK_CELL_FLAG_INSTRUMENT | instrument << MASK_CELL_INSTRUMENT_OFFSET;
+    }
+    if(Number.isFinite(volume)) {
+        R |= MASK_CELL_FLAG_VOLUME | volume << MASK_CELL_VOLUME_OFFSET;
+    }
+    if(Number.isFinite(effect)) {
+        R |= MASK_CELL_FLAG_EFFECT | effect << MASK_CELL_EFFECT_OFFSET;
+    }
     return R;
 }
 export function cellParse(cellData32Bit) {
+    let note = (cellData32Bit >> MASK_CELL_NOTE_OFFSET) & (Math.pow(2,MASK_CELL_NOTE_WIDTH)-1);
+    let instrument = (cellData32Bit >> MASK_CELL_INSTRUMENT_OFFSET) & (Math.pow(2,MASK_CELL_INSTRUMENT_WIDTH)-1);
+    let volume = (cellData32Bit >> MASK_CELL_VOLUME_OFFSET) & (Math.pow(2,MASK_CELL_VOLUME_WIDTH)-1);
+    let effect = (cellData32Bit >> MASK_CELL_EFFECT_OFFSET) & (Math.pow(2,MASK_CELL_EFFECT_WIDTH)-1);
     return [
-        (cellData32Bit >> MASK_CELL_NOTE_OFFSET      ) & (Math.pow(2,MASK_CELL_NOTE_WIDTH      )-1),
-        (cellData32Bit >> MASK_CELL_INSTRUMENT_OFFSET) & (Math.pow(2,MASK_CELL_INSTRUMENT_WIDTH)-1),
-        (cellData32Bit >> MASK_CELL_VOLUME_OFFSET    ) & (Math.pow(2,MASK_CELL_VOLUME_WIDTH    )-1),
-        (cellData32Bit >> MASK_CELL_EFFECT_OFFSET    ) & (Math.pow(2,MASK_CELL_EFFECT_WIDTH    )-1),
+        (cellData32Bit&MASK_CELL_FLAG_NOTE)? note : undefined,
+        (cellData32Bit&MASK_CELL_FLAG_INSTRUMENT)? instrument : undefined,
+        (cellData32Bit&MASK_CELL_FLAG_VOLUME)? volume : undefined,
+        (cellData32Bit&MASK_CELL_FLAG_EFFECT)? effect : undefined,
     ];
 }
 export function empty() {
