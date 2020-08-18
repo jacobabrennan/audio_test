@@ -10,7 +10,7 @@ import {
 import { noteNumberToName } from '../utilities.js';
 import { patternListUpdate } from '../controls/pattern.js';
 import { getSelection, getCursor } from './cursor.js';
-import { dataGet, DEFAULT_ROWS } from './pattern.js';
+import { dataGet, DEFAULT_ROWS, lengthGet } from './pattern.js';
 
 //-- Constants -----------------------------------
 export const FONT_SIZE = 16;
@@ -96,6 +96,9 @@ function drawCell(row, channel, dataCell) {
 
 //-- Pattern Grid --------------------------------
 function drawPatternGrid() {
+    context.save();
+    context.fillStyle = 'black';
+    context.fillRect(0,0,context.canvas.width, context.canvas.height);
     const data = dataGet();
     const rows = data.length / CHANNELS_NUMBER;
     const selection = getSelection();
@@ -128,6 +131,7 @@ function drawPatternGrid() {
     if(cursor) {
         drawGridPos(cursor.posX, cursor.posY, '#fff', '#c0c');
     }
+    context.restore();
 }
 function placeChar(char, posX, posY) {
     const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;
@@ -141,6 +145,8 @@ function placeString(string, posX, posY) {
 
 //-- Drawing Primitives --------------------------
 function drawChar(char, posX, posY, color='white', background='black') {
+    if(posX < 0 || posX >= CELL_WIDTH*CHANNELS_NUMBER) { return;}
+    if(posY < 0 || posY >= lengthGet()) { return;}
     context.save();
     const fillX = posX*FONT_SIZE;
     const fillY = posY*FONT_SIZE;
