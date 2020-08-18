@@ -5,6 +5,8 @@
 //-- Dependencies --------------------------------
 import {
     FONT_SIZE,
+} from './canvas.js'
+import {
     CELL_WIDTH,
     patternCellGet,
     editCellNote,
