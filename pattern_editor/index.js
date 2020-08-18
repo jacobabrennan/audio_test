@@ -6,6 +6,7 @@
 import Pattern from './pattern.js';
 import { PATTERNS_MAX, CHANNELS_NUMBER, cellParse, MASK_CELL_FLAG_DATA } from '../processor.js';
 import { patternListUpdate } from '../controls/pattern.js';
+import { handleMouseDown, getPosCursor } from './cursor.js';
 
 //-- Constants -----------------------------------
 export const DOM_STYLE_DYNAMIC = `
@@ -17,8 +18,9 @@ export const DOM_STYLE_DYNAMIC = `
 }
 `;
 const FONT_FAMILY = 'press_start_k_regular';
-const FONT_SIZE = 16;
-const DISPLAY_CHAR_WIDTH = 9*CHANNELS_NUMBER;
+export const FONT_SIZE = 16;
+const CELL_WIDTH = 9;
+const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
 
 //-- Module State --------------------------------
 let context;
@@ -26,6 +28,7 @@ const patterns = []
 let patternNameCount = 0;
 let indexPatternCurrent = -1;
 let rowHighlight = 0;
+let patternGrid = [];
 
 //-- Setup ---------------------------------------
 export async function setup() {
@@ -49,6 +52,7 @@ export async function setup() {
     editor.id = 'editor';
     editor.append(canvas);
     //
+    editor.addEventListener('mousedown', handleMouseDown)
     return editor;
 }
 
@@ -79,6 +83,42 @@ export function drawString(string, posX, posY, color='white', background='black'
     }
 }
 
+//-- Pattern Grid --------------------------------
+function drawPatternGrid() {
+    const pattern = patterns[indexPatternCurrent];
+    const rows = pattern.data.length / CHANNELS_NUMBER;
+    for(let row = 0; row < rows; row++) {
+        const offsetRow = row*CHANNELS_NUMBER;
+        let background = (row%2)? '#222' : 'black';
+        if(row === rowHighlight) {
+            background = '#606';
+        }
+        for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
+            const offsetChannel = channel*CELL_WIDTH;
+            const offsetFull = offsetRow + offsetChannel;
+            drawChar(patternGrid[offsetFull]+0, offsetChannel+0, row, '#fff', background);
+            drawChar(patternGrid[offsetFull]+1, offsetChannel+1, row, '#fff', background);
+            drawChar(patternGrid[offsetFull]+2, offsetChannel+2, row, '#fff', background);
+            drawChar(patternGrid[offsetFull]+3, offsetChannel+3, row, '#f88', background);
+            drawChar(patternGrid[offsetFull]+4, offsetChannel+4, row, '#6bf', background);
+            drawChar(patternGrid[offsetFull]+5, offsetChannel+5, row, '#6bf', background);
+            drawChar(patternGrid[offsetFull]+6, offsetChannel+6, row, '#86f', background);
+            drawChar(patternGrid[offsetFull]+7, offsetChannel+7, row, '#86f', background);
+            drawChar(patternGrid[offsetFull]+8, offsetChannel+8, row, '#86f', background);
+        }
+    }
+}
+function placeChar(char, posX, posY) {
+    const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;
+    patternGrid[compoundIndex] = char;
+}
+function placeString(string, posX, posY) {
+    for(let indexChar = 0; indexChar < string.length; indexChar++) {
+        placeChar(string[indexChar], posX+indexChar, posY);
+    }
+}
+
+
 //-- Pattern Display -----------------------------
 function heightSet(lines) {
     context.canvas.height = lines*FONT_SIZE;
@@ -86,43 +126,37 @@ function heightSet(lines) {
 }
 export function patternDisplay() {
     const pattern = patterns[indexPatternCurrent];
+    patternGrid = new Array(pattern.data.length*CELL_WIDTH)
     //
     const rows = pattern.data.length / CHANNELS_NUMBER;
     heightSet(rows);
     for(let row = 0; row < rows; row++) {
         const offsetRow = row*CHANNELS_NUMBER;
-        drawRow(row, pattern.data.slice(offsetRow, offsetRow+CHANNELS_NUMBER));
+        for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
+            drawCell(row, channel, pattern.data[offsetRow+channel]);
+        }
     }
     //
     patternListUpdate();
+    drawPatternGrid();
     return true;
 }
-function drawRow(row, dataRow) {
-    for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
-        drawCell(row, channel, dataRow[channel]);
-    }
-}
 function drawCell(row, channel, dataCell) {
-    const cellWidth = 9;
-    const offsetX = channel*cellWidth;
+    const offsetX = channel*CELL_WIDTH;
     const offsetY = row;
-    let background = (row%2)? '#222' : 'black';
-    if(row === rowHighlight) {
-        background = '#444';
-    }
     if(!(dataCell & MASK_CELL_FLAG_DATA)) {
-        drawString('···', offsetX, offsetY, '#888', background);
-        drawString('·', offsetX+3, offsetY, '#844', background);
-        drawString('··', offsetX+4, offsetY, '#368', background);
-        drawString('···', offsetX+6, offsetY, '#438', background);
+        placeString('···', offsetX, offsetY);
+        placeString('·', offsetX+3, offsetY);
+        placeString('··', offsetX+4, offsetY);
+        placeString('···', offsetX+6, offsetY);
         return;
     }
     const [note, instrument, volume, effects] = cellParse(dataCell);
     const noteName = noteNumberToName(note);
-    drawString(noteName, offsetX, offsetY, 'white', background);
-    drawString(instrument.toString(16), offsetX+3, offsetY, '#f88', background);
-    drawString(volume.toString(16).padStart(2,'0'), offsetX+4, offsetY, '#6bf', background);
-    drawString(effects.toString(16).padStart(3,'0'), offsetX+6, offsetY, '#86f', background);
+    placeString(noteName, offsetX, offsetY);
+    placeString(instrument.toString(16), offsetX+3);
+    placeString(volume.toString(16).padStart(2,'0'));
+    placeString(effects.toString(16).padStart(3,'0'));
 }
 
 //-- Pattern Management --------------------------
