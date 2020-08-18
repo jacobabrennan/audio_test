@@ -9,7 +9,7 @@ import {
 } from '../processor.js';
 import { noteNumberToName } from '../utilities.js';
 import { patternListUpdate } from '../controls/pattern.js';
-import { getSelection } from './cursor.js';
+import { getSelection, getCursor } from './cursor.js';
 import { dataGet, DEFAULT_ROWS } from './pattern.js';
 
 //-- Constants -----------------------------------
@@ -99,13 +99,10 @@ function drawPatternGrid() {
     const data = dataGet();
     const rows = data.length / CHANNELS_NUMBER;
     const selection = getSelection();
-    const selecting = (
-        selection.posMaxX !== selection.posMinX ||
-        selection.posMaxY !== selection.posMinY
-    );
+    const cursor = getCursor();
     for(let row = 0; row < rows; row++) {
         let background = (row%2)? '#222' : 'black';
-        if(!selecting && row === selection.posMinY) {
+        if(!selection && row === cursor.posY) {
             background = '#606';
         }
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
@@ -121,10 +118,15 @@ function drawPatternGrid() {
             drawGridPos(offsetChannel+8, row, '#86f', background);
         }
     }
-    for(let posY = selection.posMinY; posY <= selection.posMaxY; posY++) {
-        for(let posX = selection.posMinX; posX <= selection.posMaxX; posX++) {
-            drawGridPos(posX, posY, '#fff', '#c0c');
+    if(selection) {
+        for(let posY = selection.posStartY; posY <= selection.posEndY; posY++) {
+            for(let posX = selection.posStartX; posX <= selection.posEndX; posX++) {
+                drawGridPos(posX, posY, '#fff', '#c0c');
+            }
         }
+    }
+    if(cursor) {
+        drawGridPos(cursor.posX, cursor.posY, '#fff', '#c0c');
     }
 }
 function placeChar(char, posX, posY) {

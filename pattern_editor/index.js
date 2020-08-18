@@ -4,9 +4,11 @@
 
 //-- Dependencies --------------------------------
 import {
-    setup as setupCursor,
     cursorHighlight,
 } from './cursor.js';
+import {
+    setup as setupInput,
+} from './input.js';
 import {
     setup as setupCanvas,
     patternDisplay,
@@ -22,7 +24,7 @@ export async function setup() {
     editor.id = 'editor';
     //
     editor.append(await setupCanvas());
-    await setupCursor(editor);
+    await setupInput(editor);
     //
     return editor;
 }
