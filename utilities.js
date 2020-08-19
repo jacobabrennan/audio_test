@@ -4,7 +4,8 @@
 
 //-- Dependencies --------------------------------
 import {
-    MASK_CELL_NOTE_WIDTH, MASK_CELL_NOTE_STOP,
+    MASK_CELL_NOTE_WIDTH,
+    MASK_CELL_NOTE_STOP,
 } from './processor.js';
 
 //-- Constants -----------------------------------

@@ -5,10 +5,12 @@
 //-- Constants -----------------------------------
 // Generic geometric and physical constants
 export const TAU = Math.PI*2;
+export const HEX = 16;
 // Audio parameters
 export const RATE_SAMPLE = 8000;
 export const BPM_DEFAULT = 500;
 export const CHANNELS_NUMBER = 5;
+export const CHANNEL_NOISE = 4;
 export const PATTERNS_MAX = 16;
 // Pattern cell data masking
 // 0b NIVE NNNNNN IIII VVVVVV EEEEEEEEEEEE 
@@ -25,6 +27,7 @@ export const MASK_CELL_VOLUME_WIDTH = 6;
 export const MASK_CELL_VOLUME_OFFSET = 12;
 export const MASK_CELL_EFFECT_WIDTH = 12;
 export const MASK_CELL_EFFECT_OFFSET = 0;
+export const NOTE_NOISE_MAX = 0b1111;
 // Client Actions
 let INDEX = 1;
 export const ACTION_SONG = INDEX++;
@@ -47,7 +50,7 @@ function setup() {
     channel[1] = new Channel(waveSquare);
     channel[2] = new Channel(waveSaw);
     channel[3] = new Channel(waveTriangle);
-    channel[4] = new Channel(waveNoise);
+    channel[CHANNEL_NOISE] = new Channel(waveNoise);
 }
 
 
@@ -153,23 +156,26 @@ class Song extends AudioProcessor {
             patternId: this.indexPattern,
             row: this.indexRow,
         });
-        let dataPattern = this.pattern[this.indexPattern]
-        let offsetCell = this.indexRow*CHANNELS_NUMBER;
+        const dataPattern = this.pattern[this.indexPattern]
+        const offsetCell = this.indexRow*CHANNELS_NUMBER;
         for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
-            let cell = dataPattern[offsetCell+indexChannel];
+            const cell = dataPattern[offsetCell+indexChannel];
             if(!cell) { continue;}
-            let [note, indexInstrument, volume, effect] = cellParse(cell);
-            let instrument = this.instrument[indexInstrument];
-            if(cell&MASK_CELL_FLAG_VOLUME) {
+            const [note, indexInstrument, volume, effect] = cellParse(cell);
+            if(indexInstrument !== undefined) {
+                const instrument = this.instrument[indexInstrument];
+                channel[indexChannel].instrumentSet(instrument);
+            }
+            if(volume !== undefined) {
                 channel[indexChannel].volumeSet(
                     volume / (Math.pow(2, MASK_CELL_VOLUME_WIDTH)-1)
                 );
             }
             if(note === MASK_CELL_NOTE_STOP) {
                 channel[indexChannel].noteEnd();
-            }
-            else if(instrument) {
-                instrument.notePlay(note, indexChannel);
+                continue;
+            } else if(note !== undefined) {
+                channel[indexChannel].notePlay(note);
             }
         }
         this.indexRow++;
@@ -212,14 +218,24 @@ class Channel extends AudioProcessor {
         if(!this.instrument) { return 0;}
         return this.wave.sample() * this.volume * this.instrument.sample(this);
     }
+    notePlay(note) {
+        if(!this.instrument) { return;}
+        this.wave.noteSet(note);
+        this.ADSRMode = 0;
+        this.ADSRTime = this.instrument.envelope[0];
+        this.ADSRSustain = true;
+    }
     noteEnd() {
-        if(this.instrument) {
+        if(this.instrument && this.ADSRMode < 3) {
             this.ADSRMode = 3;
             this.ADSRTime = this.instrument.envelope[3];
         }
     }
     volumeSet(volumeNew) {
         this.volume = volumeNew;
+    }
+    instrumentSet(instrumentNew) {
+        this.instrument = instrumentNew;
     }
 }
 
@@ -297,10 +313,10 @@ class waveNoise extends wavePhase { // 16 "frequencies" available, 1=high, 16=lo
     // }
     sr = 1
     noteSet(note) {
-        this.frequency = note;
+        this.frequency = note+1; // Zero doesn't work with modulo
     }
     sample() {
-        this.phase = (this.phase+1)%this.frequency;
+        this.phase = (this.phase+1)%this.frequency; // see note above
         if(!this.phase) {
             this.sr = (((this.sr ^ (this.sr >>> 1)) & 0b1) << 14) | (this.sr >>> 1);
         }
@@ -348,14 +364,6 @@ class Instrument extends AudioProcessor {
             case 3:
                 return P*this.envelope[2];
         }
-    }
-    notePlay(note, indexChannel) {
-        let playChannel = channel[indexChannel];
-        playChannel.wave.noteSet(note);
-        playChannel.instrument = this;
-        playChannel.ADSRMode = 0;
-        playChannel.ADSRTime = this.envelope[0];
-        playChannel.ADSRSustain = true;
     }
 }
 

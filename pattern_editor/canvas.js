@@ -6,6 +6,9 @@
 import {
     cellParse,
     CHANNELS_NUMBER,
+    HEX,
+    CHANNEL_NOISE,
+    MASK_CELL_NOTE_STOP,
 } from '../processor.js';
 import { noteNumberToName } from '../utilities.js';
 import { patternListUpdate } from '../controls/pattern.js';
@@ -88,6 +91,8 @@ function drawCell(row, channel, dataCell) {
     const [note, instrument, volume, effects] = cellParse(dataCell);
     if(note === undefined) {
         placeString('···', offsetX, offsetY);
+    } else if(channel === CHANNEL_NOISE && note !== MASK_CELL_NOTE_STOP) {
+        placeString('-'+note.toString(HEX)+'-', offsetX, offsetY);
     } else {
         const noteName = noteNumberToName(note);
         placeString(noteName, offsetX, offsetY);
@@ -95,17 +100,17 @@ function drawCell(row, channel, dataCell) {
     if(instrument === undefined) {
         placeString('·', offsetX+3, offsetY);
     } else {
-        placeString(instrument.toString(16), offsetX+3, offsetY);
+        placeString(instrument.toString(HEX), offsetX+3, offsetY);
     }
     if(volume === undefined) {
         placeString('··', offsetX+4, offsetY);
     } else {
-        placeString(volume.toString(16).padStart(2,'0'), offsetX+4, offsetY);
+        placeString(volume.toString(HEX).padStart(2,'0'), offsetX+4, offsetY);
     }
     if(effects === undefined) {
         placeString('···', offsetX+6, offsetY);
     } else {
-        placeString(effects.toString(16).padStart(3,'0'), offsetX+6, offsetY);
+        placeString(effects.toString(HEX).padStart(3,'0'), offsetX+6, offsetY);
     }
 }
 
@@ -122,7 +127,7 @@ function drawPatternGrid() {
     for(let row = 0; row < rows; row++) {
         let background = (row%2)? '#222' : 'black';
         drawString(
-            row.toString(16).padStart(2,'0')+' ',
+            row.toString(HEX).padStart(2,'0')+' ',
             0, row-scrollY,
             '#888', background,
         );
@@ -152,7 +157,7 @@ function drawPatternGrid() {
     if(cursor) {
         drawGridPos(cursor.posX, cursor.posY, '#fff', '#c0c');
         drawString(
-            cursor.posY.toString(16).padStart(2,'0')+' ',
+            cursor.posY.toString(HEX).padStart(2,'0')+' ',
             0, cursor.posY-scrollY,
             'white', '#c0c',
         );
@@ -160,6 +165,7 @@ function drawPatternGrid() {
     context.restore();
 }
 function placeChar(char, posX, posY) {
+    char = char.toUpperCase();
     const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;
     patternGrid[compoundIndex] = char;
 }
@@ -178,14 +184,13 @@ function drawChar(char, posX, posY, color='white', background='black') {
     const fillY = posY*FONT_SIZE;
     const textX = fillX;
     const textY = fillY+FONT_SIZE;
+    context.fillStyle = background;
+    context.fillRect(fillX, fillY, FONT_SIZE, FONT_SIZE);
     if(char === '·') {
         context.globalAlpha = 0.5;
     }
-    context.fillStyle = background;
-    context.fillRect(fillX, fillY, FONT_SIZE, FONT_SIZE);
     context.fillStyle = color;
     context.fillText(char, textX, textY);
-    context.globalAlpha = 1;
     context.restore();
 }
 function drawGridPos(posX, posY, color='white', background='black') {

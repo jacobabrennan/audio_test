@@ -1,0 +1,22 @@
+
+
+//==============================================================================
+
+Pattern Editor
+    Shift+ArrowKey to move left and right one cell (input notes easier)
+    Channel labels / Mute a whole channel
+    Copy / Paste blocks of cells
+
+Controls
+    BPM Controls (beats per second)
+    Ticks per beat control?
+
+Instrument Editor
+    Make it exist
+
+Playback
+    Pause / Play buttons (it's an illusion. send new song and start from cursor)
+    Visualization
+
+APU
+    Effects

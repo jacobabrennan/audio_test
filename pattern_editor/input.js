@@ -31,6 +31,9 @@ import {
     cell,
     cellParse,
     MASK_CELL_NOTE_STOP,
+    CHANNEL_NOISE,
+    NOTE_NOISE_MAX,
+    HEX,
 } from '../processor.js';
 import { noteNameToNumber, noteNumberToName } from '../utilities.js';
 //-- Module State --------------------------------
@@ -50,7 +53,7 @@ export async function setup(editor) {
         handleMouseUp(eventMouse);
         patternDisplay();
     });
-    editor.addEventListener('keydown', (eventKeyboard) => {
+    document.addEventListener('keydown', (eventKeyboard) => {
         handleKeyDown(eventKeyboard);
         patternDisplay();
     });
@@ -171,6 +174,9 @@ function parseNoteInput(key) {
     if(!cursor) { return;}
     const indexRow = cursor.posY;
     const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
+    if(indexChannel === CHANNEL_NOISE) {
+        return parseNoiseInput(key);
+    }
     const dataCell = cellGet(indexRow, indexChannel);
     let note = cellParse(dataCell)[0];
     if(note === undefined) {
@@ -198,6 +204,31 @@ function parseNoteInput(key) {
         editCellNote(indexRow, indexChannel, value);
     }
 }
+function parseNoiseInput(key) {
+    key = key.toUpperCase();
+    const cursor = getCursor();
+    if(!cursor) { return;}
+    const indexRow = cursor.posY;
+    const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
+    const dataCell = cellGet(indexRow, indexChannel);
+    let note = cellParse(dataCell)[0];
+    if(note === undefined) { note = 0;}
+    if(key === ']') {
+        note++;
+        if(note > NOTE_NOISE_MAX) { note = 0;}
+        editCellNote(indexRow, indexChannel, note);
+        return;
+    }
+    if(key === '[') {
+        note--;
+        if(note < 0) { note = NOTE_NOISE_MAX;}
+        editCellNote(indexRow, indexChannel, note);
+        return;
+    }
+    note = parseInt(key, HEX);
+    if(!Number.isFinite(note)) { return;}
+    editCellNote(indexRow, indexChannel, note);
+}
 function parseDeleteInput() {
     const cursor = getCursor();
     if(!cursor) { return;}
@@ -224,7 +255,7 @@ function parseDeleteInput() {
     editCell(indexRow, indexChannel, dataCellNew);
 }
 function parseCellInput(digit, posX, posY) {
-    const value = parseInt(digit, 16);
+    const value = parseInt(digit, HEX);
     const indexRow = posY;
     const indexChannel = Math.floor(posX/CELL_WIDTH);
     const indexDigit = posX%CELL_WIDTH;
@@ -241,33 +272,33 @@ function parseCellInput(digit, posX, posY) {
             editCellInstrument(indexRow, indexChannel, value);
             break;
         case 4: {
-            let sV = volume.toString(16).padStart(2,'0');
+            let sV = volume.toString(HEX).padStart(2,'0');
             sV = `${digit}${sV[1]}`;
-            editCellVolume(indexRow, indexChannel, parseInt(sV, 16));
+            editCellVolume(indexRow, indexChannel, parseInt(sV, HEX));
             break;
         }
         case 5: {
-            let sV = volume.toString(16).padStart(2,'0');
+            let sV = volume.toString(HEX).padStart(2,'0');
             sV = `${sV[0]}${digit}`;
-            editCellVolume(indexRow, indexChannel, parseInt(sV, 16));
+            editCellVolume(indexRow, indexChannel, parseInt(sV, HEX));
             break;
         }
         case 6: {
-            let sE = effect.toString(16).padStart(3,'0');
+            let sE = effect.toString(HEX).padStart(3,'0');
             sE = `${digit}${sE[1]}${sE[2]}`;
-            editCellEffects(indexRow, indexChannel, parseInt(sE, 16));
+            editCellEffects(indexRow, indexChannel, parseInt(sE, HEX));
             break;
         }
         case 7: {
-            let sE = effect.toString(16).padStart(3,'0');
+            let sE = effect.toString(HEX).padStart(3,'0');
             sE = `${sE[0]}${digit}${sE[2]}`;
-            editCellEffects(indexRow, indexChannel, parseInt(sE, 16));
+            editCellEffects(indexRow, indexChannel, parseInt(sE, HEX));
             break;
         }
         case 8: {
-            let sE = effect.toString(16).padStart(3,'0');
+            let sE = effect.toString(HEX).padStart(3,'0');
             sE = `${sE[0]}${sE[1]}${digit}`;
-            editCellEffects(indexRow, indexChannel, parseInt(sE, 16));
+            editCellEffects(indexRow, indexChannel, parseInt(sE, HEX));
             break;
         }
     }
