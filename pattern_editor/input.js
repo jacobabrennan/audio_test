@@ -61,6 +61,10 @@ export async function setup(editor) {
         handleWheel(eventWheel);
         patternDisplay();
     });
+    document.addEventListener('mousemove', (eventMove) => {
+        handleMouseMove(eventMove);
+        patternDisplay();
+    });
 }
 
 //-- Event Handlers ------------------------------
@@ -76,10 +80,19 @@ function handleMouseUp(eventMouse) {
     if(posUpX === posDownX && posUpY === posDownY) {
         cursorPosition(posDownX, posDownY);
     } else {
-        cursorSelect(posDownX, posDownY, posUpX, posUpY)
+        cursorSelect(posDownX, posDownY, posUpX, posUpY);
     }
     posDownX = undefined;
     posDownY = undefined;
+}
+function handleMouseMove(eventMouse) {
+    if(posDownX === undefined || posDownY === undefined) { return;}
+    const coordsMouse = getEventCoords(eventMouse);
+    if(!coordsMouse) { return;}
+    const posUpX = coordsMouse.x;
+    const posUpY = coordsMouse.y;
+    if(posUpX === posDownX && posUpY === posDownY) { return;}
+    cursorSelect(posDownX, posDownY, posUpX, posUpY);
 }
 function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
@@ -154,6 +167,7 @@ function handleWheel(eventWheel) {
 //-- Mouse Utilities -----------------------------
 function getEventCoords(event) {
     const scrollY = getScroll();
+    if(!event.target || !event.target.getClientRects) { return;}
     const clientRect = event.target.getClientRects()[0];
     let posX = event.clientX - clientRect.left;
     let posY = event.clientY - clientRect.top;
