@@ -9,12 +9,21 @@ import {
 } from '../processor.js';
 import { noteNumberToName } from '../utilities.js';
 import { patternListUpdate } from '../controls/pattern.js';
-import { getSelection, getCursor } from './cursor.js';
-import { dataGet, DEFAULT_ROWS, lengthGet } from './pattern.js';
+import {
+    getSelection,
+    getCursor,
+    getScroll
+} from './cursor.js';
+import {
+    dataGet,
+    lengthGet,
+} from './pattern.js';
 
 //-- Constants -----------------------------------
 export const FONT_SIZE = 16;
 export const CELL_WIDTH = 9;
+export const DISPLAY_HEIGHT = 32;
+export const WIDTH_LINE_NUMBER = 3;
 const DOM_STYLE_DYNAMIC = `
 @font-face {
     font-family: 'press_start_k_regular';
@@ -28,6 +37,7 @@ const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
 //-- Module State --------------------------------
 let patternGrid = [];
 let context;
+let drawWaiting = false;
 
 //-- Setup ---------------------------------------
 export async function setup() {
@@ -38,8 +48,8 @@ export async function setup() {
     //
     const canvas = document.createElement('canvas');
     //
-    canvas.width  = DISPLAY_CHAR_WIDTH*FONT_SIZE;
-    canvas.height = DEFAULT_ROWS*FONT_SIZE;
+    canvas.width  = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE;
+    canvas.height = DISPLAY_HEIGHT*FONT_SIZE;
     //
     canvas.tabIndex = 1;
     // Request and configure display context
@@ -64,7 +74,12 @@ export function patternDisplay() {
     }
     //
     patternListUpdate();
-    drawPatternGrid();
+    if(drawWaiting) { return true;}
+    drawWaiting = true;
+    requestAnimationFrame(() => {
+        drawPatternGrid();
+        drawWaiting = false;
+    });
     return true;
 }
 function drawCell(row, channel, dataCell) {
@@ -103,9 +118,15 @@ function drawPatternGrid() {
     const rows = data.length / CHANNELS_NUMBER;
     const selection = getSelection();
     const cursor = getCursor();
+    const scrollY = getScroll();
     for(let row = 0; row < rows; row++) {
         let background = (row%2)? '#222' : 'black';
-        if(!selection && row === cursor.posY) {
+        drawString(
+            row.toString(16).padStart(2,'0')+' ',
+            0, row-scrollY,
+            'white', background,
+        );
+        if(cursor && row === cursor.posY && !selection) {
             background = '#606';
         }
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
@@ -130,6 +151,11 @@ function drawPatternGrid() {
     }
     if(cursor) {
         drawGridPos(cursor.posX, cursor.posY, '#fff', '#c0c');
+        drawString(
+            cursor.posY.toString(16).padStart(2,'0')+' ',
+            0, cursor.posY-scrollY,
+            'white', '#c0c',
+        );
     }
     context.restore();
 }
@@ -145,7 +171,7 @@ function placeString(string, posX, posY) {
 
 //-- Drawing Primitives --------------------------
 function drawChar(char, posX, posY, color='white', background='black') {
-    if(posX < 0 || posX >= CELL_WIDTH*CHANNELS_NUMBER) { return;}
+    if(posX < 0 || posX >= CELL_WIDTH*CHANNELS_NUMBER+WIDTH_LINE_NUMBER) { return;}
     if(posY < 0 || posY >= lengthGet()) { return;}
     context.save();
     const fillX = posX*FONT_SIZE;
@@ -160,6 +186,9 @@ function drawChar(char, posX, posY, color='white', background='black') {
 }
 function drawGridPos(posX, posY, color='white', background='black') {
     const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;
+    let scrollY = getScroll();
+    posY -= scrollY;
+    posX += WIDTH_LINE_NUMBER;
     drawChar(patternGrid[compoundIndex], posX, posY, color, background);
 }
 function drawString(string, posX, posY, color='white', background='black') {

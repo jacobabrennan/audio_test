@@ -14,7 +14,7 @@ import {
 import { patternDisplay } from './canvas.js';
 
 //-- Constants -----------------------------------
-export const DEFAULT_ROWS = 32;
+export const DEFAULT_ROWS = 256;
 
 //-- Module State --------------------------------
 const patterns = [];

@@ -7,12 +7,15 @@ import {
     patternDisplay,
     FONT_SIZE,
     CELL_WIDTH,
+    DISPLAY_HEIGHT,
 } from './canvas.js'
 import {
     getCursor,
     cursorMove,
     cursorSelect,
     cursorPosition,
+    getScroll,
+    scrollBy,
 } from './cursor.js';
 import {
     cellGet,
@@ -21,6 +24,7 @@ import {
     editCellInstrument,
     editCellVolume,
     editCellEffects,
+    lengthGet,
 } from './pattern.js';
 import {
     cell,
@@ -45,6 +49,10 @@ export async function setup(editor) {
         handleKeyDown(eventKeyboard);
         patternDisplay();
     });
+    editor.addEventListener('wheel', (eventWheel) => {
+        handleWheel(eventWheel);
+        patternDisplay();
+    })
 }
 
 //-- Event Handlers ------------------------------
@@ -68,6 +76,7 @@ function handleMouseUp(eventMouse) {
 function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
     const cursor = getCursor();
+    if(!cursor) { return;}
     // Handle Movement, and special values
     switch(key) {
         case 'delete':
@@ -93,6 +102,12 @@ function handleKeyDown(eventKeyboard) {
         case 'arrowright':
             cursorMove(1, 0);
             return;
+        case 'pageup':
+            cursorMove(0, Math.floor(-DISPLAY_HEIGHT/2), cursor.posY == 0);
+            return;
+        case 'pagedown':
+            cursorMove(0, Math.floor(DISPLAY_HEIGHT/2), cursor.posY == lengthGet()-1);
+            return;
     }
     //
     if(key.length !== 1) { return;}
@@ -111,14 +126,32 @@ function handleKeyDown(eventKeyboard) {
     }
     //
 }
+function handleWheel(eventWheel) {
+    let scrollLines;
+    switch(eventWheel.deltaMode) {
+        case 0:
+            scrollLines = eventWheel.deltaY / FONT_SIZE;
+            break;
+        case 1:
+            scrollLines = eventWheel.deltaY;
+            break;
+        case 0:
+        default:
+            scrollLines = eventWheel.deltaY * DISPLAY_HEIGHT;
+            break;
+    }
+    scrollBy(scrollLines);
+}
 
 //-- Mouse Utilities -----------------------------
 function getEventCoords(event) {
+    const scrollY = getScroll();
     const clientRect = event.target.getClientRects()[0];
     let posX = event.clientX - clientRect.left;
     let posY = event.clientY - clientRect.top;
     posX = Math.floor(posX/FONT_SIZE);
     posY = Math.floor(posY/FONT_SIZE);
+    posY += scrollY;
     return {
         x: posX,
         y: posY,
@@ -129,6 +162,7 @@ function getEventCoords(event) {
 function parseNoteInput(key) {
     key = key.toUpperCase();
     const cursor = getCursor();
+    if(!cursor) { return;}
     const indexRow = cursor.posY;
     const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
     const dataCell = cellGet(indexRow, indexChannel);
@@ -160,6 +194,7 @@ function parseNoteInput(key) {
 }
 function parseDeleteInput() {
     const cursor = getCursor();
+    if(!cursor) { return;}
     const indexRow = cursor.posY;
     const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
     const indexDigit = cursor.posX%CELL_WIDTH;
