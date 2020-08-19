@@ -2,6 +2,11 @@
 
 /*============================================================================*/
 
+/*-- Aggregation -------------------------------*/
+@import "reset.css";
+@import "editor_pattern/style.css";
+@import "controls/style.css";
+
 /*----------------------------------------------*/
 body {
     background: green;
@@ -18,108 +23,6 @@ body {
     overflow: hidden;
     align-items: stretch;
 }
-
-#editor {
-    /* background: green; */
-}
 canvas {
     image-rendering: crisp-edges;
-    /* background: black; */
-}
-
-/*== Pattern editor ==========================================================*/
-
-#pattern_editor {
-    /* height: 100%; */
-    overflow-y: scroll;
-    /* background: black; */
-}
-#pattern_editor table {
-    font-weight: bold;
-    font-family: 'Courier New', Courier, monospace;
-    color: white;
-    /* display: flex;
-    flex-direction: column; */
-}
-#pattern_editor tbody {
-    overflow-y: scroll;
-}
-#pattern_editor thead {
-    display: none;
-    position: sticky;
-    top: 0em;
-    z-index: 1;
-}
-#pattern_editor tfoot {}
-.pattern_header_channel {
-    text-align: center;
-    background: inherit;
-    background: grey;
-}
-.pattern_row {
-    /* display: flex;
-    flex-direction: row; */
-    height: 1em;
-}
-.pattern_row:nth-child(even) {
-    background: #222;
-}
-.pattern_row.highlight {
-    background: #444;
-}
-.pattern_row_indicator {
-    color: #666;
-    display: flex;
-    align-items: center;
-}
-.pattern_cell {
-    color: #666;
-}
-.pattern_cell, .pattern_row_indicator, .pattern_header_channel {
-    padding: 0ch 1ch;
-}
-.pattern_cell > input {
-    border: none;
-    background: transparent;
-    color: inherit;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    font-size: inherit;
-    line-height: inherit;
-    padding: 0px;
-    outline: none;
-}
-.pattern_cell > input { margin-right: 1ch;}
-.pattern_cell > input:nth-child(1) { width: 3ch;}
-.pattern_cell > input:nth-child(2) { width: 1ch;}
-.pattern_cell > input:nth-child(3) { width: 2ch;}
-.pattern_cell > input:nth-child(4) {
-    width: 3ch;
-    margin-right: 0;
-}
-.pattern_cell.full > input:nth-child(1) { color: #fff;}
-.pattern_cell.full > input:nth-child(2) { color: #f88;}
-.pattern_cell.full > input:nth-child(3) { color: #08f;}
-.pattern_cell.full > input:nth-child(4) { color: #868;}
-
-
-/*== Control Groups ==========================================================*/
-
-/*-- Shared ------------------------------------*/
-#controls {
-    border-left: 3px solid grey;
-}
-.control_group {
-    margin-top: 3px;
-}
-.control_group h2 {
-    display: block;
-}
-
-/*-- Pattern -----------------------------------*/
-#pattern_selector {
-    width: 20em;
-    background: black;
-    color: white;
-    border-width: 0px;
 }

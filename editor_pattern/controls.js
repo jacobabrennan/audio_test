@@ -10,7 +10,7 @@ import {
     patternSelect,
     lengthGet,
     lengthAdjust,
-} from '../pattern_editor/pattern.js';
+} from './pattern.js';
 
 //-- Module State --------------------------------
 let patternSelector;

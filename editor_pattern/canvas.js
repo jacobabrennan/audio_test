@@ -11,7 +11,7 @@ import {
     MASK_CELL_NOTE_STOP,
 } from '../processor.js';
 import { noteNumberToName } from '../utilities.js';
-import { patternListUpdate } from '../controls/pattern.js';
+import { patternListUpdate } from './controls.js';
 import {
     getSelection,
     getCursor,

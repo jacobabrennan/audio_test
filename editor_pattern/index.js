@@ -19,14 +19,9 @@ import {
 
 //-- Setup ---------------------------------------
 export async function setup() {
-    // Construct editor DOM
-    const editor = document.createElement('div');
-    editor.id = 'editor';
-    //
-    editor.append(await setupCanvas());
-    await setupInput(editor);
-    //
-    return editor;
+    const panePattern = await setupCanvas();
+    await setupInput(panePattern);
+    return panePattern;
 }
 
 //-- Pattern Display -----------------------------

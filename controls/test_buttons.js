@@ -11,7 +11,7 @@ import {
 } from '../processor.js';
 import {
     patternDataCompile,
-} from '../pattern_editor/pattern.js';
+} from '../editor_pattern/pattern.js';
 
 //------------------------------------------------
 export async function setup() {

@@ -36,6 +36,7 @@ import {
     HEX,
 } from '../processor.js';
 import { noteNameToNumber, noteNumberToName } from '../utilities.js';
+
 //-- Module State --------------------------------
 let posDownX;
 let posDownY;
@@ -61,7 +62,7 @@ export async function setup(editor) {
         handleWheel(eventWheel);
         patternDisplay();
     });
-    document.addEventListener('mousemove', (eventMove) => {
+    editor.addEventListener('mousemove', (eventMove) => {
         handleMouseMove(eventMove);
         patternDisplay();
     });

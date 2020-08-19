@@ -43,7 +43,6 @@ let worklet;
 const channel = [];
 let songCurrent;
 
-
 //-- Setup ---------------------------------------
 function setup() {
     channel[0] = new Channel(waveSquare);
@@ -299,7 +298,7 @@ class waveTriangle extends wavePhase {
         return Math.abs((super.sample()*4)-2)-1;
     }
 }
-class waveNoise extends wavePhase { // 16 "frequencies" available, 1=high, 16=low
+class waveNoise extends wavePhase { // 16 "frequencies" available, 0=high, 15=low
     // const timerPeriod = [4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068];
     // const timerPeriod = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
     // When the timer clocks the shift register, the following actions occur in order: 

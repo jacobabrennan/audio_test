@@ -4,10 +4,11 @@
 
 //-- Dependencies --------------------------------
 import {
-    setup as setupPatternEditor,
-} from './pattern_editor/index.js';
+    setup as setupEditor,
+    paneSelect,
+    EDITOR_PANE_PATTERN,
+} from './editor_pane.js';
 import { setup as setupControls } from './controls/index.js';
-import { patternAdd } from './controls/pattern.js';
 import {
     cell,
     pattern,
@@ -17,16 +18,15 @@ import {
 
 //-- Constants -----------------------------------
 const DOM_ID_CLIENT = 'client';
-// const DOM_ID_PATTERN_EDITOR = 'pattern_editor';
 
 //------------------------------------------------
 (async function () {
     const container = document.getElementById(DOM_ID_CLIENT);
-    const patternEditor = await setupPatternEditor();
+    const editor = await setupEditor();
     const controls = await setupControls();
-    container.append(patternEditor, controls);
+    paneSelect(EDITOR_PANE_PATTERN);
+    container.append(editor, controls);
 })();
-// Set up buttons
 
 //------------------------------------------------
 export function randomPattern(rows) {

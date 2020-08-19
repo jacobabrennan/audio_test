@@ -8,7 +8,7 @@ import {
     RESPONSE_PATTERN_ROW,
     RESPONSE_SONG_END,
 } from './processor.js';
-import { highlightRow } from './pattern_editor/index.js';
+import { highlightRow } from './editor_pattern/index.js';
 
 //-- Module State --------------------------------
 let processor;
