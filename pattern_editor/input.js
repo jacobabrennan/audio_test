@@ -8,6 +8,7 @@ import {
     FONT_SIZE,
     CELL_WIDTH,
     DISPLAY_HEIGHT,
+    WIDTH_LINE_NUMBER,
 } from './canvas.js'
 import {
     getCursor,
@@ -38,6 +39,10 @@ let posDownY;
 
 //-- Setup ---------------------------------------
 export async function setup(editor) {
+    editor.tabIndex = 1;
+    setTimeout(() => {
+        editor.focus();
+    }, 1);
     editor.addEventListener('mousedown', (eventMouse) => {
         handleMouseDown(eventMouse);
     });
@@ -52,7 +57,7 @@ export async function setup(editor) {
     editor.addEventListener('wheel', (eventWheel) => {
         handleWheel(eventWheel);
         patternDisplay();
-    })
+    });
 }
 
 //-- Event Handlers ------------------------------
@@ -152,6 +157,7 @@ function getEventCoords(event) {
     posX = Math.floor(posX/FONT_SIZE);
     posY = Math.floor(posY/FONT_SIZE);
     posY += scrollY;
+    posX -= WIDTH_LINE_NUMBER;
     return {
         x: posX,
         y: posY,

@@ -17,8 +17,8 @@ import {
 
 //-- Module State --------------------------------
 let scrollY = 0;
-let cursorX;
-let cursorY;
+let cursorX = 0;
+let cursorY = 0;
 let selection;
 
 //-- Cursor Querying -----------------------------

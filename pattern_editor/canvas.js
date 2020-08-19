@@ -124,7 +124,7 @@ function drawPatternGrid() {
         drawString(
             row.toString(16).padStart(2,'0')+' ',
             0, row-scrollY,
-            'white', background,
+            '#888', background,
         );
         if(cursor && row === cursor.posY && !selection) {
             background = '#606';
@@ -178,10 +178,14 @@ function drawChar(char, posX, posY, color='white', background='black') {
     const fillY = posY*FONT_SIZE;
     const textX = fillX;
     const textY = fillY+FONT_SIZE;
+    if(char === '·') {
+        context.globalAlpha = 0.5;
+    }
     context.fillStyle = background;
     context.fillRect(fillX, fillY, FONT_SIZE, FONT_SIZE);
     context.fillStyle = color;
     context.fillText(char, textX, textY);
+    context.globalAlpha = 1;
     context.restore();
 }
 function drawGridPos(posX, posY, color='white', background='black') {
