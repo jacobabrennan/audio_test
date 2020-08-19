@@ -50,6 +50,7 @@ export async function setup() {
     document.head.appendChild(elementStyle);
     //
     const canvas = document.createElement('canvas');
+    canvas.imTheDrawCanvas = true;
     //
     canvas.width  = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE;
     canvas.height = DISPLAY_HEIGHT*FONT_SIZE;
