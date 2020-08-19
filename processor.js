@@ -96,6 +96,9 @@ function messageReceive(action, data) {
             break;
         case ACTION_SONG:
             songCurrent = new Song(data.instruments, data.patterns);
+            for(let aChannel of channel) {
+                aChannel.reset();
+            }
             break;
     }
 }
@@ -185,18 +188,25 @@ class Song extends AudioProcessor {
         this.indexPattern = 0;
         this.indexRow = 0;
         messageSend(RESPONSE_SONG_END, {});
+        for(let aChannel of channel) {
+            aChannel.reset();
+        }
     }
 }
 
 //-- Channel -------------------------------------
 class Channel extends AudioProcessor {
-    volume = 1
-    ADSRTime = 0
-    ADSRMode = 4
     // ADSRSustain = false
     constructor(waveForm) {
         super();
         this.wave = new waveForm();
+        this.reset();
+    }
+    reset() {
+        this.volume = 1
+        this.ADSRTime = 0
+        this.ADSRMode = 4
+        delete this.instrument;
     }
     sample() {
         if(!this.instrument) { return 0;}

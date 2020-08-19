@@ -53,6 +53,8 @@ export async function setup() {
     groupLength.append(lengthLabel, lengthAdd, lengthSubtract);
     containerGroup.append(groupLength);
     //
+    patternAdd();
+    //
     return containerGroup;
 }
 
