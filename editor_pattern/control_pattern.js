@@ -8,13 +8,17 @@ import {
     patternNew,
     patternDelete,
     patternSelect,
+    lengthSet,
+    patternCount,
     lengthGet,
-    lengthAdjust,
 } from './pattern.js';
+import Adjuster from '../controls/adjuster.js';
+import Selector from '../controls/selector.js';
 
 //-- Module State --------------------------------
 let patternSelector;
-let lengthLabel;
+let lengthAdjuster;
+let patternCountAdjuster;
 
 //------------------------------------------------
 export async function setup() {
@@ -24,81 +28,57 @@ export async function setup() {
     const title = document.createElement('h2');
     title.innerText = 'Pattern';
     containerGroup.append(title);
+    // Add pattern addition / removal control
+    patternCountAdjuster = new Adjuster(
+        containerGroup, 'Patterns', 16, patternCountSet,
+    );
+    // Add pattern selection control
+    patternSelector = new Selector(
+        containerGroup, 16, 8, patternChange,
+    )
+    // Add pattern length adjustment controls
+    lengthAdjuster = new Adjuster(
+        containerGroup, 'Length', 16, lengthSet,
+    );
     //
-    patternSelector = document.createElement('select');
-    patternSelector.id = 'pattern_selector';
-    patternSelector.setAttribute('size', 8);
-    patternSelector.addEventListener('change', () => patternChange());
-    containerGroup.append(patternSelector);
-    //
-    const buttonGroup = document.createElement('div');
-    const buttonPatternAdd = document.createElement('button');
-    const buttonPatternRemove = document.createElement('button');
-    buttonPatternAdd.addEventListener('click', () => patternAdd());
-    buttonPatternRemove.addEventListener('click', () => patternRemove());
-    buttonPatternAdd.innerText = 'Add';
-    buttonPatternRemove.innerText = 'Remove';
-    buttonGroup.append(buttonPatternAdd, buttonPatternRemove);
-    containerGroup.append(buttonGroup);
-    //
-    lengthLabel = document.createElement('span');
-    lengthLabel.innerText = 'Length:';
-    const lengthAdd = document.createElement('button');
-    const lengthSubtract = document.createElement('button');
-    lengthAdd.addEventListener('click', () => patternAugment(1));
-    lengthSubtract.addEventListener('click', () => patternAugment(-1));
-    lengthAdd.innerText = '+';
-    lengthSubtract.innerText = '-';
-    const groupLength = document.createElement('div');
-    groupLength.append(lengthLabel, lengthAdd, lengthSubtract);
-    containerGroup.append(groupLength);
-    //
-    patternAdd();
+    let patternNewId = patternNew();
+    patternSelect(patternNewId);
+    patternListUpdate();
     //
     return containerGroup;
 }
 
 //------------------------------------------------
-export function patternAdd() {
-    let idPattern = patternNew();
-    patternSelect(idPattern);
-    return idPattern;
-}
-export function patternRemove() {
-    const success = patternDelete();
+export function patternCountSet(countNew) {
+    let idPatternNewest;
+    let countCurrent = patternCount();
+    while(countCurrent !== countNew) {
+        if(countNew > countCurrent) {
+            idPatternNewest = patternNew();
+        } else {
+            patternDelete();
+        }
+        const countAfter = patternCount();
+        if(countAfter === countCurrent) { break;}
+        countCurrent = countAfter;
+    }
+    if(idPatternNewest !== undefined) {
+        patternSelect(idPatternNewest);
+    } else {
+        patternListUpdate();
+    }
     patternListUpdate();
-    return success;
+    return countCurrent;
 }
-export function patternChange() {
-    const idPattern = Number(patternSelector.value);
+export function patternChange(idPattern) {
     patternSelect(idPattern);
-}
-export function patternAugment(amount) {
-    lengthAdjust(amount);
     patternListUpdate();
 }
 
 //------------------------------------------------
 export function patternListUpdate() {
-    // Clear old values
-    while (patternSelector.firstChild) {
-        patternSelector.removeChild(patternSelector.lastChild);
-    }
-    // Populate with new data
     const listData = patternListGet();
-    const options = [];
-    for(let indexPattern = 0; indexPattern < listData.length; indexPattern++) {
-        const option = document.createElement('option');
-        option.setAttribute('value', indexPattern);
-        option.innerText = listData.names[indexPattern];
-        option.value = indexPattern;
-        if(indexPattern == listData.indexCurrent) {
-            option.selected = true;
-        }
-        options.push(option);
-    }
-    // patternSelector.value = listData.indexCurrent;
-    patternSelector.append(...options);
-    const patternLength = lengthGet();
-    lengthLabel.innerText = `Length: ${patternLength}`;
+    patternSelector.optionsUpdate(listData);
+    patternCountAdjuster.valueSet(listData.length, true);
+    lengthAdjuster.valueSet(lengthGet(), true);
 }

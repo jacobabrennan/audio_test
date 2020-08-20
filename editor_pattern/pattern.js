@@ -39,6 +39,9 @@ export function patternListGet() {
     };
     return patternData;
 }
+export function patternCount() {
+    return patterns.length;
+}
 
 //-- Pattern Management --------------------------
 export function patternSelect(indexPattern) {

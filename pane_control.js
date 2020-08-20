@@ -15,6 +15,7 @@ const groupsActive = [];
 export async function setup() {
     // Create DOM container
     controls = document.createElement('div');
+    controls.id = 'controls';
     // Return DOM container
     return controls;
 }
@@ -26,7 +27,7 @@ export function groupRegister(idGroup, elementGroup) {
 export function groupShow(idGroup) {
     const groupNew = groups[idGroup];
     if(!groupNew) { return;}
-    groupsActive.push(groupNew);
+    groupsActive.push(idGroup);
     controls.append(groupNew);
 }
 export function groupHide(idGroup) {
@@ -38,7 +39,7 @@ export function groupHide(idGroup) {
     groupsActive.splice(indexGroup, 1);
 }
 export function groupHideAll() {
-    for(let idGroup of groupsActive) {
+    for(let idGroup of groupsActive.slice()) {
         groupHide(idGroup);
     }
 }

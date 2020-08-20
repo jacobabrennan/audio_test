@@ -42,6 +42,7 @@ export function cursorPosition(posX, posY) {
     cursorX = posX;
     cursorY = posY;
     scrollCheck();
+    patternDisplay();
 }
 export function cursorSelect(posDownX, posDownY, posUpX, posUpY) {
     cursorX = undefined;
@@ -52,6 +53,7 @@ export function cursorSelect(posDownX, posDownY, posUpX, posUpY) {
         posEndX: Math.max(posDownX, posUpX),
         posEndY: Math.max(posDownY, posUpY),
     };
+    patternDisplay();
 }
 export function cursorHighlight(indexRow) {
     cursorY = indexRow;
@@ -82,6 +84,7 @@ export function cursorMove(deltaX, deltaY, wrap=true) {
         }
     }
     scrollCheck();
+    patternDisplay();
 }
 
 //-- Scrolling -----------------------------------
@@ -90,9 +93,12 @@ export function scrollTo(posY) {
     patternDisplay();
 }
 export function scrollBy(deltaY) {
+    let scrollYOld = scrollY;
     scrollY += deltaY;
     scrollY = Math.max(0, Math.min(lengthGet()-DISPLAY_HEIGHT, scrollY));
-    patternDisplay();
+    if(scrollY !== scrollYOld) {
+        patternDisplay();
+    }
 }
 export function scrollCheck() {
     if(cursorY < scrollY) {

@@ -1,0 +1,12 @@
+
+
+/*============================================================================*/
+
+/*-- Testing -----------------------------------*/
+:root {
+    --color-fg: white;
+    --color-bg: black;
+    --color-bg-primary: grey;
+    --color-fg-highlight: white;
+    --color-bg-highlight: #c0c;
+}

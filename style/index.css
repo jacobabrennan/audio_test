@@ -1,0 +1,77 @@
+
+
+/*============================================================================*/
+
+/*-- Aggregation -------------------------------*/
+@import "reset.css";
+@import "theme.css";
+
+/*-- Layout ------------------------------------*/
+body {
+    background: green;
+    font-size: 16px;
+}
+#client {
+    background: var(--color-bg-primary);
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    align-items: stretch;
+}
+#editor {}
+#controls {
+    border-left: 3px solid var(--color-bg-primary);
+}
+canvas {
+    image-rendering: crisp-edges;
+}
+
+
+/*== Control Groups ==========================================================*/
+
+/*-- Shared ------------------------------------*/
+.control_group {
+    margin-top: 3px;
+    display: flex;
+    flex-direction: column;
+}
+.control_group h2 {
+    display: block;
+}
+
+/*-- Control Group Components ------------------*/
+.adjuster, .selector, .selector option {
+    color: var(--color-fg);
+    align-self: flex-start;
+}
+.adjuster {
+    border: solid 2px var(--color-bg);
+}
+.selector {
+    border: none;
+    outline: solid 2px var(--color-bg);
+    margin-left: 2px;
+    padding: 0px;
+}
+option {
+    border: none;
+    outline: none;
+    margin: 0px;
+    padding: 0px;
+}
+option.selected {
+    color: var(--color-fg-highlight);
+    background: var(--color-bg-highlight);
+}
+
+/*-- Pattern -----------------------------------*/
+#pattern_selector {
+    width: 20em;
+    background: black;
+    color: white;
+    border-width: 0px;
+}

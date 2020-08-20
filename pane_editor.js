@@ -4,7 +4,16 @@
 
 //-- Dependencies --------------------------------
 import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
-import { groupHideAll, groupShow } from './pane_control.js';
+import {
+    groupHideAll,
+    groupShow,
+    groupRegister,
+} from './pane_control.js';
+import {
+    EDITOR_PANE_PATTERN,
+    EDITOR_PANE_INSTRUMENT,
+    CONTROL_GROUP_EDITOR_SWAP,
+} from './utilities.js';
 
 //-- Module State --------------------------------
 let editor;
@@ -16,7 +25,11 @@ let idPaneCurrent;
 export async function setup() {
     // Create DOM container
     editor = document.createElement('div');
+    editor.id = 'editor';
     editor.style.width = `${DISPLAY_PIXEL_WIDTH}px`;
+    // Register pane controls
+    const controls = await setupControls();
+    groupRegister(CONTROL_GROUP_EDITOR_SWAP, controls);
     // Return DOM container
     return editor;
 }

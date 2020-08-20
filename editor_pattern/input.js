@@ -4,8 +4,6 @@
 
 //-- Dependencies --------------------------------
 import {
-    patternDisplay,
-    FONT_SIZE,
     CELL_WIDTH,
     DISPLAY_HEIGHT,
     WIDTH_LINE_NUMBER,
@@ -35,7 +33,11 @@ import {
     NOTE_NOISE_MAX,
     HEX,
 } from '../processor.js';
-import { noteNameToNumber, noteNumberToName } from '../utilities.js';
+import {
+    noteNameToNumber,
+    noteNumberToName,
+    FONT_SIZE,
+} from '../utilities.js';
 
 //-- Module State --------------------------------
 let posDownX;
@@ -52,19 +54,15 @@ export async function setup(editor) {
     });
     editor.addEventListener('mouseup', (eventMouse) => {
         handleMouseUp(eventMouse);
-        patternDisplay();
     });
     document.addEventListener('keydown', (eventKeyboard) => {
         handleKeyDown(eventKeyboard);
-        patternDisplay();
     });
     editor.addEventListener('wheel', (eventWheel) => {
         handleWheel(eventWheel);
-        patternDisplay();
     });
     editor.addEventListener('mousemove', (eventMove) => {
         handleMouseMove(eventMove);
-        patternDisplay();
     });
 }
 
