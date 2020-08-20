@@ -24,10 +24,6 @@ let patternCountAdjuster;
 export async function setup() {
     const containerGroup = document.createElement('div');
     containerGroup.className = 'control_group';
-    //
-    const title = document.createElement('h2');
-    title.innerText = 'Pattern';
-    containerGroup.append(title);
     // Add pattern addition / removal control
     patternCountAdjuster = new Adjuster(
         containerGroup, 'Patterns', 16, patternCountSet,

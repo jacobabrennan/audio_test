@@ -2,6 +2,16 @@
 
 /*============================================================================*/
 
+/*----------------------------------------------*/
+body {
+    font-family: press_start_k_regular;
+    font-size: 16px;
+}
+body * {
+    font-family: press_start_k_regular;
+    font-size: 16px;
+}
+
 /*-- Testing -----------------------------------*/
 :root {
     --color-fg: white;
@@ -9,4 +19,6 @@
     --color-bg-primary: grey;
     --color-fg-highlight: white;
     --color-bg-highlight: #c0c;
+    --color-fg-hint: white;
+    --color-bg-hint: #0078d7;
 }

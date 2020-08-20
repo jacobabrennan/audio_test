@@ -13,6 +13,7 @@ import {
     CHANNEL_NOISE,
     NOTE_NOISE_MAX,
     MASK_CELL_NOTE_STOP,
+    HEX,
 } from '../processor.js';
 import { patternDisplay } from './canvas.js';
 
@@ -22,7 +23,6 @@ export const DEFAULT_ROWS = 32;
 //-- Module State --------------------------------
 const patterns = [];
 let patternCurrent;
-let patternNameCount = 0;
 
 //-- Pattern Querying -----------------------------
 export function dataGet() {
@@ -35,7 +35,11 @@ export function patternListGet() {
     const patternData = {
         indexCurrent: patterns.indexOf(patternCurrent),
         length: patterns.length,
-        names: patterns.map(pattern => pattern.name),
+        names: patterns.map(
+            function (pattern, index) {
+                return  `${index.toString(HEX)} ${pattern.name}`;
+            }
+        ),
     };
     return patternData;
 }
@@ -46,7 +50,7 @@ export function patternCount() {
 //-- Pattern Management --------------------------
 export function patternSelect(indexPattern) {
     const patternNew = patterns[indexPattern];
-    if(!patternNew) { return false;}
+    if(!patternNew) { return;}
     patternCurrent = patternNew;
     patternDisplay();
 }
@@ -55,7 +59,7 @@ export function patternNew() {
     if(indexPattern >= PATTERNS_MAX) { return -1;}
     patterns[indexPattern] = {
         data: new Uint32Array(DEFAULT_ROWS*CHANNELS_NUMBER),
-        name: `Pattern ${patternNameCount++}`,
+        name: 'Pattern',
     };
     return indexPattern;
 }

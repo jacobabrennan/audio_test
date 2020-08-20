@@ -69,17 +69,18 @@ export async function setupControls() {
     const switchPattern = document.createElement('button');
     const switchInstrument = document.createElement('button');
     switchPattern.innerText = 'Pattern Editor';
-    switchInstrument.innerText = 'Instrument Editor';
-    switchPattern.addEventListener('click', handleSelectPattern);
-    switchInstrument.addEventListener('click', handleSelectInstrument);
+    switchInstrument.innerText = 'Ins. Editor';
+    switchPattern.addEventListener('click', () => {
+        switchInstrument.classList.remove('selected');
+        switchPattern.classList.add('selected');
+        paneSelect(EDITOR_PANE_PATTERN);
+    });
+    switchInstrument.addEventListener('click', () => {
+        switchPattern.classList.remove('selected');
+        switchInstrument.classList.add('selected');
+        paneSelect(EDITOR_PANE_INSTRUMENT);
+    });
+    switchPattern.classList.add('selected');
     controlGroup.append(switchPattern, switchInstrument);
     return controlGroup;
-}
-
-//-- Interaction Handlers ------------------------
-function handleSelectPattern() {
-    paneSelect(EDITOR_PANE_PATTERN);
-}
-function handleSelectInstrument() {
-    paneSelect(EDITOR_PANE_INSTRUMENT);
 }

@@ -9,9 +9,8 @@ import {
     ACTION_PLAYBACK_PLAY,
     ACTION_PLAYBACK_STOP,
 } from '../processor.js';
-import {
-    patternDataCompile,
-} from '../editor_pattern/pattern.js';
+import { patternDataCompile } from '../editor_pattern/pattern.js';
+import { instrumentDataCompile } from '../editor_instrument/instrument.js';
 
 //------------------------------------------------
 export async function setup() {
@@ -30,11 +29,7 @@ export async function setup() {
     buttonPlay.addEventListener('click', async function () {
         await messageSend(ACTION_SONG, {
             patterns: patternDataCompile(),
-            instruments: [
-                [100,200,0.5,2000, true],
-                [25,25,1,500, false],
-                [25,75,1,1000, false],
-            ],
+            instruments: instrumentDataCompile(),
         });
         await messageSend(ACTION_PLAYBACK_PLAY, {derp: 'herp'});
     });

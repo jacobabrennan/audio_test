@@ -23,7 +23,7 @@ export const EDITOR_PANE_INSTRUMENT = 'editor_pane_instrument';
 export const CONTROL_GROUP_EDITOR_SWAP = 'control_group_editor_swap';
 export const CONTROL_GROUP_PATTERN = 'control_group_pattern';
 export const CONTROL_GROUP_PLAYBACK = 'control_group_playback';
-
+export const CONTROL_GROUP_INSTRUMENT_SELECT = 'control_group_instrument_select';
 
 
 //== Canvas Utilities ==========================================================

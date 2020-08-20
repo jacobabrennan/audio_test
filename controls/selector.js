@@ -21,7 +21,7 @@ export default class Selector {
         //
         this.onChange = onChange;
         this.element.addEventListener('change', () => {
-            onChange(Number(this.element.value))
+            onChange(Number(this.element.value));
         });
     }
     optionsUpdate(patternList) {

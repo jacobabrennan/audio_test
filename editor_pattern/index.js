@@ -16,7 +16,7 @@ import {
 import {
     patternSelect
 } from './pattern.js';
-import { setup as setupControlPattern } from './control_pattern.js';
+import { setup as setupControlPattern, patternListUpdate } from './control_pattern.js';
 import { setup as setupControlPlayback } from './control_playback.js';
 import { paneAdd } from '../pane_editor.js';
 import {
@@ -24,6 +24,7 @@ import {
     CONTROL_GROUP_PATTERN,
     CONTROL_GROUP_PLAYBACK,
     CONTROL_GROUP_EDITOR_SWAP,
+    CONTROL_GROUP_INSTRUMENT_SELECT,
 } from '../utilities.js';
 import { groupRegister } from '../pane_control.js';
 
@@ -35,6 +36,7 @@ export async function setup() {
         CONTROL_GROUP_EDITOR_SWAP,
         CONTROL_GROUP_PLAYBACK,
         CONTROL_GROUP_PATTERN,
+        CONTROL_GROUP_INSTRUMENT_SELECT,
     ]);
     const groupPlayback = await setupControlPlayback();
     const groupPattern = await setupControlPattern();
@@ -47,6 +49,7 @@ export async function setup() {
 export function highlightRow(indexRow, indexPattern, scroll) {
     if(indexPattern !== undefined) {
         patternSelect(indexPattern);
+        patternListUpdate();
     }
     cursorHighlight(indexRow);
     patternDisplay();
