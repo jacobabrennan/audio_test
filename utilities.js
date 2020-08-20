@@ -1,6 +1,14 @@
 
 
-//==============================================================================
+//== Client Global Constants ===================================================
+
+//-- Edit & Control Group IDs --------------------
+export const EDITOR_PANE_PATTERN = 'editor_pane_pattern';
+export const EDITOR_PANE_INSTRUMENT = 'editor_pane_instrument';
+export const CONTROL_GROUP_PATTERN = 'control_group_pattern';
+export const CONTROL_GROUP_PLAYBACK = 'control_group_playback';
+
+//== Note Name / Nubmer formatting =============================================
 
 //-- Dependencies --------------------------------
 import {

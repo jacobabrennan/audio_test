@@ -16,11 +16,28 @@ import {
 import {
     patternSelect
 } from './pattern.js';
+import { setup as setupControlPattern } from './control_pattern.js';
+import { setup as setupControlPlayback } from './control_playback.js';
+import { paneAdd } from '../pane_editor.js';
+import {
+    EDITOR_PANE_PATTERN,
+    CONTROL_GROUP_PATTERN,
+    CONTROL_GROUP_PLAYBACK,
+} from '../utilities.js';
+import { groupRegister } from '../pane_control.js';
 
 //-- Setup ---------------------------------------
 export async function setup() {
     const panePattern = await setupCanvas();
     await setupInput(panePattern);
+    paneAdd(EDITOR_PANE_PATTERN, panePattern, [
+        CONTROL_GROUP_PATTERN,
+        CONTROL_GROUP_PLAYBACK,
+    ]);
+    const groupPlayback = await setupControlPlayback();
+    const groupPattern = await setupControlPattern();
+    groupRegister(CONTROL_GROUP_PATTERN, groupPattern);
+    groupRegister(CONTROL_GROUP_PLAYBACK, groupPlayback);
     return panePattern;
 }
 

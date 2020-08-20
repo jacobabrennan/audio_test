@@ -11,7 +11,7 @@ import {
     MASK_CELL_NOTE_STOP,
 } from '../processor.js';
 import { noteNumberToName } from '../utilities.js';
-import { patternListUpdate } from './controls.js';
+import { patternListUpdate } from './control_pattern.js';
 import {
     getSelection,
     getCursor,
@@ -36,6 +36,7 @@ const DOM_STYLE_DYNAMIC = `
 }`;
 const FONT_FAMILY = 'press_start_k_regular';
 const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
+export const DISPLAY_PIXEL_WIDTH = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE
 
 //-- Module State --------------------------------
 let patternGrid = [];
@@ -52,7 +53,7 @@ export async function setup() {
     const canvas = document.createElement('canvas');
     canvas.imTheDrawCanvas = true;
     //
-    canvas.width  = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE;
+    canvas.width  = DISPLAY_PIXEL_WIDTH;
     canvas.height = DISPLAY_HEIGHT*FONT_SIZE;
     //
     canvas.tabIndex = 1;

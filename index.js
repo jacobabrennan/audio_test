@@ -3,30 +3,23 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import {
-    setup as setupEditor,
-    paneSelect,
-    EDITOR_PANE_PATTERN,
-} from './editor_pane.js';
-import { setup as setupControls } from './controls/index.js';
+import { setup as setupClient } from './client.js';
+
+//------------------------------------------------
+(async function () {
+    await setupClient();
+})();
+
+
+//== Scaffolding / testing =====================================================
+
+//-- Dependencies --------------------------------
 import {
     cell,
     pattern,
     CHANNELS_NUMBER,
     CHANNEL_NOISE,
 } from './processor.js';
-
-//-- Constants -----------------------------------
-const DOM_ID_CLIENT = 'client';
-
-//------------------------------------------------
-(async function () {
-    const container = document.getElementById(DOM_ID_CLIENT);
-    const editor = await setupEditor();
-    const controls = await setupControls();
-    paneSelect(EDITOR_PANE_PATTERN);
-    container.append(editor, controls);
-})();
 
 //------------------------------------------------
 export function randomPattern(rows) {
