@@ -40,20 +40,24 @@ export default class Selector {
                 option.selected = true;
             }
             this.options.push(option);
+            const optionDerp = document.createElement('option');
+            optionDerp.setAttribute('value', `${indexPattern}_derp`);
+            optionDerp.style.display = 'none';
+            this.options.push(optionDerp);
         }
         this.element.append(...this.options);
         this.fixColors();
     }
     fixColors() {
-        for(let indexOption = 0; indexOption < this.options.length; indexOption++) {
-            const option = this.options[indexOption];
-            if(indexOption === Number(this.element.value)) {
+        for(let option of this.options) {
+            if(option.value === this.element.value) {
                 option.classList.add('selected');
+                option.scrollIntoView();
             } else{
                 option.classList.remove('selected');
             }
         }
-        this.element.value = undefined;
+        this.element.value = `${this.element.value}_derp`;
         this.element.blur();
     }
 }
