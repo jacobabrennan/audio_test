@@ -18,7 +18,7 @@ import {
 } from './pattern.js';
 import { setup as setupControlPattern, patternListUpdate } from './control_pattern.js';
 import { setup as setupControlPlayback } from './control_playback.js';
-import { paneAdd } from '../pane_editor.js';
+import { paneAdd } from '../pane/pane_editor.js';
 import {
     EDITOR_PANE_PATTERN,
     CONTROL_GROUP_PATTERN,
@@ -26,7 +26,7 @@ import {
     CONTROL_GROUP_EDITOR_SWAP,
     CONTROL_GROUP_INSTRUMENT_SELECT,
 } from '../utilities.js';
-import { groupRegister } from '../pane_control.js';
+import { groupRegister } from '../pane/pane_control.js';
 
 //-- Setup ---------------------------------------
 export async function setup() {

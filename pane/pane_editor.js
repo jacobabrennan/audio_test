@@ -3,7 +3,7 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
+import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
 import {
     groupHideAll,
     groupShow,
@@ -13,7 +13,7 @@ import {
     EDITOR_PANE_PATTERN,
     EDITOR_PANE_INSTRUMENT,
     CONTROL_GROUP_EDITOR_SWAP,
-} from './utilities.js';
+} from '../utilities.js';
 
 //-- Module State --------------------------------
 let editor;

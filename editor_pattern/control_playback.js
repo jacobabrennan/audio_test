@@ -37,5 +37,6 @@ export async function setup() {
         messageSend(ACTION_PLAYBACK_STOP, {derp: 'herp'});
     });
     containerGroup.append(buttonPlay, buttonStop);
+    //
     return containerGroup;
 }

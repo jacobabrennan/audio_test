@@ -14,6 +14,7 @@ import {
 } from './pattern.js';
 import Adjuster from '../controls/adjuster.js';
 import Selector from '../controls/selector.js';
+import { randomPattern } from '../utilities.js';
 
 //-- Module State --------------------------------
 let patternSelector;
@@ -37,7 +38,9 @@ export async function setup() {
         containerGroup, 'Length', 16, lengthSet,
     );
     //
-    let patternNewId = patternNew();
+    let patternNewId = patternNew(
+        randomPattern(64)
+    );
     patternSelect(patternNewId);
     patternListUpdate();
     //

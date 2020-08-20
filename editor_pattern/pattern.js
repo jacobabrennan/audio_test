@@ -54,11 +54,14 @@ export function patternSelect(indexPattern) {
     patternCurrent = patternNew;
     patternDisplay();
 }
-export function patternNew() {
+export function patternNew(dataLoad) {
     const indexPattern = patterns.length;
     if(indexPattern >= PATTERNS_MAX) { return -1;}
+    if(!dataLoad) {
+        dataLoad = new Uint32Array(DEFAULT_ROWS*CHANNELS_NUMBER);
+    }
     patterns[indexPattern] = {
-        data: new Uint32Array(DEFAULT_ROWS*CHANNELS_NUMBER),
+        data: dataLoad,
         name: 'Pattern',
     };
     return indexPattern;

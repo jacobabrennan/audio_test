@@ -8,8 +8,8 @@ import {
     CONTROL_GROUP_EDITOR_SWAP,
     CONTROL_GROUP_INSTRUMENT_SELECT,
 } from '../utilities.js';
-import { paneAdd } from '../pane_editor.js';
-import { groupRegister } from '../pane_control.js';
+import { paneAdd } from '../pane/pane_editor.js';
+import { groupRegister } from '../pane/pane_control.js';
 import { setupControlInstrumentSelect } from './controls.js';
 
 //-- Setup ---------------------------------------
