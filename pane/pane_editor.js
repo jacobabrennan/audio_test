@@ -15,7 +15,7 @@ import {
     CONTROL_GROUP_EDITOR_SWAP,
     FONT_SIZE,
 } from '../utilities.js';
-import Button, { ButtonBar } from '../controls/button.js';
+import { ButtonBar } from '../controls/button.js';
 
 //-- Module State --------------------------------
 let editor;

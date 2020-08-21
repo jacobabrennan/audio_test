@@ -11,28 +11,32 @@ import {
 } from '../processor.js';
 import { patternDataCompile } from '../editor_pattern/pattern.js';
 import { instrumentDataCompile } from '../editor_instrument/instrument.js';
+import { ButtonBar } from '../controls/button.js';
+import Adjuster from '../controls/adjuster.js';
 
 //------------------------------------------------
 export async function setup() {
     //
     const containerGroup = document.createElement('div');
-    containerGroup.className = 'control_group button_group';
+    containerGroup.className = 'control_group';
     //
-    const buttonPlay = document.createElement('button');
-    const buttonStop = document.createElement('button');
-    buttonPlay.innerText = 'Play';
-    buttonStop.innerText = 'Stop';
-    buttonPlay.addEventListener('click', async function () {
-        await messageSend(ACTION_SONG, {
-            patterns: patternDataCompile(),
-            instruments: instrumentDataCompile(),
-        });
-        await messageSend(ACTION_PLAYBACK_PLAY, {derp: 'herp'});
+    new ButtonBar(containerGroup, {
+        'Play': async () => {
+            await messageSend(ACTION_SONG, {
+                patterns: patternDataCompile(),
+                instruments: instrumentDataCompile(),
+            });
+            await messageSend(ACTION_PLAYBACK_PLAY, {derp: 'herp'});
+        },
+        'Stop': () => {
+            messageSend(ACTION_PLAYBACK_STOP, {derp: 'herp'});
+        }
     });
-    buttonStop.addEventListener('click', function () {
-        messageSend(ACTION_PLAYBACK_STOP, {derp: 'herp'});
+    //
+    let bps = new Adjuster(containerGroup, 'Row/Sec.', 16, (valueNew) => {
+        return valueNew
     });
-    containerGroup.append(buttonPlay, buttonStop);
+    bps.valueSet(1, true);
     //
     return containerGroup;
 }
