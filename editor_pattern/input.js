@@ -49,21 +49,11 @@ export async function setup(editor) {
     setTimeout(() => {
         editor.focus();
     }, 1);
-    editor.addEventListener('mousedown', (eventMouse) => {
-        handleMouseDown(eventMouse);
-    });
-    editor.addEventListener('mouseup', (eventMouse) => {
-        handleMouseUp(eventMouse);
-    });
-    document.addEventListener('keydown', (eventKeyboard) => {
-        handleKeyDown(eventKeyboard);
-    });
-    editor.addEventListener('wheel', (eventWheel) => {
-        handleWheel(eventWheel);
-    });
-    editor.addEventListener('mousemove', (eventMove) => {
-        handleMouseMove(eventMove);
-    });
+    editor.addEventListener('mousedown', handleMouseDown);
+    editor.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('keydown', handleKeyDown);
+    editor.addEventListener('wheel', handleWheel);
+    editor.addEventListener('mousemove', handleMouseMove);
 }
 
 //-- Event Handlers ------------------------------

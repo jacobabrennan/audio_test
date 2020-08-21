@@ -35,7 +35,7 @@ let tabIndex = 1;
 //-- Configure -----------------------------------
 export function contextConfigure(context) {
     context.canvas.tabIndex = tabIndex;
-    tabIndex++
+    tabIndex++;
     context.imageSmoothingEnabled = false;
     context.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
 }

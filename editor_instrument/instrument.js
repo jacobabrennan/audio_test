@@ -12,13 +12,17 @@ let instrumentCurrent;
 //-- Instrument Class -------------------------------
 export class Instrument {
     name = 'Instrument'
-    envelopeVolume = []
     envelopeLength = []
+    envelopeVolume = []
     envelopePointGet(indexPoint) {
         return [
-            this.envelopeVolume[indexPoint],
             this.envelopeLength[indexPoint],
+            this.envelopeVolume[indexPoint],
         ];
+    }
+    envelopePointSet(indexPoint, duration, volume) {
+        this.envelopeLength[indexPoint] = duration;
+        this.envelopeVolume[indexPoint] = volume;
     }
     envelopeLengthGet() {
         return this.envelopeVolume.length;
