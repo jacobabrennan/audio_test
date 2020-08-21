@@ -24,6 +24,18 @@ export class Instrument {
         this.envelopeLength[indexPoint] = duration;
         this.envelopeVolume[indexPoint] = volume;
     }
+    envelopeLengthSet(lengthNew) {
+        lengthNew = Math.max(0, Math.min(9, lengthNew));
+        if(lengthNew <= this.envelopeLengthGet()) {
+            this.envelopeLength.length = lengthNew;
+            this.envelopeVolume.length = lengthNew;
+            return;
+        }
+        while(this.envelopeLengthGet() < lengthNew) {
+            this.envelopeLength.push(this.envelopeLength.length? 25 : 0);
+            this.envelopeVolume.push(0.5);
+        }
+    }
     envelopeLengthGet() {
         return this.envelopeVolume.length;
     }

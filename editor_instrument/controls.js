@@ -13,6 +13,7 @@ import {
     instrumentRemove,
     instrumentSelect,
 } from './instrument.js';
+import { instrumentDraw } from './canvas.js';
 
 //-- Module State --------------------------------
 let instrumentSelector;
@@ -52,6 +53,7 @@ export async function setupControlInstrumentSelect() {
 function instrumentChange(idInstrument) {
     instrumentSelect(idInstrument);
     instrumentListUpdate();
+    instrumentDraw();
 }
 function instrumentCountSet(countNew) {
     let idInstrumentNewest;

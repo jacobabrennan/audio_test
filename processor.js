@@ -7,7 +7,7 @@
 export const TAU = Math.PI*2;
 export const HEX = 16;
 // Audio parameters
-export const RATE_SAMPLE = 8000;
+export const RATE_SAMPLE = 16000;
 export const BPM_DEFAULT = 500;
 export const CHANNELS_NUMBER = 5;
 export const CHANNEL_NOISE = 4;
@@ -215,7 +215,7 @@ class Channel extends AudioProcessor {
     }
     sample() {
         if(!this.instrument) { return 0;}
-        return this.wave.sample() * this.volume * this.instrument.sample(this);
+        return this.wave.sample()// * this.volume * this.instrument.sample(this);
     }
     notePlay(note) {
         if(!this.instrument) { return;}
@@ -265,6 +265,8 @@ class wavePhase extends AudioProcessor{
 }
 class waveSquare extends wavePhase {
     duty = 1/2
+    lastValue = 0
+    lastCount = 0
     setDuty(dutyNew) { // 16 values possible, only 8 unique
         if(this.phase >= this.duty) {
             if(this.phase < dutyNew) {

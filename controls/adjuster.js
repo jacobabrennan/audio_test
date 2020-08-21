@@ -53,7 +53,7 @@ export default class Adjuster {
         this.context.fillText('-', (this.width-2)*FONT_SIZE, FONT_SIZE);
         this.context.fillText('+', (this.width-1)*FONT_SIZE, FONT_SIZE);
         const valueWidth = this.value.toString().length;
-        const valueOffset = (this.width-3)-valueWidth;
+        const valueOffset = (this.width-2)-valueWidth;
         if(this.focus) {
             this.context.fillStyle = COLOR_BG_HIGHLIGHT;
             this.context.fillRect(valueOffset*FONT_SIZE, 0, valueWidth*FONT_SIZE, FONT_SIZE);

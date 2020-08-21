@@ -31,18 +31,30 @@ body {
 }
 #editor {
     height: 640PX;
-    position: relative;
 }
 #controls {
     border-left: 4px solid var(--color-bg-primary);
 }
 #pattern_display {
 }
+#pane_instrument {
+    display: flex;
+    flex-direction: column;
+    height: 640PX;
+}
+#pane_instrument > #pattern_display {
+    margin-bottom: auto;
+}
 #instrument_display {
     margin-top: 3px;
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
+}
+#instrument_controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+#instrument_controls > * {
+    margin-left: 4px;
 }
 
 /*----------------------------------------------*/
@@ -71,7 +83,6 @@ canvas {
     width: 120px;
 }
 
-
 /*----------------------------------------------*/
 button.selected {
     color: var(--color-fg-highlight);
@@ -88,6 +99,9 @@ button:hover {
 
 
 /*-- Control Group Components ------------------*/
+.radio {
+    border: solid 2px var(--color-bg);
+}
 .adjuster, .selector, .selector option {
     color: var(--color-fg);
     align-self: flex-start;
