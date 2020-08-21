@@ -16,6 +16,7 @@ import {
     HEX,
 } from '../processor.js';
 import { patternDisplay } from './canvas.js';
+import { instrumentIndexGet } from '../editor_instrument/instrument.js';
 
 //-- Constants -----------------------------------
 export const DEFAULT_ROWS = 32;
@@ -116,14 +117,19 @@ export function editCell(row, channel, cellData) {
     patternCurrent.data[(row*CHANNELS_NUMBER)+channel] = cellData;
     patternDisplay();
 }
-export function editCellNote(row, channel, note) {
-    if(channel === CHANNEL_NOISE && note !== MASK_CELL_NOTE_STOP) {
-        note = Math.max(0, Math.min(NOTE_NOISE_MAX, note));
-    }
+export function editCellNote(row, channel, noteNew) {
     const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(patternCurrent.data[indexCell]);
-    note &= Math.pow(2, MASK_CELL_NOTE_WIDTH)-1;
-    cellData = cell(note, cellData[1], cellData[2], cellData[3]);
+    let [noteOld, instrument, volume, effects] = cellParse(patternCurrent.data[indexCell]);
+    if(noteNew !== MASK_CELL_NOTE_STOP) {
+        if(channel === CHANNEL_NOISE) {
+            noteNew = Math.max(0, Math.min(NOTE_NOISE_MAX, noteNew));
+        }
+        if(instrument === undefined) {
+            instrument = instrumentIndexGet();
+        }
+    }
+    noteNew &= Math.pow(2, MASK_CELL_NOTE_WIDTH)-1;
+    const cellData = cell(noteNew, instrument, volume, effects);
     patternCurrent.data[indexCell] = cellData;
     editCell(row, channel, cellData);
 }

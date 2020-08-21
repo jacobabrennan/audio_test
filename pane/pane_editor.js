@@ -13,7 +13,9 @@ import {
     EDITOR_PANE_PATTERN,
     EDITOR_PANE_INSTRUMENT,
     CONTROL_GROUP_EDITOR_SWAP,
+    FONT_SIZE,
 } from '../utilities.js';
+import Button, { ButtonBar } from '../controls/button.js';
 
 //-- Module State --------------------------------
 let editor;
@@ -66,21 +68,20 @@ export function paneAdd(idPane, elementPane, controlGroups) {
 export async function setupControls() {
     const controlGroup = document.createElement('div');
     controlGroup.className = 'control_group';
-    const switchPattern = document.createElement('button');
-    const switchInstrument = document.createElement('button');
-    switchPattern.innerText = 'Pattern Editor';
-    switchInstrument.innerText = 'Ins. Editor';
-    switchPattern.addEventListener('click', () => {
-        switchInstrument.classList.remove('selected');
-        switchPattern.classList.add('selected');
-        paneSelect(EDITOR_PANE_PATTERN);
+    const labelP = 'Pattern';
+    const labelI = 'Ins.';
+    const switchBar = new ButtonBar(controlGroup, {
+        [labelP]: () => {
+            switchBar.buttonGet(labelI).element.classList.remove('selected');
+            switchBar.buttonGet(labelP).element.classList.add('selected');
+            paneSelect(EDITOR_PANE_PATTERN);
+        },
+        [labelI]: () => {
+            switchBar.buttonGet(labelP).element.classList.remove('selected');
+            switchBar.buttonGet(labelI).element.classList.add('selected');
+            paneSelect(EDITOR_PANE_INSTRUMENT);
+        }
     });
-    switchInstrument.addEventListener('click', () => {
-        switchPattern.classList.remove('selected');
-        switchInstrument.classList.add('selected');
-        paneSelect(EDITOR_PANE_INSTRUMENT);
-    });
-    switchPattern.classList.add('selected');
-    controlGroup.append(switchPattern, switchInstrument);
+    switchBar.buttonGet(labelP).element.classList.add('selected');
     return controlGroup;
 }

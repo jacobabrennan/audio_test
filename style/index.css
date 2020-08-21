@@ -42,6 +42,15 @@ canvas {
 .control_group h2 {
     display: block;
 }
+.button_group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.button_group button {
+    width: 128px;
+}
+
 
 /*----------------------------------------------*/
 button.selected {

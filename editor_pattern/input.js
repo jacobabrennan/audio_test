@@ -197,11 +197,11 @@ function parseNoteInput(key) {
         note = noteNameToNumber('C 2');
     }
     if(key === ']') {
-        editCellNote(indexRow, indexChannel, note+1);
+        editCellNote(indexRow, indexChannel, note+1, instrumentIndexGet());
         return;
     }
     if(key === '[') {
-        editCellNote(indexRow, indexChannel, note-1);
+        editCellNote(indexRow, indexChannel, note-1, instrumentIndexGet());
         return;
     }
     note = noteNumberToName(note);

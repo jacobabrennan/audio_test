@@ -16,11 +16,7 @@ import { instrumentDataCompile } from '../editor_instrument/instrument.js';
 export async function setup() {
     //
     const containerGroup = document.createElement('div');
-    containerGroup.className = 'control_group';
-    //
-    const title = document.createElement('h2');
-    title.innerText = 'Playback';
-    containerGroup.append(title);
+    containerGroup.className = 'control_group button_group';
     //
     const buttonPlay = document.createElement('button');
     const buttonStop = document.createElement('button');

@@ -53,3 +53,6 @@ export function instrumentListGet() {
 export function instrumentDataCompile() {
     return instruments.map(instrument => instrument.toData())
 }
+export function instrumentIndexGet() {
+    return instruments.indexOf(instrumentCurrent);
+}
