@@ -7,6 +7,7 @@ export const COLOR_FG = 'white';
 export const COLOR_BG = 'black';
 export const COLOR_FG_HIGHLIGHT = 'white';
 export const COLOR_BG_HIGHLIGHT = '#c0c';
+export const COLOR_BG_HINT = '#0078d7';
 export const DOM_STYLE_DYNAMIC = `
 @font-face {
     font-family: 'press_start_k_regular';

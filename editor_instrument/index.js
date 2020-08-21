@@ -37,6 +37,6 @@ export async function setup() {
 export function instrumentEditorShown() {
     let paneInstrument = paneGet(EDITOR_PANE_INSTRUMENT);
     let editorCanvas = paneGet(EDITOR_PANE_PATTERN);
-    canvasHeightSet(16);
+    canvasHeightSet(23);
     paneInstrument.prepend(editorCanvas);
 }

@@ -40,6 +40,8 @@ export async function setupControlInstrumentSelect() {
     for(let envelope of envelopes) {
         const instrumentNew = new Instrument();
         instrumentNew.envelope = envelope;
+        instrumentNew.envelopeVolume = [0,1,0.5,0.5,0];
+        instrumentNew.envelopeLength = [0,100,300,500,900];
         instrumentAdd(instrumentNew);
     }
     instrumentChange(0);

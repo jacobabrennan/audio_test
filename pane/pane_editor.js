@@ -89,5 +89,14 @@ export async function setupControls() {
         }
     });
     switchBar.buttonGet(labelP).element.classList.add('selected');
+    //
+    setTimeout(() => {
+        switchBar.buttonGet(labelP).element.classList.remove('selected');
+        switchBar.buttonGet(labelI).element.classList.add('selected');
+        paneSelect(EDITOR_PANE_INSTRUMENT);
+        instrumentEditorShown();
+        console.log('Displaying instrument pane')
+    }, 1);
+    //
     return controlGroup;
 }

@@ -40,6 +40,9 @@ body {
 }
 #instrument_display {
     margin-top: 3px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
 }
 
 /*----------------------------------------------*/

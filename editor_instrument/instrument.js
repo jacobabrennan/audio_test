@@ -9,24 +9,31 @@ import { HEX } from '../processor.js';
 const instruments = [];
 let instrumentCurrent;
 
-//------------------------------------------------
+//-- Instrument Class -------------------------------
 export class Instrument {
-    constructor() {
-        this.name = 'Instrument';
+    name = 'Instrument'
+    envelopeVolume = []
+    envelopeLength = []
+    envelopePointGet(indexPoint) {
+        return [
+            this.envelopeVolume[indexPoint],
+            this.envelopeLength[indexPoint],
+        ];
+    }
+    envelopeLengthGet() {
+        return this.envelopeVolume.length;
     }
     toData() {
         return this.envelope;
     }
 }
 
-//------------------------------------------------
+//-- Instrument Management -----------------------
 export function instrumentSelect(indexInstrument) {
     const instrumentNew = instruments[indexInstrument];
     if(!instrumentNew) { return;}
     instrumentCurrent = instrumentNew;
 }
-
-//------------------------------------------------
 export function instrumentAdd(instrumentNew) {
     if(instruments.indexOf(instrumentNew) !== -1) { return;}
     instruments.push(instrumentNew);
@@ -37,6 +44,14 @@ export function instrumentRemove() {
     if(indexInstrument === -1) { return;}
     instruments.splice(indexInstrument, 1);
     return instruments.length;
+}
+
+//-- Instrument Querying -------------------------
+export function instrumentGet() {
+    return instrumentCurrent;
+}
+export function instrumentIndexGet() {
+    return instruments.indexOf(instrumentCurrent);
 }
 export function instrumentCount() {
     return instruments.length;
@@ -52,7 +67,4 @@ export function instrumentListGet() {
 }
 export function instrumentDataCompile() {
     return instruments.map(instrument => instrument.toData())
-}
-export function instrumentIndexGet() {
-    return instruments.indexOf(instrumentCurrent);
 }
