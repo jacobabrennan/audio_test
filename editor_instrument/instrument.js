@@ -12,7 +12,7 @@ let instrumentCurrent;
 //------------------------------------------------
 export class Instrument {
     constructor() {
-        this.name = "Instrument";
+        this.name = 'Instrument';
     }
     toData() {
         return this.envelope;

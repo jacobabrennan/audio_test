@@ -26,10 +26,10 @@ export async function setup() {
                 patterns: patternDataCompile(),
                 instruments: instrumentDataCompile(),
             });
-            await messageSend(ACTION_PLAYBACK_PLAY, {derp: 'herp'});
+            await messageSend(ACTION_PLAYBACK_PLAY, {/* Current empty */});
         },
         'Stop': () => {
-            messageSend(ACTION_PLAYBACK_STOP, {derp: 'herp'});
+            messageSend(ACTION_PLAYBACK_STOP, {/* Current empty */});
         }
     });
     //

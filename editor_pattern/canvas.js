@@ -9,6 +9,7 @@ import {
     HEX,
     CHANNEL_NOISE,
     MASK_CELL_NOTE_STOP,
+    PATTERNS_MAX,
 } from '../processor.js';
 import {
     noteNumberToName,
@@ -34,18 +35,20 @@ export const CELL_WIDTH = 9;
 export const DISPLAY_HEIGHT = 40;
 export const WIDTH_LINE_NUMBER = 3;
 const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
-export const DISPLAY_PIXEL_WIDTH = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE
+export const DISPLAY_PIXEL_WIDTH = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE;
 
 //-- Module State --------------------------------
 let patternGrid = [];
 let context;
 let drawWaiting = false;
+let heightCanvas = DISPLAY_HEIGHT;
 
 //-- Setup ---------------------------------------
 export async function setup() {
     //
     const canvas = document.createElement('canvas');
     canvas.imTheDrawCanvas = true;
+    canvas.id = 'pattern_display';
     //
     canvas.width  = DISPLAY_PIXEL_WIDTH;
     canvas.height = DISPLAY_HEIGHT*FONT_SIZE;
@@ -195,4 +198,15 @@ function drawString(string, posX, posY, color=COLOR_FG, background=COLOR_BG) {
     for(let indexChar = 0; indexChar < string.length; indexChar++) {
         drawChar(string[indexChar], posX+indexChar, posY, color, background);
     }
+}
+
+//-- Canvas Size ---------------------------------
+export function canvasHeightSet(heightNew) {
+    context.canvas.height = heightNew*FONT_SIZE;
+    heightCanvas = heightNew;
+    contextConfigure(context);
+    patternDisplay();
+}
+export function canvasHeightGet() {
+    return heightCanvas;
 }

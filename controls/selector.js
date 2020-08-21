@@ -40,6 +40,7 @@ export default class Selector {
                 option.selected = true;
             }
             this.options.push(option);
+            // Option derp is a hack to get around the lack of css option colors
             const optionDerp = document.createElement('option');
             optionDerp.setAttribute('value', `${indexPattern}_derp`);
             optionDerp.style.display = 'none';

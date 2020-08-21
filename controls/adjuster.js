@@ -17,7 +17,6 @@ export default class Adjuster {
     value = 0
     focus = false
     constructor(elementParent, label, width, onChange) {
-        this.derp = true
         this.element = document.createElement('canvas');
         this.element.className = 'adjuster';
         elementParent.append(this.element);

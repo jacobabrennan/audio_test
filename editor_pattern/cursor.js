@@ -8,8 +8,8 @@ import {
 } from '../processor.js';
 import {
     patternDisplay,
+    canvasHeightGet,
     CELL_WIDTH,
-    DISPLAY_HEIGHT,
 } from './canvas.js'
 import {
     lengthGet,
@@ -95,7 +95,7 @@ export function scrollTo(posY) {
 export function scrollBy(deltaY) {
     let scrollYOld = scrollY;
     scrollY += deltaY;
-    scrollY = Math.max(0, Math.min(lengthGet()-DISPLAY_HEIGHT, scrollY));
+    scrollY = Math.max(0, Math.min(lengthGet()-canvasHeightGet(), scrollY));
     if(scrollY !== scrollYOld) {
         patternDisplay();
     }
@@ -103,8 +103,10 @@ export function scrollBy(deltaY) {
 export function scrollCheck() {
     if(cursorY < scrollY) {
         scrollTo(cursorY);
+        return;
     }
-    else if(cursorY >= DISPLAY_HEIGHT+scrollY) {
-        scrollTo(cursorY - (DISPLAY_HEIGHT-1));
+    const canvasHeight = canvasHeightGet();
+    if(cursorY >= canvasHeight+scrollY) {
+        scrollTo(cursorY - (canvasHeight-1));
     }
 }

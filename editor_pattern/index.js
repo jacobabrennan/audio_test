@@ -12,6 +12,8 @@ import {
 import {
     setup as setupCanvas,
     patternDisplay,
+    DISPLAY_HEIGHT,
+    canvasHeightSet,
 } from './canvas.js';
 import {
     patternSelect
@@ -43,6 +45,9 @@ export async function setup() {
     groupRegister(CONTROL_GROUP_PATTERN, groupPattern);
     groupRegister(CONTROL_GROUP_PLAYBACK, groupPlayback);
     return panePattern;
+}
+export function patternEditorShown() {
+    canvasHeightSet(DISPLAY_HEIGHT);
 }
 
 //-- Pattern Display -----------------------------

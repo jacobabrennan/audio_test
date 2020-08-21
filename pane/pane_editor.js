@@ -15,12 +15,13 @@ import {
     CONTROL_GROUP_EDITOR_SWAP,
 } from '../utilities.js';
 import { ButtonBar } from '../controls/button.js';
+import { patternEditorShown } from '../editor_pattern/index.js';
+import { instrumentEditorShown } from '../editor_instrument/index.js';
 
 //-- Module State --------------------------------
 let editor;
 const panes = {};
 const paneControlGroups = {};
-const panesOnfocus = {};
 let idPaneCurrent;
 
 //-- Setup ---------------------------------------
@@ -55,16 +56,10 @@ export function paneSelect(idPane) {
     for(let idGroup of controlGroupsNew) {
         groupShow(idGroup);
     }
-    // Inform pane of gaining focus
-    const onFocus = panesOnfocus[idPane];
-    if(onFocus) {
-        onfocus();
-    }
 }
-export function paneAdd(idPane, elementPane, controlGroups, onFocus) {
+export function paneAdd(idPane, elementPane, controlGroups) {
     panes[idPane] = elementPane;
     paneControlGroups[idPane] = controlGroups;
-    panesOnfocus[idPane] = onFocus;
 }
 export function paneGet(idPane) {
     return panes[idPane];
@@ -84,11 +79,13 @@ export async function setupControls() {
             switchBar.buttonGet(labelI).element.classList.remove('selected');
             switchBar.buttonGet(labelP).element.classList.add('selected');
             paneSelect(EDITOR_PANE_PATTERN);
+            patternEditorShown();
         },
         [labelI]: () => {
             switchBar.buttonGet(labelP).element.classList.remove('selected');
             switchBar.buttonGet(labelI).element.classList.add('selected');
             paneSelect(EDITOR_PANE_INSTRUMENT);
+            instrumentEditorShown();
         }
     });
     switchBar.buttonGet(labelP).element.classList.add('selected');
