@@ -65,7 +65,9 @@ export default class Radio {
     handleClick(eventClick) {
         const clientRect = eventClick.target.getClientRects()[0];
         let posY = eventClick.clientY - clientRect.top;
-        posY = Math.max(0, Math.min(this.options.length, Math.floor(posY/LINE_HEIGHT)));
+        posY = Math.max(0,
+            Math.min(this.options.length-1,
+                Math.floor(posY/LINE_HEIGHT)));
         const selectedOption = this.options[posY];
         this.valueSet(selectedOption);
         this.draw();

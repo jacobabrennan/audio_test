@@ -2,6 +2,10 @@
 
 //==============================================================================
 
+Interface
+    Save / Load work
+    Instrument Editor button toggles instrument editor (no pattern button)
+
 Pattern Editor
     Shift+ArrowKey to move left and right one cell (input notes easier)
     Channel labels / Mute a whole channel
