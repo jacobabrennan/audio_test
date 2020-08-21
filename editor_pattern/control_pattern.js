@@ -27,15 +27,15 @@ export async function setup() {
     containerGroup.className = 'control_group';
     // Add pattern addition / removal control
     patternCountAdjuster = new Adjuster(
-        containerGroup, 'Patterns', 16, patternCountSet,
+        containerGroup, 'Patterns', 15, patternCountSet,
     );
     // Add pattern selection control
     patternSelector = new Selector(
-        containerGroup, 16, 8, patternChange,
+        containerGroup, 15, 8, patternChange,
     )
     // Add pattern length adjustment controls
     lengthAdjuster = new Adjuster(
-        containerGroup, 'Length', 16, lengthSet,
+        containerGroup, 'Length', 15, lengthSet,
     );
     //
     let patternNewId = patternNew(

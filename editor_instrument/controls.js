@@ -24,12 +24,12 @@ export async function setupControlInstrumentSelect() {
     containerGroup.className = 'control_group';
     // Add instrument addition / removal control
     instrumentCountAdjuster = new Adjuster(
-        containerGroup, 'Instruments', 16, instrumentCountSet,
+        containerGroup, 'Inst.', 15, instrumentCountSet,
     );
     instrumentCountAdjuster.valueSet(0, true);
     // Add instrument selection control
     instrumentSelector = new Selector(
-        containerGroup, 16, 8, instrumentChange,
+        containerGroup, 15, 8, instrumentChange,
     );
     //
     let envelopes = [

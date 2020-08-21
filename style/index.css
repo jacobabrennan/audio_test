@@ -8,21 +8,30 @@
 
 /*-- Layout ------------------------------------*/
 body {
-    background: green;
+    background: black;
+    background-image: var(--image-bg-noise);
     font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
 }
 #client {
+    outline: ridge 16px var(--color-bg-primary);
     background: var(--color-bg-primary);
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
+    width: 1024px;
+    /* height: 768px; */
+    /* max-width: 100vw;
+    max-height: 100vh; */
     display: flex;
     flex-direction: row;
     overflow: hidden;
     align-items: stretch;
 }
-#editor {}
+#editor {
+    height: 640PX;
+}
 #controls {
     border-left: 4px solid var(--color-bg-primary);
 }
@@ -48,7 +57,7 @@ canvas {
     justify-content: space-between;
 }
 .button_group button {
-    width: 128px;
+    width: 120px;
 }
 
 

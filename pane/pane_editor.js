@@ -13,7 +13,6 @@ import {
     EDITOR_PANE_PATTERN,
     EDITOR_PANE_INSTRUMENT,
     CONTROL_GROUP_EDITOR_SWAP,
-    FONT_SIZE,
 } from '../utilities.js';
 import { ButtonBar } from '../controls/button.js';
 
@@ -21,6 +20,7 @@ import { ButtonBar } from '../controls/button.js';
 let editor;
 const panes = {};
 const paneControlGroups = {};
+const panesOnfocus = {};
 let idPaneCurrent;
 
 //-- Setup ---------------------------------------
@@ -55,10 +55,19 @@ export function paneSelect(idPane) {
     for(let idGroup of controlGroupsNew) {
         groupShow(idGroup);
     }
+    // Inform pane of gaining focus
+    const onFocus = panesOnfocus[idPane];
+    if(onFocus) {
+        onfocus();
+    }
 }
-export function paneAdd(idPane, elementPane, controlGroups) {
+export function paneAdd(idPane, elementPane, controlGroups, onFocus) {
     panes[idPane] = elementPane;
     paneControlGroups[idPane] = controlGroups;
+    panesOnfocus[idPane] = onFocus;
+}
+export function paneGet(idPane) {
+    return panes[idPane];
 }
 
 
@@ -68,8 +77,8 @@ export function paneAdd(idPane, elementPane, controlGroups) {
 export async function setupControls() {
     const controlGroup = document.createElement('div');
     controlGroup.className = 'control_group';
-    const labelP = 'Pattern';
-    const labelI = 'Ins.';
+    const labelP = 'Pttrn.';
+    const labelI = 'Inst.';
     const switchBar = new ButtonBar(controlGroup, {
         [labelP]: () => {
             switchBar.buttonGet(labelI).element.classList.remove('selected');

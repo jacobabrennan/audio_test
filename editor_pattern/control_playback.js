@@ -33,7 +33,7 @@ export async function setup() {
         }
     });
     //
-    let bps = new Adjuster(containerGroup, 'Row/Sec.', 16, (valueNew) => {
+    let bps = new Adjuster(containerGroup, 'Row/Sec.', 15, (valueNew) => {
         return valueNew
     });
     bps.valueSet(1, true);

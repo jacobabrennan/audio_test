@@ -19,7 +19,6 @@ import {
     COLOR_FG,
     COLOR_BG,
 } from '../utilities.js';
-import { patternListUpdate } from './control_pattern.js';
 import {
     getSelection,
     getCursor,
@@ -32,7 +31,7 @@ import {
 
 //-- Constants -----------------------------------
 export const CELL_WIDTH = 9;
-export const DISPLAY_HEIGHT = 32;
+export const DISPLAY_HEIGHT = 40;
 export const WIDTH_LINE_NUMBER = 3;
 const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
 export const DISPLAY_PIXEL_WIDTH = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE
@@ -85,7 +84,7 @@ function drawCell(row, channel, dataCell) {
     if(note === undefined) {
         placeString('···', offsetX, offsetY);
     } else if(channel === CHANNEL_NOISE && note !== MASK_CELL_NOTE_STOP) {
-        placeString('-'+note.toString(HEX).toUpperCase()+'-', offsetX, offsetY);
+        placeString('*'+note.toString(HEX).toUpperCase()+'*', offsetX, offsetY);
     } else {
         const noteName = noteNumberToName(note);
         placeString(noteName, offsetX, offsetY);
@@ -118,7 +117,7 @@ function drawPatternGrid() {
     const cursor = getCursor();
     const scrollY = getScroll();
     for(let row = 0; row < rows; row++) {
-        let background = (row%2)? '#222' : COLOR_BG;
+        let background = (row%2)? COLOR_BG : '#222';
         drawString(
             row.toString(HEX).padStart(2,'0')+' ',
             0, row-scrollY,
