@@ -36,8 +36,6 @@ export async function setupControlInstrumentSelect() {
     //
     let envelopes = [
         [100,200,0.5,2000, true],
-        [25,25,1,500, false],
-        [25,75,1,1000, false],
     ];
     for(let envelope of envelopes) {
         const instrumentNew = new Instrument();

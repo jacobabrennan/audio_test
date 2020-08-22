@@ -29,9 +29,9 @@ export async function setup() {
     paneInstrument.append(await setupCanvas());
     // Register pane
     paneAdd(EDITOR_PANE_INSTRUMENT, paneInstrument, [
-        CONTROL_GROUP_EDITOR_SWAP,
         CONTROL_GROUP_PLAYBACK,
         CONTROL_GROUP_PATTERN,
+        CONTROL_GROUP_EDITOR_SWAP,
         CONTROL_GROUP_INSTRUMENT_SELECT,
     ]);
     // Register instrument selector control group
