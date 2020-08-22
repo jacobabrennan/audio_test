@@ -118,8 +118,8 @@ class Song extends AudioProcessor {
     playing = false
     constructor(instruments, patterns) {
         super();
-        this.instrument = instruments.map(function (envelope) {
-            return new Instrument(...envelope);
+        this.instrument = instruments.map(function (data) {
+            return new Instrument(data);
         });
         this.pattern = patterns;
         this.indexPattern = 0;
@@ -161,9 +161,9 @@ class Song extends AudioProcessor {
             const cell = dataPattern[offsetCell+indexChannel];
             if(!cell) { continue;}
             const [note, indexInstrument, volume, effect] = cellParse(cell);
+            let instrument = null;
             if(indexInstrument !== undefined) {
-                const instrument = this.instrument[indexInstrument];
-                channel[indexChannel].instrumentSet(instrument);
+                instrument = this.instrument[indexInstrument];
             }
             if(volume !== undefined) {
                 channel[indexChannel].volumeSet(
@@ -173,8 +173,9 @@ class Song extends AudioProcessor {
             if(note === MASK_CELL_NOTE_STOP) {
                 channel[indexChannel].noteEnd();
                 continue;
-            } else if(note !== undefined) {
-                channel[indexChannel].notePlay(note);
+            }
+            if(note !== undefined && instrument) {
+                channel[indexChannel].notePlay(note, instrument);
             }
         }
         this.indexRow++;
@@ -201,40 +202,33 @@ class Song extends AudioProcessor {
 
 //-- Channel -------------------------------------
 class Channel extends AudioProcessor {
-    // ADSRSustain = false
     constructor(waveForm) {
         super();
         this.wave = new waveForm();
-        this.reset();
+        this.volume = 1;
     }
     reset() {
-        this.volume = 1
-        this.ADSRTime = 0
-        this.ADSRMode = 4
-        delete this.instrument;
+        delete this.note;
     }
     sample() {
-        if(!this.instrument) { return 0;}
-        return this.wave.sample()// * this.volume * this.instrument.sample(this);
+        if(!this.note) { return 0;}
+        const noteSample = this.note.sample();
+        if(noteSample === null) {
+            this.reset();
+            return 0;
+        }
+        return this.wave.sample() * this.volume * noteSample;
     }
-    notePlay(note) {
-        if(!this.instrument) { return;}
+    notePlay(note, instrument) {
         this.wave.noteSet(note);
-        this.ADSRMode = 0;
-        this.ADSRTime = this.instrument.envelope[0];
-        this.ADSRSustain = true;
+        this.note = new Note(instrument);
     }
     noteEnd() {
-        if(this.instrument && this.ADSRMode < 3) {
-            this.ADSRMode = 3;
-            this.ADSRTime = this.instrument.envelope[3];
-        }
+        if(!this.note) { return;}
+        this.note.cut();
     }
     volumeSet(volumeNew) {
         this.volume = volumeNew;
-    }
-    instrumentSet(instrumentNew) {
-        this.instrument = instrumentNew;
     }
 }
 
@@ -327,44 +321,49 @@ class waveNoise extends wavePhase { // 16 "frequencies" available, 0=high, 15=lo
 
 //-- Instrument ----------------------------------
 class Instrument extends AudioProcessor {
-    /* envelope:
-        A: Time to reach full volume
-        D: Time to decay to sustain volume
-        S: Sustain volume
-        R: Time to "release" to 0 volume
-    */
-    constructor(timeAttack, timeDecay, volumeSustain, timeRelease, sustain) {
+    constructor(data) {
         super();
-        this.envelope = [timeAttack, timeDecay, volumeSustain, timeRelease];
-        this.sustain = sustain;
+        this.sustain = data.sustain;
+        this.loopEnd = data.loopEnd;
+        this.loopStart = data.loopStart;
+        this.envelopeVolume = data.envelopeVolume;
+        this.envelopeDuration = data.envelopeDuration;
     }
-    sample(playChannel) {
-        switch(playChannel.ADSRMode) {
-            case 4:
-                return 0;
-            case 2:
-                if(this.sustain) {
-                    return this.envelope[2];
-                } else {
-                    playChannel.ADSRMode++;
-                    playChannel.ADSRTime = this.envelope[3]
-                }
-                break;
-            default:
-                if(playChannel.ADSRTime--) { break;}
-                playChannel.ADSRMode++;
-                playChannel.ADSRTime = this.envelope[playChannel.ADSRMode]
-                break;
+}
+
+//-- Note ----------------------------------------
+class Note extends AudioProcessor {
+    constructor(instrument) {
+        super();
+        this.instrument = instrument;
+        this.nodeIndexCurrent = 0;
+        this.duration = 0;
+        this.volumeGoal = instrument.envelopeVolume[0];
+        this.volume = this.volumeGoal;
+    }
+    sample() {
+        //
+        if(!this.live && this.nodeIndexCurrent === this.instrument.sustain) {
+            return this.instrument.envelopeVolume[this.nodeIndexCurrent];
         }
-        const P = playChannel.ADSRTime/this.envelope[playChannel.ADSRMode];
-        switch(playChannel.ADSRMode) {
-            case 0:
-                return 1-P;
-            case 1:
-                return (P * (1-this.envelope[2])) + this.envelope[2];
-            case 3:
-                return P*this.envelope[2];
+        if(this.duration-- <= 0) {
+            this.nodeIndexCurrent++;
+            if(this.nodeIndexCurrent >= this.instrument.envelopeVolume.length) {
+                return null;
+            }
+            if(!this.live && this.nodeIndexCurrent === this.instrument.loopEnd) {
+                this.nodeIndexCurrent = this.instrument.loopStart;
+            }
+            this.volume = this.volumeGoal;
+            this.volumeGoal = this.instrument.envelopeVolume[this.nodeIndexCurrent];
+            this.duration = this.instrument.envelopeDuration[this.nodeIndexCurrent];
         }
+        //
+        this.volume += (this.volumeGoal - this.volume) / this.duration;
+        return this.volume;
+    }
+    cut() {
+        this.live = true;
     }
 }
 
