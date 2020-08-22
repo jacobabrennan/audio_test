@@ -34,16 +34,7 @@ export async function setupControlInstrumentSelect() {
         containerGroup, 15, 8, instrumentChange,
     );
     //
-    let envelopes = [
-        [100,200,0.5,2000, true],
-    ];
-    for(let envelope of envelopes) {
-        const instrumentNew = new Instrument();
-        instrumentNew.envelope = envelope;
-        instrumentNew.envelopeVolume = [0,1,0.5,0.5,0];
-        instrumentNew.envelopeLength = [0,100,200,200,400];
-        instrumentAdd(instrumentNew);
-    }
+    instrumentAdd(new Instrument());
     instrumentChange(0);
     return containerGroup;
 }
@@ -71,9 +62,10 @@ function instrumentCountSet(countNew) {
     }
     if(idInstrumentNewest !== undefined) {
         instrumentSelect(idInstrumentNewest);
-    } else {
-        instrumentListUpdate();
     }
+    instrumentListUpdate();
+    controlStripUpdate();
+    instrumentDraw();
     return countCurrent;
 }
 export function instrumentListUpdate() {

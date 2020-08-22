@@ -54,7 +54,7 @@ export function instrumentDraw() {
     // Blank and fill back color
     context.fillStyle = COLOR_BG;
     context.fillRect(0, 0, DISPLAY_PIXEL_WIDTH, DISPLAY_INSTRUMENT_HEIGHT);
-    context.fillStyle = '#444';
+    context.fillStyle = '#438';
     // Draw graph lines
     for(let volume = 0; volume <= 1; volume += 1/8) {
         const posY = Math.floor(volume*DISPLAY_INSTRUMENT_HEIGHT);

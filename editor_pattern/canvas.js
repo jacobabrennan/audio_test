@@ -23,7 +23,8 @@ import {
 import {
     getSelection,
     getCursor,
-    getScroll
+    getScroll,
+    scrollCheck
 } from './cursor.js';
 import {
     dataGet,
@@ -206,6 +207,7 @@ export function canvasHeightSet(heightNew) {
     heightCanvas = heightNew;
     contextConfigure(context);
     patternDisplay();
+    scrollCheck();
 }
 export function canvasHeightGet() {
     return heightCanvas;

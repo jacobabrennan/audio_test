@@ -20,14 +20,12 @@ body {
 #client {
     outline: ridge 16px var(--color-bg-primary);
     background: var(--color-bg-primary);
+    box-shadow: 0px 0px 400px rgba(255,255,255,0.25);
     width: 1024px;
-    /* height: 768px; */
-    /* max-width: 100vw;
-    max-height: 100vh; */
+    border-top: 2px solid black;
+    border-left: 2px solid black;
     display: flex;
     flex-direction: row;
-    overflow: hidden;
-    align-items: stretch;
 }
 #editor {
     height: 640PX;

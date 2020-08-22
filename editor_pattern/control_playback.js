@@ -33,10 +33,10 @@ export async function setup() {
         }
     });
     //
-    let bps = new Adjuster(containerGroup, 'Row/Sec.', 15, (valueNew) => {
-        return valueNew
-    });
-    bps.valueSet(1, true);
+    // let bps = new Adjuster(containerGroup, 'Row/Sec.', 15, (valueNew) => {
+    //     return valueNew
+    // });
+    // bps.valueSet(1, true);
     //
     return containerGroup;
 }

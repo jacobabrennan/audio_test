@@ -12,27 +12,28 @@ let instrumentCurrent;
 //-- Instrument Class -------------------------------
 export class Instrument {
     name = 'Instrument'
-    envelopeLength = []
-    envelopeVolume = []
+    envelopeDuration = [0]
+    envelopeVolume = [0.5]
+    sustain = 0
     envelopePointGet(indexPoint) {
         return [
-            this.envelopeLength[indexPoint],
+            this.envelopeDuration[indexPoint],
             this.envelopeVolume[indexPoint],
         ];
     }
     envelopePointSet(indexPoint, duration, volume) {
-        this.envelopeLength[indexPoint] = duration;
+        this.envelopeDuration[indexPoint] = duration;
         this.envelopeVolume[indexPoint] = volume;
     }
     envelopeLengthSet(lengthNew) {
-        lengthNew = Math.max(0, Math.min(9, lengthNew));
+        lengthNew = Math.max(1, Math.min(9, lengthNew));
         if(lengthNew <= this.envelopeLengthGet()) {
-            this.envelopeLength.length = lengthNew;
+            this.envelopeDuration.length = lengthNew;
             this.envelopeVolume.length = lengthNew;
             return;
         }
         while(this.envelopeLengthGet() < lengthNew) {
-            this.envelopeLength.push(this.envelopeLength.length? 25 : 0);
+            this.envelopeDuration.push(this.envelopeDuration.length? 25 : 0);
             this.envelopeVolume.push(0.5);
         }
     }
@@ -81,7 +82,13 @@ export class Instrument {
         return [start, end];
     }
     toData() {
-        return this.envelope;
+        return {
+            sustain: this.sustain,
+            loopStart: this.loopStart,
+            loopEnd: this.loopEnd,
+            envelopeDuration: this.envelopeDuration,
+            envelopeVolume: this.envelopeVolume,
+        };
     }
 }
 
@@ -97,9 +104,15 @@ export function instrumentAdd(instrumentNew) {
     return instruments.length-1;
 }
 export function instrumentRemove() {
-    let indexInstrument = instruments.indexOf(instrumentNew);
+    let indexInstrument = instruments.indexOf(instrumentCurrent);
     if(indexInstrument === -1) { return;}
     instruments.splice(indexInstrument, 1);
+    if(instruments.length) {
+        indexInstrument = Math.max(0, Math.min(instruments.length-1, indexInstrument));
+    } else {
+        indexInstrument = instrumentAdd(new Instrument());
+    }
+    instrumentSelect(indexInstrument);
     return instruments.length;
 }
 
@@ -123,5 +136,5 @@ export function instrumentListGet() {
     };
 }
 export function instrumentDataCompile() {
-    return instruments.map(instrument => instrument.toData())
+    return instruments.map(instrument => instrument.toData());
 }

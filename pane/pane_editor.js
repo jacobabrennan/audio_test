@@ -17,6 +17,7 @@ import {
 import Button, { ButtonBar } from '../controls/button.js';
 import { patternEditorShown } from '../editor_pattern/index.js';
 import { instrumentEditorShown } from '../editor_instrument/index.js';
+import { instrumentListUpdate } from '../editor_instrument/controls.js';
 
 //-- Module State --------------------------------
 let editor;
@@ -105,6 +106,11 @@ export async function setupControls() {
             instToggle.element.classList.remove('selected');
             paneSelect(EDITOR_PANE_PATTERN);
             patternEditorShown();
+            instrumentListUpdate()
+            // instrumentSelect(idInstrument);
+            // instrumentListUpdate();
+            // controlStripUpdate();
+            // instrumentDraw();
         }
         else {
             visible = true;

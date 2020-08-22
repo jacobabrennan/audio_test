@@ -4,12 +4,12 @@
 
 Interface
     Save / Load work
-    Instrument Editor button toggles instrument editor (no pattern button)
 
 Pattern Editor
     Shift+ArrowKey to move left and right one cell (input notes easier)
     Channel labels / Mute a whole channel
     Copy / Paste blocks of cells
+    Control Strip
 
 Controls
     BPM Controls (beats per second)
@@ -17,6 +17,9 @@ Controls
 
 Instrument Editor
     Make it exist
+    New Instruments must have one node / cannot remove all nodes
+    Cannot delete Instruments
+    Generating new instruments doesn't update the instrument count
 
 Playback
     Pause / Play buttons (it's an illusion. send new song and start from cursor)
@@ -24,3 +27,6 @@ Playback
 
 APU
     Effects
+
+Bug
+    Play a song with instrument editor open. Close editor after end. Click in black area.
