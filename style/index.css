@@ -51,10 +51,11 @@ body {
 #instrument_controls {
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
 }
 #instrument_controls > * {
-    margin-left: 4px;
+    /* margin-left: 4px; */
+    margin-right: 4px;
 }
 
 /*----------------------------------------------*/
@@ -108,6 +109,7 @@ button:hover {
 }
 .adjuster {
     border: solid 2px var(--color-bg);
+    border-top: none;
 }
 .selector {
     border: none;

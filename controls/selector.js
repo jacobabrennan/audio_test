@@ -17,7 +17,9 @@ export default class Selector {
         this.element.style.fontFamily = FONT_FAMILY;
         this.element.style.fontSize = FONT_SIZE+'px';
         this.element.style.background = COLOR_BG;
-        elementParent.append(this.element);
+        if(elementParent) {
+            elementParent.append(this.element);
+        }
         //
         this.onChange = onChange;
         this.element.addEventListener('change', () => {

@@ -22,7 +22,9 @@ export class ButtonBar {
             const buttonNew = new Button(this.element, label, buttons[label]);
             this.buttons[label] = buttonNew;
         }
-        elementParent.append(this.element);
+        if(elementParent) {
+            elementParent.append(this.element);
+        }
     }
     buttonGet(label) {
         return this.buttons[label];

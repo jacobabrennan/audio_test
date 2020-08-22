@@ -19,7 +19,9 @@ export default class Adjuster {
     constructor(elementParent, label, width, onChange) {
         this.element = document.createElement('canvas');
         this.element.className = 'adjuster';
-        elementParent.append(this.element);
+        if(elementParent) {
+            elementParent.append(this.element);
+        }
         //
         this.onChange = onChange;
         this.element.addEventListener('blur', () => this.handleBlur());

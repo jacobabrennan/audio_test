@@ -14,6 +14,7 @@ import {
     instrumentSelect,
 } from './instrument.js';
 import { instrumentDraw } from './canvas.js';
+import { controlStripUpdate } from './control_strip.js';
 
 //-- Module State --------------------------------
 let instrumentSelector;
@@ -53,6 +54,7 @@ export async function setupControlInstrumentSelect() {
 function instrumentChange(idInstrument) {
     instrumentSelect(idInstrument);
     instrumentListUpdate();
+    controlStripUpdate();
     instrumentDraw();
 }
 function instrumentCountSet(countNew) {

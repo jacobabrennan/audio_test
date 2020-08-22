@@ -9,6 +9,8 @@ import {
     COLOR_BG,
     COLOR_BG_HIGHLIGHT,
     COLOR_BG_HINT,
+    COLOR_FG_HIGHLIGHT,
+    FONT_SIZE,
 } from '../utilities.js';
 import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
 import { instrumentGet } from './instrument.js';
@@ -72,62 +74,91 @@ export function instrumentDraw() {
         }
     }
     // Plot lines
-    let pointSelection = pointSelectionGet();
-    context.strokeStyle = 'grey';
-    context.lineWidth = 4;
-    context.beginPath();
-    let first = true;
-    let sampleXCurrent = 0;
-    pointSprites = [];
-    for(let indexPoint = 0; indexPoint < instrument.envelopeLengthGet(); indexPoint++) {
-        let point;
-        if(pointSelection && indexPoint === pointSelection.index && pointSelection.point) {
-            point = [pointSelection.point[0], pointSelection.point[1]];
-        } else {
-            point = instrument.envelopePointGet(indexPoint);
-        }
-        sampleXCurrent += point[0];
-        const pointDrawn = [
-            (sampleXCurrent/zoomSampleWidth) * DISPLAY_PIXEL_WIDTH,
-            (1-point[1]) * DISPLAY_INSTRUMENT_HEIGHT,
-        ];
-        pointSprites.push(pointDrawn);
-        if(first) {
-            first = false;
-            context.moveTo(pointDrawn[0], pointDrawn[1]);
-        } else {
-            context.lineTo(pointDrawn[0], pointDrawn[1]);
-        }
-    }
-    context.stroke();
+    plotLines();
     // Plot points
-    context.fillStyle = COLOR_BG_HIGHLIGHT;
     for(let point of pointSprites) {
-        context.fillRect(point[0], 0, 1, DISPLAY_INSTRUMENT_HEIGHT);
-        context.beginPath();
-        context.arc(point[0], point[1], GRAPH_POINT_RADIUS, 0, TAU);
-        context.stroke();
-        context.fill();
+        drawPoint(point[0], point[1], COLOR_BG_HIGHLIGHT);
     }
     // Draw Selected Point
+    let pointSelection = pointSelectionGet();
     if(pointSelection) {
-        context.fillStyle = COLOR_BG_HINT;
         const selectedPoint = pointSprites[pointSelection.index];
-        context.fillRect(
-            selectedPoint[0], 0,
-            1, DISPLAY_INSTRUMENT_HEIGHT,
-        );
-        context.beginPath();
-        context.arc(
-            selectedPoint[0], selectedPoint[1],
-            GRAPH_POINT_RADIUS, 0, TAU
-        );
-        context.stroke();
-        context.fill();
+        drawPoint(selectedPoint[0], selectedPoint[1], COLOR_BG_HINT);
+    }
+    // Draw Sustain marker
+    const indexSus = instrument.sustainGet();
+    if(indexSus !== undefined) {
+        context.fillStyle = COLOR_FG_HIGHLIGHT;
+        const pointSus = pointSprites[indexSus];
+        context.fillText('S', pointSus[0]-7, pointSus[1]+7);
+    }
+    // Draw Loop markers
+    const dataLoop = instrument.loopGet();
+    if(dataLoop) {
+        context.fillStyle = COLOR_FG_HIGHLIGHT;
+        const pointLoopStart = pointSprites[dataLoop[0]];
+        context.fillText('[', pointLoopStart[0]-13, pointLoopStart[1]+7);
+        const pointLoopEnd = pointSprites[dataLoop[1]];
+        context.fillText(']', pointLoopEnd[0]-1, pointLoopEnd[1]+7);
     }
     //
     context.restore();
 }
+function plotLines() {
+    // Set drawing styles
+    context.strokeStyle = 'grey';
+    context.lineWidth = 4;
+    // Move path to start of graph
+    const instrument = instrumentGet();
+    const firstPoint = instrument.envelopePointGet(0);
+    if(!firstPoint) { return;}
+    context.beginPath();
+    context.moveTo(firstPoint[0], firstPoint[1]);
+    // Prep for loop
+    const selection = pointSelectionGet();
+    let sampleTotal = 0;
+    pointSprites = [];
+    // Retreive each point, save location information, and connect path
+    for(let index = 0; index < instrument.envelopeLengthGet(); index++) {
+        // Retreive points from envelope, and from user selection
+        let point = instrument.envelopePointGet(index);
+        if(selection && index === selection.index && selection.point) {
+            point = [selection.point[0], selection.point[1]];
+        }
+        // Save location information
+        sampleTotal += point[0];
+        const pointDrawn = [
+            (sampleTotal/zoomSampleWidth) * DISPLAY_PIXEL_WIDTH,
+            (1-point[1]) * DISPLAY_INSTRUMENT_HEIGHT,
+        ];
+        pointSprites.push(pointDrawn);
+        // Connect path
+        context.lineTo(pointDrawn[0], pointDrawn[1]);
+    }
+    // Finalize graph / path
+    context.stroke();
+    // Return location information
+    return pointSprites;
+}
+function drawPoint(posX, posY, color) {
+    context.fillStyle = color;
+    context.fillRect(posX, 0, 1, DISPLAY_INSTRUMENT_HEIGHT);
+    context.beginPath();
+    context.arc(posX, posY, GRAPH_POINT_RADIUS, 0, TAU);
+    context.stroke();
+    context.fill();
+}
+
+
+
+
+
+
+
+
+
+
+
 
 //------------------------------------------------
 export function instrumentPointSelect(selection) {
