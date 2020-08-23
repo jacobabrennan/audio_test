@@ -5,11 +5,11 @@
 //-- Dependencies --------------------------------
 import {
     contextConfigure,
-    FONT_SIZE,
+    CHAR_HEART,
     COLOR_BG,
     COLOR_FG,
     COLOR_BG_HIGHLIGHT,
-    COLOR_FG_HIGHLIGHT
+    FONT_SIZE,
 } from '../utilities.js';
 
 //-- Constants -----------------------------------
@@ -57,8 +57,7 @@ export default class Radio {
             this.context.fillText(option, FONT_SIZE*2, -2+LINE_HEIGHT*(indexOption+1));
             if(option === this.value) {
                 this.context.fillStyle = COLOR_BG_HIGHLIGHT;
-                this.context.fillText('Œ-', 0, -2+LINE_HEIGHT*(indexOption+1));
-                // The character "Œ" is a heart in the "presst start k" font
+                this.context.fillText(CHAR_HEART, 0, -2+LINE_HEIGHT*(indexOption+1));
             }
         }
     }
