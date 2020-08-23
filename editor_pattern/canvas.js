@@ -120,7 +120,7 @@ function drawPatternGrid() {
     const selection = getSelection();
     const cursor = getCursor();
     const scrollY = getScroll();
-    for(let row = 0; row < rows; row++) {
+    for(let row = scrollY; row < rows; row++) {
         let background = (row%2)? COLOR_BG : '#222';
         drawString(
             row.toString(HEX).padStart(2,'0')+' ',
@@ -144,7 +144,7 @@ function drawPatternGrid() {
         }
     }
     if(selection) {
-        for(let posY = selection.posStartY; posY <= selection.posEndY; posY++) {
+        for(let posY = selection.posStartY; posY <= rows-1; posY++) {
             for(let posX = selection.posStartX; posX <= selection.posEndX; posX++) {
                 drawGridPos(posX, posY, COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT);
             }
