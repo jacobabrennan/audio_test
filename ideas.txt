@@ -2,6 +2,9 @@
 
 //==============================================================================
 
+Bugs:
+    (none)
+
 Interface
     Save / Load work
 
@@ -16,17 +19,31 @@ Controls
     Ticks per beat control?
 
 Instrument Editor
-    Make it exist
-    New Instruments must have one node / cannot remove all nodes
-    Cannot delete Instruments
-    Generating new instruments doesn't update the instrument count
+    Zoom control
+    duty control
 
 Playback
     Pause / Play buttons (it's an illusion. send new song and start from cursor)
     Visualization
 
-APU
-    Effects
-
-Bug
-    Play a song with instrument editor open. Close editor after end. Click in black area.
+Effects to be implemented:
+    arpeggio
+    Go to:
+        Specific Pattern
+        specific row
+        specific row in specific pattern
+    Loops:
+        set loop start
+        execute loop
+        specify number of loops
+    Retrigger
+        useful for drum rolls, etc.
+        relies on a sub-row division of time
+    Note delay
+        causes a note to be played behind the beat
+        relies on a sub-row division of time
+    Pattern delay
+        lengthens the duration of a row
+        could be either a set number of rows, or a sub-row division of time
+    Set song speed
+    Set song volume

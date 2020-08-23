@@ -8,7 +8,8 @@ export const TAU = Math.PI*2;
 export const HEX = 16;
 // Audio parameters
 export const RATE_SAMPLE = 16000;
-export const BPM_DEFAULT = 500;
+export const BPS_DEFAULT = 8;
+export const TPB_DEFAULT = 4;
 export const CHANNELS_NUMBER = 5;
 export const CHANNEL_NOISE = 4;
 export const PATTERNS_MAX = 16;
@@ -97,7 +98,7 @@ function messageReceive(action, data) {
             songCurrent.pause();
             break;
         case ACTION_SONG:
-            songCurrent = new Song(data.instruments, data.patterns);
+            songCurrent = new Song(data);
             for(let aChannel of channel) {
                 aChannel.reset();
             }
@@ -114,14 +115,16 @@ class AudioProcessor {
 
 //-- Song Playing --------------------------------
 class Song extends AudioProcessor {
-    samplesPerRow = (RATE_SAMPLE*60)/BPM_DEFAULT
+    samplesPerRow = RATE_SAMPLE/BPS_DEFAULT
     playing = false
-    constructor(instruments, patterns) {
+    constructor(dataSong) {
         super();
-        this.instrument = instruments.map(function (data) {
+        this.instrument = dataSong.instruments.map(function (data) {
             return new Instrument(data);
         });
-        this.pattern = patterns;
+        this.samplesPerRow = Math.floor(RATE_SAMPLE/dataSong.bps);
+        this.ticksPerRow = dataSong.tpb;
+        this.pattern = dataSong.patterns;
         this.indexPattern = 0;
         this.indexRow = 0;
         this.indexSample = 0;

@@ -47,6 +47,9 @@ export default class Adjuster {
         }
         this.value = this.onChange(valueNew);
     }
+    valueGet() {
+        return this.value;
+    }
     draw() {
         this.context.fillStyle = COLOR_BG;
         this.context.fillRect(0, 0, this.width*FONT_SIZE, FONT_SIZE);
