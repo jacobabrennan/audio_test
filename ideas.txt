@@ -2,42 +2,26 @@
 
 //==============================================================================
 
-Bugs:
-    (none)
+//-- Bugs-----------------------------------------
+(none)
 
+//-- Interface -----------------------------------
 Interface
     Save / Load work
-
 Pattern Editor
     Shift+ArrowKey to move left and right one cell (input notes easier)
     Channel labels / Mute a whole channel
     Copy / Paste blocks of cells
     Control Strip
-
-Controls
-    BPM Controls (beats per second)
-    Ticks per beat control?
-
 Instrument Editor
     Zoom control
     duty control
-
 Playback
     Pause / Play buttons (it's an illusion. send new song and start from cursor)
     Visualization
 
+//-- Synthesizer ---------------------------------
 Effects to be implemented:
-    Arpeggio
-        arpeggio down
-        arpeggio split
-    Go to:
-        Specific Pattern
-        specific row
-        specific row in specific pattern
-    Loops:
-        set loop start
-        execute loop
-        specify number of loops
     Retrigger
         useful for drum rolls, etc.
         relies on a sub-row division of time
@@ -50,9 +34,14 @@ Effects to be implemented:
     Set song speed
     Set song volume
 
+
+//== Finished===================================================================
+
+//-- Synthesizer ---------------------------------
 Effects Finish:
     0xy: Arpeggia; x and y specify semitone offsets from the base note.
     1-0: Set loop point
     1-y: Repeat; y specifies number of times to repeat.
     2-y: Pattern jump; y specifies the pattern to jump.
     3xx: Row jump; xx specifies the pattern to jump.
+    4-y: Retrigger note; retriggers a note every y ticks.

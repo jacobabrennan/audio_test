@@ -396,6 +396,10 @@ class Note extends AudioProcessor {
         this.volume = this.volumeGoal;
     }
     sample() {
+        if(this.nodeIndexCurrent >= this.instrument.envelopeVolume.length) {
+            return 0;
+            // return null;
+        }
         //
         if(!this.live && this.nodeIndexCurrent === this.instrument.sustain) {
             return this.instrument.envelopeVolume[this.nodeIndexCurrent];
@@ -403,7 +407,9 @@ class Note extends AudioProcessor {
         if(this.duration-- <= 0) {
             this.nodeIndexCurrent++;
             if(this.nodeIndexCurrent >= this.instrument.envelopeVolume.length) {
-                return null;
+                this.duration = Infinity;
+                return 0;
+                // return null;
             }
             if(!this.live && this.nodeIndexCurrent === this.instrument.loopEnd) {
                 this.nodeIndexCurrent = this.instrument.loopStart;
@@ -418,6 +424,12 @@ class Note extends AudioProcessor {
     }
     cut() {
         this.live = true;
+    }
+    retrigger() {
+        this.nodeIndexCurrent = 0;
+        this.duration = 0;
+        this.volumeGoal = this.instrument.envelopeVolume[0];
+        this.volume = this.volumeGoal;
     }
 }
 
@@ -465,6 +477,11 @@ export function pattern(rows, channelNumber) {
 
 //-- Effect Handler ------------------------------
 function handleEffect(effect, indexChannel) {
+    // Cleanup previous effect
+    const theChannel = channels[indexChannel];
+    if(theChannel.effect) {
+        theChannel.effect(theChannel, null);
+    }
     // Parse input
     const effectIndex = (effect >>> 8)&(0b1111);
     const arg1 = (effect >>> 4)&(0b1111);
@@ -480,7 +497,9 @@ function handleEffect(effect, indexChannel) {
             return effectPatternJump(indexChannel, arg1, arg2);
         case 0b0011:
             return effectRowJump(indexChannel, arg1, arg2);
-        case 0b0100: break;
+        case 0b0100:
+            channels[indexChannel].effectAdd(effectRetrigger, arg1, arg2);
+            break;
         case 0b0101: break;
         case 0b0110: break;
         case 0b0111: break;
@@ -501,6 +520,10 @@ function handleEffect(effect, indexChannel) {
 function effectArpeggio(theChannel, tick) {
     if(!theChannel.note) { return;}
     let noteValue = theChannel.note.value;
+    if(tick === null) {
+        theChannel.wave.noteSet(noteValue);
+        return;
+    }
     switch(tick % 3) {
         case 0:
             theChannel.wave.noteSet(noteValue);
@@ -513,12 +536,6 @@ function effectArpeggio(theChannel, tick) {
             break;
     }
 }
-// function effectRepeat(row) {
-//     songCurrent.indexRow = row;
-//     songCurrent.indexSample = 0;
-//     songCurrent.playRow();
-//     songCurrent.tickAdvance(0);
-// }
 function effectLoop(indexChannel, arg1, repeatTimes) {
     // Handle Loop point set command
     const theChannel = channels[indexChannel];
@@ -562,4 +579,10 @@ function effectRowJump(indexChannel, nibble1, nibble2) {
     const indexRow = (nibble1 << 4)|nibble2;
     songCurrent.indexRow = indexRow;
     return true;
+}
+function effectRetrigger(theChannel, tick) {
+    if(tick === null) { return;}
+    if(!theChannel.note) { return;}
+    if(tick%theChannel.effectParameter2) { return;}
+    theChannel.note.retrigger();
 }
