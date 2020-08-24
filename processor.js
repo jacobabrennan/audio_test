@@ -41,16 +41,16 @@ export const RESPONSE_SONG_END = INDEX++;
 
 //-- Module State --------------------------------
 let worklet;
-const channel = [];
+const channels = [];
 let songCurrent;
 
 //-- Setup ---------------------------------------
 function setup() {
-    channel[0] = new Channel(waveSquare);
-    channel[1] = new Channel(waveSquare);
-    channel[2] = new Channel(waveSaw);
-    channel[3] = new Channel(waveTriangle);
-    channel[CHANNEL_NOISE] = new Channel(waveNoise);
+    channels[0] = new Channel(waveSquare);
+    channels[1] = new Channel(waveSquare);
+    channels[2] = new Channel(waveSaw);
+    channels[3] = new Channel(waveTriangle);
+    channels[CHANNEL_NOISE] = new Channel(waveNoise);
 }
 
 
@@ -99,7 +99,7 @@ function messageReceive(action, data) {
             break;
         case ACTION_SONG:
             songCurrent = new Song(data);
-            for(let aChannel of channel) {
+            for(let aChannel of channels) {
                 aChannel.reset();
             }
             break;
@@ -144,19 +144,19 @@ class Song extends AudioProcessor {
         }
         this.indexSample++;
         return (
-            channel[0].sample() +
-            channel[1].sample() +
-            channel[2].sample() +
-            channel[3].sample() +
-            channel[4].sample()
+            channels[0].sample() +
+            channels[1].sample() +
+            channels[2].sample() +
+            channels[3].sample() +
+            channels[4].sample()
         );
     }
     tickAdvance(indexTick) {
-        channel[0].tickAdvance(indexTick);
-        channel[1].tickAdvance(indexTick);
-        channel[2].tickAdvance(indexTick);
-        channel[3].tickAdvance(indexTick);
-        channel[4].tickAdvance(indexTick);
+        channels[0].tickAdvance(indexTick);
+        channels[1].tickAdvance(indexTick);
+        channels[2].tickAdvance(indexTick);
+        channels[3].tickAdvance(indexTick);
+        channels[4].tickAdvance(indexTick);
     }
     playRow() {
         let patternCurrent = this.pattern[this.indexPattern];
@@ -184,14 +184,14 @@ class Song extends AudioProcessor {
                 instrument = this.instrument[indexInstrument];
             }
             if(volume !== undefined) {
-                channel[indexChannel].volumeSet(
+                channels[indexChannel].volumeSet(
                     volume / (Math.pow(2, MASK_CELL_VOLUME_WIDTH)-1)
                 );
             }
             if(note === MASK_CELL_NOTE_STOP) {
-                channel[indexChannel].noteEnd();
+                channels[indexChannel].noteEnd();
             } else if(note !== undefined && instrument) {
-                channel[indexChannel].notePlay(note, instrument);
+                channels[indexChannel].notePlay(note, instrument);
             }
             if(effect !== undefined) {
                 handleEffect(effect, indexChannel);
@@ -205,7 +205,7 @@ class Song extends AudioProcessor {
     pause() {
         this.playing = false;
         for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
-            channel[indexChannel].noteEnd();
+            channels[indexChannel].noteEnd();
         }
     }
     end() {
@@ -213,7 +213,7 @@ class Song extends AudioProcessor {
         this.indexPattern = 0;
         this.indexRow = 0;
         messageSend(RESPONSE_SONG_END, {});
-        for(let aChannel of channel) {
+        for(let aChannel of channels) {
             aChannel.reset();
         }
     }
@@ -228,6 +228,7 @@ class Channel extends AudioProcessor {
     }
     reset() {
         delete this.note;
+        delete this.repeat;
     }
     tickAdvance(tick) {
         if(this.effect) {
@@ -435,8 +436,8 @@ export function cellParse(cellData32Bit) {
 export function empty() {
     return 0;
 }
-export function pattern(rows, channels) {
-    return new Uint32Array(rows*channels);
+export function pattern(rows, channelNumber) {
+    return new Uint32Array(rows*channelNumber);
 }
 
 
@@ -449,10 +450,13 @@ function handleEffect(effect, indexChannel) {
     const arg2 = (effect >>> 0)&(0b1111);
     switch(effectIndex) {
         case 0b0000: {
-            channel[indexChannel].effectAdd(effectArpeggio, arg1, arg2);
+            channels[indexChannel].effectAdd(effectArpeggio, arg1, arg2);
             break;
         }
-        case 0b0001: {break;}
+        case 0b0001: {
+            effectLoop(indexChannel, arg1, arg2);
+            break;
+        }
         case 0b0010: {break;}
         case 0b0011: {break;}
         case 0b0100: {break;}
@@ -471,18 +475,57 @@ function handleEffect(effect, indexChannel) {
 }
 
 //------------------------------------------------
-function effectArpeggio(channel, tick) {
-    if(!channel.note) { return;}
-    let noteValue = channel.note.value;
+function effectArpeggio(theChannel, tick) {
+    if(!theChannel.note) { return;}
+    let noteValue = theChannel.note.value;
     switch(tick % 3) {
         case 0:
-            channel.wave.noteSet(noteValue);
+            theChannel.wave.noteSet(noteValue);
             break;
         case 1:
-            channel.wave.noteSet(noteValue+channel.effectParameter1);
+            theChannel.wave.noteSet(noteValue+theChannel.effectParameter1);
             break;
         case 2:
-            channel.wave.noteSet(noteValue+channel.effectParameter2);
+            theChannel.wave.noteSet(noteValue+theChannel.effectParameter2);
             break;
+    }
+}
+// function effectRepeat(row) {
+//     songCurrent.indexRow = row;
+//     songCurrent.indexSample = 0;
+//     songCurrent.playRow();
+//     songCurrent.tickAdvance(0);
+// }
+function effectLoop(indexChannel, arg1, repeatTimes) {
+    // Handle Loop point set command
+    const theChannel = channels[indexChannel];
+    if(!repeatTimes) {
+        // don't retrigger on every loop iteration
+        if(!theChannel.repeat) {
+            theChannel.repeat = {
+                row: songCurrent.indexRow,
+                count: 0,
+            };
+        }
+        return;
+    }
+    // Loop from start if no loop start specified
+    if(!theChannel.repeat) {
+        theChannel.repeat = {
+            row: 0,
+            count: 0,
+        };
+    }
+    // Do the actual repeating
+    if(theChannel.repeat.count < repeatTimes) {
+        theChannel.repeat.count++;
+        songCurrent.indexRow = theChannel.repeat.row;
+        songCurrent.indexSample = 0;
+        songCurrent.playRow();
+        songCurrent.tickAdvance(0);
+    }
+    // Cleanup for next loop
+    else {
+        delete theChannel.repeat;
     }
 }

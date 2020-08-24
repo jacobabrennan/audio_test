@@ -27,7 +27,9 @@ Playback
     Visualization
 
 Effects to be implemented:
-    arpeggio
+    Arpeggio
+        arpeggio down
+        arpeggio split
     Go to:
         Specific Pattern
         specific row
