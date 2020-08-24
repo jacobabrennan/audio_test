@@ -25,8 +25,6 @@ Effects to be implemented:
     Pattern delay?
         lengthens the duration of a row
         could be either a set number of rows, or a sub-row division of time
-    Set song BPS
-    Set song TPB
 
 
 //== Finished===================================================================
@@ -40,4 +38,6 @@ Effects Finish:
     3xx: Row jump; xx specifies the pattern to jump.
     4-y: Retrigger note; retriggers a note every y ticks.
     5-y: Delay Note; y specifies the delay as a number of ticks.
-    6xx: Set song volume; xx specifies a volume from 0 to 63 (#3f);
+    6xx: Set song volume; xx specifies a volume from 0 to 63 (#3f).
+    7xx: Set song BPS; xx specifies the beats per second.
+    8-y: Set song TPB; y specifies the ticks per beat.

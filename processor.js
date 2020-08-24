@@ -9,7 +9,9 @@ export const HEX = 16;
 // Audio parameters
 export const RATE_SAMPLE = 16000;
 export const BPS_DEFAULT = 8;
+export const BPS_MAX = 63;
 export const TPB_DEFAULT = 4;
+export const TPB_MAX = 15;
 export const CHANNELS_NUMBER = 5;
 export const CHANNEL_NOISE = 4;
 export const PATTERNS_MAX = 16;
@@ -120,6 +122,10 @@ class Song extends AudioProcessor {
     indexRow = 0
     indexSample = 0
     volume = 1
+    beatsPerSecond = 1
+    ticksPerBeat = 1
+    samplesPerRow = 1
+    samplesPerTick = 1
     constructor(dataSong) {
         // Ensure parent behavior
         super();
@@ -133,9 +139,12 @@ class Song extends AudioProcessor {
             return new Instrument(data);
         });
         // Calculate metrics
-        this.samplesPerRow = Math.ceil(RATE_SAMPLE/dataSong.bps);
-        this.ticksPerRow = dataSong.tpb;
-        this.samplesPerTick = Math.ceil(this.samplesPerRow/this.ticksPerRow);
+        if(dataSong.bps) {
+            this.bpsSet(dataSong.bps);
+        }
+        if(dataSong.tpb) {
+            this.tpbSet(dataSong.tpb);
+        }
     }
     sample() {
         if(!this.playing) { return 0;}
@@ -235,6 +244,18 @@ class Song extends AudioProcessor {
     }
     volumeSet(volumeNew) {
         this.volume = volumeNew / ((1 << MASK_CELL_VOLUME_WIDTH)-1);
+    }
+    bpsSet(bpsNew) {
+        bpsNew = Math.min(BPS_MAX, bpsNew);
+        this.beatsPerSecond = bpsNew;
+        this.samplesPerRow = Math.ceil(RATE_SAMPLE/this.beatsPerSecond);
+        this.samplesPerTick = Math.ceil(this.samplesPerRow/this.ticksPerRow);
+    }
+    tpbSet(tpbNew) {
+        tpbNew = Math.min(TPB_MAX, tpbNew);
+        this.ticksPerRow = tpbNew;
+        this.samplesPerRow = Math.ceil(RATE_SAMPLE/this.beatsPerSecond);
+        this.samplesPerTick = Math.ceil(this.samplesPerRow/this.ticksPerRow);
     }
 }
 
@@ -505,8 +526,10 @@ function handleEffect(effect, indexChannel) {
             break;
         case 0b0110:
             return effectSongVolume(indexChannel, arg1, arg2);
-        case 0b0111: break;
-        case 0b1000: break;
+        case 0b0111:
+            return effectSongBPS(indexChannel, arg1, arg2);
+        case 0b1000:
+            return effectSongTPB(indexChannel, arg1, arg2);
         case 0b1001: break;
         case 0b1010: break;
         case 0b1011: break;
@@ -609,4 +632,11 @@ function effectDelay(theChannel, tick) {
 function effectSongVolume(indexChannel, nibble1, nibble2) {
     const volumeNew = (nibble1 << 4)|nibble2;
     songCurrent.volumeSet(volumeNew);
+}
+function effectSongBPS(indexChannel, nibble1, nibble2) {
+    const bpsNew = (nibble1 << 4)|nibble2;
+    songCurrent.bpsSet(bpsNew);
+}
+function effectSongTPB(indexChannel, arg1, tpbNew) {
+    songCurrent.tpbSet(tpbNew);
 }
