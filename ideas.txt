@@ -49,3 +49,10 @@ Effects to be implemented:
         could be either a set number of rows, or a sub-row division of time
     Set song speed
     Set song volume
+
+Effects Finish:
+    0xy: Arpeggia; x and y specify semitone offsets from the base note.
+    1-0: Set loop point
+    1-y: Repeat; y specifies number of times to repeat.
+    2-y: Pattern jump; y specifies the pattern to jump.
+    3xx: Row jump; xx specifies the pattern to jump.

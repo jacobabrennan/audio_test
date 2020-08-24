@@ -134,11 +134,17 @@ class Song extends AudioProcessor {
     }
     sample() {
         if(!this.playing) { return 0;}
+        let jump = false;
         if(!(this.indexSample%this.samplesPerRow)) {
             this.indexSample = 0;
-            this.playRow();
+            jump = this.playRow();
+            if(jump) {
+                songCurrent.indexSample = 0;
+                songCurrent.playRow();
+                songCurrent.tickAdvance(0);
+            }
         }
-        if(!(this.indexSample%this.samplesPerTick)) {
+        if(!jump && !(this.indexSample%this.samplesPerTick)) {
             const indexTick = this.indexSample/this.samplesPerTick;
             this.tickAdvance(indexTick);
         }
@@ -159,6 +165,7 @@ class Song extends AudioProcessor {
         channels[4].tickAdvance(indexTick);
     }
     playRow() {
+        let jump = false;
         let patternCurrent = this.pattern[this.indexPattern];
         if(this.indexRow >= patternCurrent.length / CHANNELS_NUMBER) {
             this.indexPattern++;
@@ -194,10 +201,14 @@ class Song extends AudioProcessor {
                 channels[indexChannel].notePlay(note, instrument);
             }
             if(effect !== undefined) {
-                handleEffect(effect, indexChannel);
+                const channelJump = handleEffect(effect, indexChannel);
+                jump = channelJump || jump;
             }
         }
-        this.indexRow++;
+        if(!jump) {
+            this.indexRow++;
+        }
+        return jump;
     }
     play() {
         this.playing = true;
@@ -227,6 +238,7 @@ class Channel extends AudioProcessor {
         this.volume = 1;
     }
     reset() {
+        this.volume = 1;
         delete this.note;
         delete this.repeat;
     }
@@ -445,35 +457,36 @@ export function pattern(rows, channelNumber) {
 
 //-- Effect Handler ------------------------------
 function handleEffect(effect, indexChannel) {
+    // Parse input
     const effectIndex = (effect >>> 8)&(0b1111);
     const arg1 = (effect >>> 4)&(0b1111);
     const arg2 = (effect >>> 0)&(0b1111);
+    // Handle individual effects; indicate jumps where necessary
     switch(effectIndex) {
-        case 0b0000: {
+        case 0b0000:
             channels[indexChannel].effectAdd(effectArpeggio, arg1, arg2);
             break;
-        }
-        case 0b0001: {
-            effectLoop(indexChannel, arg1, arg2);
-            break;
-        }
-        case 0b0010: {
-            effectPatternJump(indexChannel, arg1, arg2);
-            break;}
-        case 0b0011: {break;}
-        case 0b0100: {break;}
-        case 0b0101: {break;}
-        case 0b0110: {break;}
-        case 0b0111: {break;}
-        case 0b1000: {break;}
-        case 0b1001: {break;}
-        case 0b1010: {break;}
-        case 0b1011: {break;}
-        case 0b1100: {break;}
-        case 0b1101: {break;}
-        case 0b1110: {break;}
-        case 0b1111: {break;}
+        case 0b0001:
+            return effectLoop(indexChannel, arg1, arg2);
+        case 0b0010:
+            return effectPatternJump(indexChannel, arg1, arg2);
+        case 0b0011:
+            return effectRowJump(indexChannel, arg1, arg2);
+        case 0b0100: break;
+        case 0b0101: break;
+        case 0b0110: break;
+        case 0b0111: break;
+        case 0b1000: break;
+        case 0b1001: break;
+        case 0b1010: break;
+        case 0b1011: break;
+        case 0b1100: break;
+        case 0b1101: break;
+        case 0b1110: break;
+        case 0b1111: break;
     }
+    // Indicate no jump
+    return false;
 }
 
 //------------------------------------------------
@@ -511,7 +524,7 @@ function effectLoop(indexChannel, arg1, repeatTimes) {
         }
         // Set repeat point to this row
         theChannel.repeat.row = songCurrent.indexRow;
-        return;
+        return false;
     }
     // Loop from start if no loop start specified
     if(!theChannel.repeat) {
@@ -524,19 +537,21 @@ function effectLoop(indexChannel, arg1, repeatTimes) {
     if(theChannel.repeat.count < repeatTimes) {
         theChannel.repeat.count++;
         songCurrent.indexRow = theChannel.repeat.row;
-        songCurrent.indexSample = 0;
-        songCurrent.playRow();
-        songCurrent.tickAdvance(0);
     }
     // Cleanup for next loop
     else {
         delete theChannel.repeat;
     }
+    // Indicate a jump
+    return true;
 }
 function effectPatternJump(indexChannel, arg1, indexPattern) {
     songCurrent.indexPattern = indexPattern;
     songCurrent.indexRow = 0;
-    songCurrent.indexSample = 0;
-    songCurrent.playRow();
-    songCurrent.tickAdvance(0);
+    return true;
+}
+function effectRowJump(indexChannel, nibble1, nibble2) {
+    const indexRow = (nibble1 << 4)|nibble2;
+    songCurrent.indexRow = indexRow;
+    return true;
 }
