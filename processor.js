@@ -115,24 +115,32 @@ class AudioProcessor {
 
 //-- Song Playing --------------------------------
 class Song extends AudioProcessor {
-    samplesPerRow = RATE_SAMPLE/BPS_DEFAULT
     playing = false
+    indexPattern = 0
+    indexRow = 0
+    indexSample = 0
     constructor(dataSong) {
+        // Ensure parent behavior
         super();
+        // Populate instruments and patterns
+        this.pattern = dataSong.patterns;
         this.instrument = dataSong.instruments.map(function (data) {
             return new Instrument(data);
         });
-        this.samplesPerRow = Math.floor(RATE_SAMPLE/dataSong.bps);
+        // Calculate metrics
+        this.samplesPerRow = Math.ceil(RATE_SAMPLE/dataSong.bps);
         this.ticksPerRow = dataSong.tpb;
-        this.pattern = dataSong.patterns;
-        this.indexPattern = 0;
-        this.indexRow = 0;
-        this.indexSample = 0;
+        this.samplesPerTick = Math.ceil(this.samplesPerRow/this.ticksPerRow);
     }
     sample() {
         if(!this.playing) { return 0;}
         if(!(this.indexSample%this.samplesPerRow)) {
+            this.indexSample = 0;
             this.playRow();
+        }
+        if(!(this.indexSample%this.samplesPerTick)) {
+            const indexTick = this.indexSample/this.samplesPerTick;
+            this.tickAdvance(indexTick);
         }
         this.indexSample++;
         return (
@@ -142,6 +150,13 @@ class Song extends AudioProcessor {
             channel[3].sample() +
             channel[4].sample()
         );
+    }
+    tickAdvance(indexTick) {
+        channel[0].tickAdvance(indexTick);
+        channel[1].tickAdvance(indexTick);
+        channel[2].tickAdvance(indexTick);
+        channel[3].tickAdvance(indexTick);
+        channel[4].tickAdvance(indexTick);
     }
     playRow() {
         let patternCurrent = this.pattern[this.indexPattern];
@@ -175,10 +190,11 @@ class Song extends AudioProcessor {
             }
             if(note === MASK_CELL_NOTE_STOP) {
                 channel[indexChannel].noteEnd();
-                continue;
-            }
-            if(note !== undefined && instrument) {
+            } else if(note !== undefined && instrument) {
                 channel[indexChannel].notePlay(note, instrument);
+            }
+            if(effect !== undefined) {
+                handleEffect(effect, indexChannel);
             }
         }
         this.indexRow++;
@@ -213,6 +229,11 @@ class Channel extends AudioProcessor {
     reset() {
         delete this.note;
     }
+    tickAdvance(tick) {
+        if(this.effect) {
+            this.effect(this, tick);
+        }
+    }
     sample() {
         if(!this.note) { return 0;}
         const noteSample = this.note.sample();
@@ -223,8 +244,11 @@ class Channel extends AudioProcessor {
         return this.wave.sample() * this.volume * noteSample;
     }
     notePlay(note, instrument) {
+        if(this.effect) {
+            delete this.effect;
+        }
         this.wave.noteSet(note);
-        this.note = new Note(instrument);
+        this.note = new Note(instrument, note);
     }
     noteEnd() {
         if(!this.note) { return;}
@@ -232,6 +256,11 @@ class Channel extends AudioProcessor {
     }
     volumeSet(volumeNew) {
         this.volume = volumeNew;
+    }
+    effectAdd(effect, arg1, arg2) {
+        this.effectParameter1 = arg1;
+        this.effectParameter2 = arg2;
+        this.effect = effect; 
     }
 }
 
@@ -336,8 +365,9 @@ class Instrument extends AudioProcessor {
 
 //-- Note ----------------------------------------
 class Note extends AudioProcessor {
-    constructor(instrument) {
+    constructor(instrument, value) {
         super();
+        this.value = value;
         this.instrument = instrument;
         this.nodeIndexCurrent = 0;
         this.duration = 0;
@@ -407,4 +437,52 @@ export function empty() {
 }
 export function pattern(rows, channels) {
     return new Uint32Array(rows*channels);
+}
+
+
+//== Effects ===================================================================
+
+//-- Effect Handler ------------------------------
+function handleEffect(effect, indexChannel) {
+    const effectIndex = (effect >>> 8)&(0b1111);
+    const arg1 = (effect >>> 4)&(0b1111);
+    const arg2 = (effect >>> 0)&(0b1111);
+    switch(effectIndex) {
+        case 0b0000: {
+            channel[indexChannel].effectAdd(effectArpeggio, arg1, arg2);
+            break;
+        }
+        case 0b0001: {break;}
+        case 0b0010: {break;}
+        case 0b0011: {break;}
+        case 0b0100: {break;}
+        case 0b0101: {break;}
+        case 0b0110: {break;}
+        case 0b0111: {break;}
+        case 0b1000: {break;}
+        case 0b1001: {break;}
+        case 0b1010: {break;}
+        case 0b1011: {break;}
+        case 0b1100: {break;}
+        case 0b1101: {break;}
+        case 0b1110: {break;}
+        case 0b1111: {break;}
+    }
+}
+
+//------------------------------------------------
+function effectArpeggio(channel, tick) {
+    if(!channel.note) { return;}
+    let noteValue = channel.note.value;
+    switch(tick % 3) {
+        case 0:
+            channel.wave.noteSet(noteValue);
+            break;
+        case 1:
+            channel.wave.noteSet(noteValue+channel.effectParameter1);
+            break;
+        case 2:
+            channel.wave.noteSet(noteValue+channel.effectParameter2);
+            break;
+    }
 }

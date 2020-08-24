@@ -19,7 +19,7 @@ import Adjuster from '../controls/adjuster.js';
 //------------------------------------------------
 let adjusterBPS;
 let adjusterTPB;
-let beatsPerSecond = 63//BPS_DEFAULT;
+let beatsPerSecond = BPS_DEFAULT;
 let ticksPerBeat = TPB_DEFAULT;
 
 //------------------------------------------------
