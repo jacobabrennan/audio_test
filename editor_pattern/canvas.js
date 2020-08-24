@@ -112,14 +112,17 @@ function drawCell(row, channel, dataCell) {
 
 //-- Pattern Grid --------------------------------
 function drawPatternGrid() {
+    // Ensure context changes don't bleed into other functions
     context.save();
-    context.fillStyle = COLOR_BG;
-    context.fillRect(0,0,context.canvas.width, context.canvas.height);
+    // Get pattern and interface state
     const data = dataGet();
     const rows = data.length / CHANNELS_NUMBER;
     const selection = getSelection();
     const cursor = getCursor();
     const scrollY = getScroll();
+    // Draw character grid (the whole big deal)
+    context.fillStyle = COLOR_BG;
+    context.fillRect(0,0,context.canvas.width, context.canvas.height);
     for(let row = scrollY; row < rows; row++) {
         let background = (row%2)? COLOR_BG : '#222';
         drawString(
@@ -143,6 +146,7 @@ function drawPatternGrid() {
             drawGridPos(offsetChannel+8, row, '#86f', background);
         }
     }
+    // Draw Selection box
     if(selection) {
         const posYMax = Math.min(rows-1, selection.posEndY);
         for(let posY = selection.posStartY; posY <= posYMax; posY++) {
@@ -151,6 +155,7 @@ function drawPatternGrid() {
             }
         }
     }
+    // Draw Cursor
     if(cursor) {
         drawGridPos(cursor.posX, cursor.posY, COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT);
         drawString(
@@ -159,6 +164,7 @@ function drawPatternGrid() {
             COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT,
         );
     }
+    // Cleanup context
     context.restore();
 }
 function placeChar(char, posX, posY) {

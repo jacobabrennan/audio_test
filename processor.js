@@ -457,7 +457,9 @@ function handleEffect(effect, indexChannel) {
             effectLoop(indexChannel, arg1, arg2);
             break;
         }
-        case 0b0010: {break;}
+        case 0b0010: {
+            effectPatternJump(indexChannel, arg1, arg2);
+            break;}
         case 0b0011: {break;}
         case 0b0100: {break;}
         case 0b0101: {break;}
@@ -503,10 +505,12 @@ function effectLoop(indexChannel, arg1, repeatTimes) {
         // don't retrigger on every loop iteration
         if(!theChannel.repeat) {
             theChannel.repeat = {
-                row: songCurrent.indexRow,
+                // row: songCurrent.indexRow,
                 count: 0,
             };
         }
+        // Set repeat point to this row
+        theChannel.repeat.row = songCurrent.indexRow;
         return;
     }
     // Loop from start if no loop start specified
@@ -528,4 +532,11 @@ function effectLoop(indexChannel, arg1, repeatTimes) {
     else {
         delete theChannel.repeat;
     }
+}
+function effectPatternJump(indexChannel, arg1, indexPattern) {
+    songCurrent.indexPattern = indexPattern;
+    songCurrent.indexRow = 0;
+    songCurrent.indexSample = 0;
+    songCurrent.playRow();
+    songCurrent.tickAdvance(0);
 }
