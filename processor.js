@@ -503,7 +503,8 @@ function handleEffect(effect, indexChannel) {
         case 0b0101: 
             channels[indexChannel].effectAdd(effectDelay, arg1, arg2);
             break;
-        case 0b0110: break;
+        case 0b0110:
+            return effectSongVolume(indexChannel, arg1, arg2);
         case 0b0111: break;
         case 0b1000: break;
         case 0b1001: break;
@@ -604,4 +605,8 @@ function effectDelay(theChannel, tick) {
         note.volumeGoal = instrument.envelopeVolume[0];
         note.volume = note.volumeGoal;
     }
+}
+function effectSongVolume(indexChannel, nibble1, nibble2) {
+    const volumeNew = (nibble1 << 4)|nibble2;
+    songCurrent.volumeSet(volumeNew);
 }
