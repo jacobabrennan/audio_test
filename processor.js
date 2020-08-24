@@ -500,7 +500,9 @@ function handleEffect(effect, indexChannel) {
         case 0b0100:
             channels[indexChannel].effectAdd(effectRetrigger, arg1, arg2);
             break;
-        case 0b0101: break;
+        case 0b0101: 
+            channels[indexChannel].effectAdd(effectDelay, arg1, arg2);
+            break;
         case 0b0110: break;
         case 0b0111: break;
         case 0b1000: break;
@@ -585,4 +587,21 @@ function effectRetrigger(theChannel, tick) {
     if(!theChannel.note) { return;}
     if(tick%theChannel.effectParameter2) { return;}
     theChannel.note.retrigger();
+}
+function effectDelay(theChannel, tick) {
+    if(!theChannel.note) { return;}
+    const note = theChannel.note;
+    const instrument = theChannel.note.instrument;
+    if(tick === 0) {
+        note.nodeIndexCurrent = instrument.envelopeDuration.length-1;
+        note.duration = Infinity;
+        note.volumeGoal = 0;
+        note.volume = 0;
+    }
+    else if(tick === theChannel.effectParameter2) {
+        note.nodeIndexCurrent = 0;
+        note.duration = 0;
+        note.volumeGoal = instrument.envelopeVolume[0];
+        note.volume = note.volumeGoal;
+    }
 }

@@ -22,9 +22,6 @@ Playback
 
 //-- Synthesizer ---------------------------------
 Effects to be implemented:
-    Retrigger
-        useful for drum rolls, etc.
-        relies on a sub-row division of time
     Note delay
         causes a note to be played behind the beat
         relies on a sub-row division of time
@@ -45,3 +42,4 @@ Effects Finish:
     2-y: Pattern jump; y specifies the pattern to jump.
     3xx: Row jump; xx specifies the pattern to jump.
     4-y: Retrigger note; retriggers a note every y ticks.
+    5-y: Delay Note; y specifies the delay as a number of ticks.
