@@ -119,9 +119,14 @@ class Song extends AudioProcessor {
     indexPattern = 0
     indexRow = 0
     indexSample = 0
+    volume = 1
     constructor(dataSong) {
         // Ensure parent behavior
         super();
+        // Configure basic settings
+        if(dataSong.volume !== undefined) {
+            this.volumeSet(dataSong.volume);
+        }
         // Populate instruments and patterns
         this.pattern = dataSong.patterns;
         this.instrument = dataSong.instruments.map(function (data) {
@@ -149,7 +154,7 @@ class Song extends AudioProcessor {
             this.tickAdvance(indexTick);
         }
         this.indexSample++;
-        return (
+        return this.volume * (
             channels[0].sample() +
             channels[1].sample() +
             channels[2].sample() +
@@ -227,6 +232,9 @@ class Song extends AudioProcessor {
         for(let aChannel of channels) {
             aChannel.reset();
         }
+    }
+    volumeSet(volumeNew) {
+        this.volume = volumeNew / ((1 << MASK_CELL_VOLUME_WIDTH)-1);
     }
 }
 

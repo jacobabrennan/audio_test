@@ -17,10 +17,12 @@ import { ButtonBar } from '../controls/button.js';
 import Adjuster from '../controls/adjuster.js';
 
 //------------------------------------------------
+let adjusterVolume;
 let adjusterBPS;
 let adjusterTPB;
 let beatsPerSecond = BPS_DEFAULT;
 let ticksPerBeat = TPB_DEFAULT;
+let volume = 16;
 
 //------------------------------------------------
 export async function setup() {
@@ -37,6 +39,9 @@ export async function setup() {
             messageSend(ACTION_PLAYBACK_STOP, {/* Current empty */});
         }
     });
+    // Volume control
+    adjusterVolume = new Adjuster(containerGroup, 'Volume', 15, volumeSet);
+    adjusterVolume.valueSet(volume, true);
     // Time Controls
     adjusterBPS = new Adjuster(containerGroup, 'Rows/Sec.', 15, bpsSet);
     adjusterBPS.valueSet(beatsPerSecond, true);
@@ -49,6 +54,7 @@ export async function setup() {
 //------------------------------------------------
 function songCompile() {
     return {
+        volume: volume,
         bps: adjusterBPS.valueGet(),
         tpb: adjusterTPB.valueGet(),
         patterns: patternDataCompile(),
@@ -57,6 +63,11 @@ function songCompile() {
 }
 
 //------------------------------------------------
+function volumeSet(volumeNew) {
+    volumeNew = Math.max(0, Math.min(63, volumeNew));
+    volume = volumeNew;
+    return volumeNew;
+}
 function bpsSet(beatsNew) {
     beatsNew = Math.max(1, Math.min(63, beatsNew));
     beatsPerSecond = beatsNew;
