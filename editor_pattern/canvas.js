@@ -144,7 +144,8 @@ function drawPatternGrid() {
         }
     }
     if(selection) {
-        for(let posY = selection.posStartY; posY <= rows-1; posY++) {
+        const posYMax = Math.min(rows-1, selection.posEndY);
+        for(let posY = selection.posStartY; posY <= posYMax; posY++) {
             for(let posX = selection.posStartX; posX <= selection.posEndX; posX++) {
                 drawGridPos(posX, posY, COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT);
             }
