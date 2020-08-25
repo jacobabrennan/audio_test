@@ -15,6 +15,7 @@ import {
     cursorPosition,
     getScroll,
     scrollBy,
+    getSelection,
 } from './cursor.js';
 import {
     cellGet,
@@ -32,6 +33,7 @@ import {
     CHANNEL_NOISE,
     NOTE_NOISE_MAX,
     HEX,
+    CHANNELS_NUMBER,
 } from '../processor.js';
 import {
     noteNameToNumber,
@@ -42,6 +44,7 @@ import {
 //-- Module State --------------------------------
 let posDownX;
 let posDownY;
+let clipBoard;
 
 //-- Setup ---------------------------------------
 export async function setup(editor) {
@@ -86,7 +89,21 @@ function handleMouseMove(eventMouse) {
 function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
     const cursor = getCursor();
-    if(!cursor) { return;}
+    // Handle Copy / Paste
+    if(eventKeyboard.ctrlKey) {
+        switch(key) {
+            case 'c':
+                commandCopy();
+                break;
+            case 'v':
+                commandPaste();
+                break;
+            case 'x':
+                commandCopy(true);
+                break;
+        }
+        return;
+    }
     // Handle Movement, and special values
     switch(key) {
         case 'delete':
@@ -94,6 +111,7 @@ function handleKeyDown(eventKeyboard) {
             parseDeleteInput();
             return;
         case 'enter':
+            if(!cursor) { break;}
             editCellNote(
                 cursor.posY,
                 Math.floor(cursor.posX/CELL_WIDTH),
@@ -113,12 +131,16 @@ function handleKeyDown(eventKeyboard) {
             cursorMove(1, 0);
             return;
         case 'pageup':
+            if(!cursor) { break;}
             cursorMove(0, Math.floor(-DISPLAY_HEIGHT/2), cursor.posY == 0);
             return;
         case 'pagedown':
+            if(!cursor) { break;}
             cursorMove(0, Math.floor(DISPLAY_HEIGHT/2), cursor.posY == lengthGet()-1);
             return;
     }
+    //
+    if(!cursor) { return;}
     //
     if(key.length !== 1) { return;}
     // Handle Note Entry
@@ -235,28 +257,41 @@ function parseNoiseInput(key) {
 }
 function parseDeleteInput() {
     const cursor = getCursor();
-    if(!cursor) { return;}
-    const indexRow = cursor.posY;
-    const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
-    const indexDigit = cursor.posX%CELL_WIDTH;
-    const dataCellOld = cellGet(indexRow, indexChannel);
-    let [note, instrument, volume, effect] = cellParse(dataCellOld);
-    switch(indexDigit) {
-        case 0: case 1: case 2:
-            note = undefined;
-            break;
-        case 3:
-            instrument = undefined;
-            break;
-        case 4: case 5:
-            volume = undefined;
-            break;
-        case 6: case 7: case 8:
-            effect = undefined;
-            break;
+    if(cursor) {
+        const indexRow = cursor.posY;
+        const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
+        const indexDigit = cursor.posX%CELL_WIDTH;
+        const dataCellOld = cellGet(indexRow, indexChannel);
+        let [note, instrument, volume, effect] = cellParse(dataCellOld);
+        switch(indexDigit) {
+            case 0: case 1: case 2:
+                note = undefined;
+                break;
+            case 3:
+                instrument = undefined;
+                break;
+            case 4: case 5:
+                volume = undefined;
+                break;
+            case 6: case 7: case 8:
+                effect = undefined;
+                break;
+        }
+        const dataCellNew = cell(note, instrument, volume, effect);
+        editCell(indexRow, indexChannel, dataCellNew);
     }
-    const dataCellNew = cell(note, instrument, volume, effect);
-    editCell(indexRow, indexChannel, dataCellNew);
+    const selection = getSelection()
+    if(selection) {
+        const posXStart = Math.floor(selection.posStartX / CELL_WIDTH);
+        const posYStart = selection.posStartY;
+        const posXEnd = Math.floor(selection.posEndX / CELL_WIDTH);
+        const posYEnd = selection.posEndY;
+        for(let posY = posYStart; posY <= posYEnd; posY++) {
+            for(let posX = posXStart; posX <= posXEnd; posX++) {
+                editCell(posY, posX, 0);
+            }
+        }
+    }
 }
 function parseCellInput(digit, posX, posY) {
     const value = parseInt(digit, HEX);
@@ -304,6 +339,61 @@ function parseCellInput(digit, posX, posY) {
             sE = `${sE[0]}${sE[1]}${digit}`;
             editCellEffects(indexRow, indexChannel, parseInt(sE, HEX));
             break;
+        }
+    }
+}
+function commandCopy(clear) {
+    //
+    let posXStart;
+    let posXEnd;
+    let posYStart;
+    let posYEnd;
+    const cursor = getCursor();
+    const selection = getSelection();
+    if(selection) {
+        posXStart = selection.posStartX;
+        posXEnd = selection.posEndX;
+        posYStart = selection.posStartY;
+        posYEnd = selection.posEndY;
+    }
+    else if(cursor) {
+        posXStart = cursor.posX;
+        posXEnd = cursor.posX;
+        posYStart = cursor.posY;
+        posYEnd = cursor.posY;
+    }
+    else { return;}
+    posXStart = Math.floor(posXStart / CELL_WIDTH);
+    posXEnd = Math.floor(posXEnd / CELL_WIDTH);
+    //
+    clipBoard = [];
+    for(let posY = posYStart; posY <= posYEnd; posY++) {
+        clipBoard[posY-posYStart] = [];
+        for(let posX = posXStart; posX <= posXEnd; posX++) {
+            clipBoard[posY-posYStart][posX-posXStart] = cellGet(posY, posX);
+            if(clear) {
+                editCell(posY, posX, 0);
+            }
+        }
+    }
+}
+function commandPaste() {
+    //
+    const cursor = getCursor();
+    if(!cursor) { return;}
+    //
+    if(!clipBoard) { return;}
+    //
+    let posXStart = Math.floor(cursor.posX / CELL_WIDTH);
+    let posYStart = cursor.posY;
+    let posYEnd = (posYStart+clipBoard.length)-1;
+    let posXEnd = (posXStart+clipBoard[0].length)-1;
+    posXEnd = Math.min(posXEnd, CHANNELS_NUMBER-1);
+    //
+    for(let posY = posYStart; posY <= posYEnd; posY++) {
+        for(let posX = posXStart; posX <= posXEnd; posX++) {
+            const cellData = clipBoard[posY-posYStart][posX-posXStart];
+            editCell(posY, posX, cellData);
         }
     }
 }
