@@ -2,6 +2,10 @@
 
 //==============================================================================
 
+import { ButtonBar } from '../controls/button.js';
+import { songSave, songLoad } from '../file_management/controls.js';
+import { CONTROL_GROUP_FILE_MANAGEMENT } from '../utilities.js';
+
 //-- Dependencies --------------------------------
 
 //-- Constants -----------------------------------
@@ -13,6 +17,12 @@ const groupsActive = [];
 
 //-- Setup ---------------------------------------
 export async function setup() {
+    // Create file management group
+    const fileManagement = new ButtonBar(undefined, {
+        'Save': songSave,
+        'Load': songLoad,
+    });
+    groupRegister(CONTROL_GROUP_FILE_MANAGEMENT, fileManagement.element);
     // Create DOM container
     controls = document.createElement('div');
     controls.id = 'controls';

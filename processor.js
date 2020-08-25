@@ -12,6 +12,7 @@ export const BPS_DEFAULT = 8;
 export const BPS_MAX = 63;
 export const TPB_DEFAULT = 4;
 export const TPB_MAX = 15;
+export const VOLUME_MAX = 63;
 export const CHANNELS_NUMBER = 5;
 export const CHANNEL_NOISE = 4;
 export const PATTERNS_MAX = 16;

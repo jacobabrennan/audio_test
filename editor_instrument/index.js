@@ -10,6 +10,7 @@ import {
     CONTROL_GROUP_PLAYBACK,
     CONTROL_GROUP_PATTERN,
     EDITOR_PANE_PATTERN,
+    CONTROL_GROUP_FILE_MANAGEMENT,
 } from '../utilities.js';
 import { paneAdd, paneGet } from '../pane/pane_editor.js';
 import { groupRegister } from '../pane/pane_control.js';
@@ -33,6 +34,7 @@ export async function setup() {
         CONTROL_GROUP_PATTERN,
         CONTROL_GROUP_EDITOR_SWAP,
         CONTROL_GROUP_INSTRUMENT_SELECT,
+        CONTROL_GROUP_FILE_MANAGEMENT,
     ]);
     // Register instrument selector control group
     const groupInstrumentSelect = await setupControlInstrumentSelect();

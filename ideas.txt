@@ -1,9 +1,12 @@
 
 
-//==============================================================================
+//== To Do =====================================================================
 
 //-- Bugs-----------------------------------------
 (none)
+
+//-- Current Focus -------------------------------
+Saving & Loading
 
 //-- Interface -----------------------------------
 Interface
@@ -20,16 +23,10 @@ Playback
     Pause / Play buttons (it's an illusion. send new song and start from cursor)
     Visualization
 
-//-- Synthesizer ---------------------------------
-Effects to be implemented:
-    Pattern delay?
-        lengthens the duration of a row
-        could be either a set number of rows, or a sub-row division of time
 
+//== Notes =====================================================================
 
-//== Finished===================================================================
-
-//-- Synthesizer ---------------------------------
+//-- Effects Reference ---------------------------
 Effects Finish:
     0xy: Arpeggia; x and y specify semitone offsets from the base note.
     1-0: Set loop point

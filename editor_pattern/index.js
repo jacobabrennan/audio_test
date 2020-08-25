@@ -27,6 +27,7 @@ import {
     CONTROL_GROUP_PLAYBACK,
     CONTROL_GROUP_EDITOR_SWAP,
     CONTROL_GROUP_INSTRUMENT_SELECT,
+    CONTROL_GROUP_FILE_MANAGEMENT,
 } from '../utilities.js';
 import { groupRegister } from '../pane/pane_control.js';
 
@@ -39,6 +40,7 @@ export async function setup() {
         CONTROL_GROUP_PATTERN,
         CONTROL_GROUP_EDITOR_SWAP,
         CONTROL_GROUP_INSTRUMENT_SELECT,
+        CONTROL_GROUP_FILE_MANAGEMENT,
     ]);
     const groupPlayback = await setupControlPlayback();
     const groupPattern = await setupControlPattern();

@@ -18,6 +18,9 @@ import Button, { ButtonBar } from '../controls/button.js';
 import { patternEditorShown } from '../editor_pattern/index.js';
 import { instrumentEditorShown } from '../editor_instrument/index.js';
 import { instrumentListUpdate } from '../editor_instrument/controls.js';
+import { instrumentGet, instrumentSelect } from '../editor_instrument/instrument.js';
+import { controlStripUpdate } from '../editor_instrument/control_strip.js';
+import { instrumentDraw } from '../editor_instrument/canvas.js';
 
 //-- Module State --------------------------------
 let editor;
@@ -69,55 +72,38 @@ export function paneGet(idPane) {
 
 //== Controls ==================================================================
 
+//-- Module State --------------------------------
+let instrumenteditorVisible = false;
+let instToggle;
+
 //-- Setup ---------------------------------------
 export async function setupControls() {
     const controlGroup = document.createElement('div');
     controlGroup.className = 'control_group';
-    // const labelP = 'Pttrn.';
-    // const labelI = 'Inst.';
-    // const switchBar = new ButtonBar(controlGroup, {
-    //     [labelP]: () => {
-    //         switchBar.buttonGet(labelI).element.classList.remove('selected');
-    //         switchBar.buttonGet(labelP).element.classList.add('selected');
-    //         paneSelect(EDITOR_PANE_PATTERN);
-    //         patternEditorShown();
-    //     },
-    //     [labelI]: () => {
-    //         switchBar.buttonGet(labelP).element.classList.remove('selected');
-    //         switchBar.buttonGet(labelI).element.classList.add('selected');
-    //         paneSelect(EDITOR_PANE_INSTRUMENT);
-    //         instrumentEditorShown();
-    //     }
-    // });
-    // switchBar.buttonGet(labelP).element.classList.add('selected');
-    //
-    // setTimeout(() => {
-    //     switchBar.buttonGet(labelP).element.classList.remove('selected');
-    //     switchBar.buttonGet(labelI).element.classList.add('selected');
-    //     paneSelect(EDITOR_PANE_INSTRUMENT);
-    //     instrumentEditorShown();
-    //     console.log('Displaying instrument pane')
-    // }, 1);
-    //
-    let visible = false;
-    let instToggle = new Button(controlGroup, 'EditInstrument', () => {
-        if(visible) {
-            visible = false;
-            instToggle.element.classList.remove('selected');
-            paneSelect(EDITOR_PANE_PATTERN);
-            patternEditorShown();
-            instrumentListUpdate()
-            // instrumentSelect(idInstrument);
-            // instrumentListUpdate();
-            // controlStripUpdate();
-            // instrumentDraw();
+    instToggle = new Button(controlGroup, 'EditInstrument', () => {
+        if(instrumenteditorVisible) {
+            closeInstrumentEditor();
         }
         else {
-            visible = true;
+            instrumentListUpdate();
+            controlStripUpdate();
+            instrumentDraw();
+            instrumenteditorVisible = true;
             instToggle.element.classList.add('selected');
             paneSelect(EDITOR_PANE_INSTRUMENT);
             instrumentEditorShown();
         }
     });
     return controlGroup;
+}
+
+//------------------------------------------------
+export function closeInstrumentEditor() {
+    if(instrumenteditorVisible) {
+        instrumenteditorVisible = false;
+        instToggle.element.classList.remove('selected');
+        paneSelect(EDITOR_PANE_PATTERN);
+        patternEditorShown();
+        instrumentListUpdate()
+    }
 }

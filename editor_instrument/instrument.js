@@ -15,6 +15,14 @@ export class Instrument {
     envelopeDuration = [0]
     envelopeVolume = [0.5]
     sustain = 0
+    constructor(data) {
+        if(!data) { return;}
+        this.sustain = data.sustain;
+        this.loopStart = data.loopStart;
+        this.loopEnd = data.loopEnd;
+        this.envelopeDuration = data.envelopeDuration.slice();
+        this.envelopeVolume = data.envelopeDuration.slice();
+    }
     envelopePointGet(indexPoint) {
         return [
             this.envelopeDuration[indexPoint],
@@ -86,10 +94,21 @@ export class Instrument {
             sustain: this.sustain,
             loopStart: this.loopStart,
             loopEnd: this.loopEnd,
-            envelopeDuration: this.envelopeDuration,
-            envelopeVolume: this.envelopeVolume,
+            envelopeDuration: this.envelopeDuration.slice(),
+            envelopeVolume: this.envelopeVolume.slice(),
         };
     }
+}
+
+//-- Saving / Loading ----------------------------
+export function populateFromData(data) {
+    instruments.splice(0);
+    for(let instrumentData of data) {
+        instrumentAdd(
+            new Instrument(instrumentData)
+        );
+    }
+    instrumentCurrent = instruments[0];
 }
 
 //-- Instrument Management -----------------------

@@ -14,14 +14,13 @@ import {
 } from './pattern.js';
 import Adjuster from '../controls/adjuster.js';
 import Selector from '../controls/selector.js';
-import { randomPattern } from '../utilities.js';
 
 //-- Module State --------------------------------
 let patternSelector;
 let lengthAdjuster;
 let patternCountAdjuster;
 
-//------------------------------------------------
+//-- Setup ---------------------------------------
 export async function setup() {
     const containerGroup = document.createElement('div');
     containerGroup.className = 'control_group';
@@ -38,13 +37,16 @@ export async function setup() {
         containerGroup, 'Length', 15, lengthSet,
     );
     //
-    let patternNewId = patternNew(
-        randomPattern(64)
-    );
+    let patternNewId = patternNew();
     patternSelect(patternNewId);
     patternListUpdate();
     //
     return containerGroup;
+}
+
+//-- Saving / Loading ----------------------------
+export function loadFromData(length) {
+    lengthAdjuster.valueSet(length);
 }
 
 //------------------------------------------------

@@ -25,6 +25,15 @@ export const DEFAULT_ROWS = 32;
 const patterns = [];
 let patternCurrent;
 
+//-- Saving / Loading ----------------------------
+export function populateFromData(data) {
+    patterns.splice(0);
+    for(let patternData of data) {
+        patternNew(patternData);
+    }
+    patternCurrent = patterns[0];
+}
+
 //-- Pattern Querying -----------------------------
 export function dataGet() {
     return patternCurrent.data;
