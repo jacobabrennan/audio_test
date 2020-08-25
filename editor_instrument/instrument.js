@@ -22,7 +22,6 @@ export class Instrument {
         this.loopEnd = data.loopEnd;
         this.envelopeDuration = data.envelopeDuration.slice();
         this.envelopeVolume = data.envelopeVolume.slice();
-        console.log(this.envelopeVolume)
     }
     envelopePointGet(indexPoint) {
         return [

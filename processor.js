@@ -42,18 +42,52 @@ export const RESPONSE_READY = INDEX++;
 export const RESPONSE_PATTERN_ROW = INDEX++;
 export const RESPONSE_SONG_END = INDEX++;
 
+//-- Important Interfaces ------------------------
+class AudioProcessor {
+    sample() { return 0;}
+}
+
 //-- Module State --------------------------------
 let worklet;
-const channels = [];
-let songCurrent;
+let APU;
 
-//-- Setup ---------------------------------------
-function setup() {
-    channels[0] = new Channel(waveSquare);
-    channels[1] = new Channel(waveSquare);
-    channels[2] = new Channel(waveSaw);
-    channels[3] = new Channel(waveTriangle);
-    channels[CHANNEL_NOISE] = new Channel(waveNoise);
+//-- APU -----------------------------------------
+class AudioProcessingUnit {
+    channels = [
+        new Channel(waveSquare),
+        new Channel(waveSquare),
+        new Channel(waveSaw),
+        new Channel(waveTriangle),
+        new Channel(waveNoise),
+    ]
+    sample() {
+        if(!this.songCurrent) {
+            return 0;
+        }
+        this.songCurrent.sample();
+        const volume = this.songCurrent.volume;
+        return volume * (
+            this.channels[0].sample() +
+            this.channels[1].sample() +
+            this.channels[2].sample() +
+            this.channels[3].sample() +
+            this.channels[4].sample()
+        );
+    }
+    playSong(songData) {
+        for(let channel of this.channels) {
+            channel.reset();
+        }
+        this.songCurrent = new Song(songData);
+    }
+    play() {
+        if(!this.songCurrent) { return;}
+        this.songCurrent.play();
+    }
+    pause() {
+        if(!this.songCurrent) { return;}
+        this.songCurrent.pause();
+    }
 }
 
 
@@ -68,15 +102,14 @@ if(typeof registerProcessor !== 'undefined') {
             this.port.onmessage = function (eventMessage) {
                 messageReceive(eventMessage.data.action, eventMessage.data.data);
             }
-            setup();
+            APU = new AudioProcessingUnit();
             messageSend(RESPONSE_READY, {});
         }
         process(inputs, outputs, parameters) {
-            if(!songCurrent) { return true;}
             const output = outputs[0][0];
             let bufferLength = output.length;
             for(let index=0; index < bufferLength; index++) {
-                output[index] = songCurrent.sample();
+                output[index] = APU.sample();
             }
             return true;
         }
@@ -93,28 +126,18 @@ function messageSend(action, data) {
 function messageReceive(action, data) {
     switch(action) {
         case ACTION_PLAYBACK_PLAY:
-            if(!songCurrent) { break;}
-            songCurrent.play();
+            APU.play();
             break;
         case ACTION_PLAYBACK_STOP:
-            if(!songCurrent) { break;}
-            songCurrent.pause();
+            APU.pause();
             break;
         case ACTION_SONG:
-            songCurrent = new Song(data);
-            for(let aChannel of channels) {
-                aChannel.reset();
-            }
+            APU.playSong(data);
             break;
     }
 }
 
 //== Audio Processors ==========================================================
-
-//-- Abstract Audio Processor --------------------
-class AudioProcessor {
-    sample() { return 0;}
-}
 
 //-- Song Playing --------------------------------
 class Song extends AudioProcessor {
@@ -154,9 +177,9 @@ class Song extends AudioProcessor {
             this.indexSample = 0;
             jump = this.playRow();
             if(jump) {
-                songCurrent.indexSample = 0;
-                songCurrent.playRow();
-                songCurrent.tickAdvance(0);
+                this.indexSample = 0;
+                this.playRow();
+                this.tickAdvance(0);
             }
         }
         if(!jump && !(this.indexSample%this.samplesPerTick)) {
@@ -164,20 +187,13 @@ class Song extends AudioProcessor {
             this.tickAdvance(indexTick);
         }
         this.indexSample++;
-        return this.volume * (
-            channels[0].sample() +
-            channels[1].sample() +
-            channels[2].sample() +
-            channels[3].sample() +
-            channels[4].sample()
-        );
     }
     tickAdvance(indexTick) {
-        channels[0].tickAdvance(indexTick);
-        channels[1].tickAdvance(indexTick);
-        channels[2].tickAdvance(indexTick);
-        channels[3].tickAdvance(indexTick);
-        channels[4].tickAdvance(indexTick);
+        APU.channels[0].tickAdvance(indexTick);
+        APU.channels[1].tickAdvance(indexTick);
+        APU.channels[2].tickAdvance(indexTick);
+        APU.channels[3].tickAdvance(indexTick);
+        APU.channels[4].tickAdvance(indexTick);
     }
     playRow() {
         let jump = false;
@@ -206,14 +222,14 @@ class Song extends AudioProcessor {
                 instrument = this.instrument[indexInstrument];
             }
             if(volume !== undefined) {
-                channels[indexChannel].volumeSet(
+                APU.channels[indexChannel].volumeSet(
                     volume / (Math.pow(2, MASK_CELL_VOLUME_WIDTH)-1)
                 );
             }
             if(note === MASK_CELL_NOTE_STOP) {
-                channels[indexChannel].noteEnd();
+                APU.channels[indexChannel].noteEnd();
             } else if(note !== undefined && instrument) {
-                channels[indexChannel].notePlay(note, instrument);
+                APU.channels[indexChannel].notePlay(note, instrument);
             }
             if(effect !== undefined) {
                 const channelJump = handleEffect(effect, indexChannel);
@@ -231,7 +247,7 @@ class Song extends AudioProcessor {
     pause() {
         this.playing = false;
         for(let indexChannel = 0; indexChannel < CHANNELS_NUMBER; indexChannel++) {
-            channels[indexChannel].noteEnd();
+            APU.channels[indexChannel].noteEnd();
         }
     }
     end() {
@@ -239,7 +255,7 @@ class Song extends AudioProcessor {
         this.indexPattern = 0;
         this.indexRow = 0;
         messageSend(RESPONSE_SONG_END, {});
-        for(let aChannel of channels) {
+        for(let aChannel of APU.channels) {
             aChannel.reset();
         }
     }
@@ -505,7 +521,7 @@ export function pattern(rows, channelNumber) {
 //-- Effect Handler ------------------------------
 function handleEffect(effect, indexChannel) {
     // Cleanup previous effect
-    const theChannel = channels[indexChannel];
+    const theChannel = APU.channels[indexChannel];
     if(theChannel.effect) {
         theChannel.effect(theChannel, null);
     }
@@ -516,7 +532,7 @@ function handleEffect(effect, indexChannel) {
     // Handle individual effects; indicate jumps where necessary
     switch(effectIndex) {
         case 0b0000:
-            channels[indexChannel].effectAdd(effectArpeggio, arg1, arg2);
+            APU.channels[indexChannel].effectAdd(effectArpeggio, arg1, arg2);
             break;
         case 0b0001:
             return effectLoop(indexChannel, arg1, arg2);
@@ -525,10 +541,10 @@ function handleEffect(effect, indexChannel) {
         case 0b0011:
             return effectRowJump(indexChannel, arg1, arg2);
         case 0b0100:
-            channels[indexChannel].effectAdd(effectRetrigger, arg1, arg2);
+            APU.channels[indexChannel].effectAdd(effectRetrigger, arg1, arg2);
             break;
         case 0b0101: 
-            channels[indexChannel].effectAdd(effectDelay, arg1, arg2);
+            APU.channels[indexChannel].effectAdd(effectDelay, arg1, arg2);
             break;
         case 0b0110:
             return effectSongVolume(indexChannel, arg1, arg2);
@@ -570,17 +586,16 @@ function effectArpeggio(theChannel, tick) {
 }
 function effectLoop(indexChannel, arg1, repeatTimes) {
     // Handle Loop point set command
-    const theChannel = channels[indexChannel];
+    const theChannel = APU.channels[indexChannel];
     if(!repeatTimes) {
         // don't retrigger on every loop iteration
         if(!theChannel.repeat) {
             theChannel.repeat = {
-                // row: songCurrent.indexRow,
                 count: 0,
             };
         }
         // Set repeat point to this row
-        theChannel.repeat.row = songCurrent.indexRow;
+        theChannel.repeat.row = APU.songCurrent.indexRow;
         return false;
     }
     // Loop from start if no loop start specified
@@ -593,7 +608,7 @@ function effectLoop(indexChannel, arg1, repeatTimes) {
     // Do the actual repeating
     if(theChannel.repeat.count < repeatTimes) {
         theChannel.repeat.count++;
-        songCurrent.indexRow = theChannel.repeat.row;
+        APU.songCurrent.indexRow = theChannel.repeat.row;
     }
     // Cleanup for next loop
     else {
@@ -604,13 +619,13 @@ function effectLoop(indexChannel, arg1, repeatTimes) {
     return true;
 }
 function effectPatternJump(indexChannel, arg1, indexPattern) {
-    songCurrent.indexPattern = indexPattern;
-    songCurrent.indexRow = 0;
+    APU.songCurrent.indexPattern = indexPattern;
+    APU.songCurrent.indexRow = 0;
     return true;
 }
 function effectRowJump(indexChannel, nibble1, nibble2) {
     const indexRow = (nibble1 << 4)|nibble2;
-    songCurrent.indexRow = indexRow;
+    APU.songCurrent.indexRow = indexRow;
     return true;
 }
 function effectRetrigger(theChannel, tick) {
@@ -638,12 +653,12 @@ function effectDelay(theChannel, tick) {
 }
 function effectSongVolume(indexChannel, nibble1, nibble2) {
     const volumeNew = (nibble1 << 4)|nibble2;
-    songCurrent.volumeSet(volumeNew);
+    APU.songCurrent.volumeSet(volumeNew);
 }
 function effectSongBPS(indexChannel, nibble1, nibble2) {
     const bpsNew = (nibble1 << 4)|nibble2;
-    songCurrent.bpsSet(bpsNew);
+    APU.songCurrent.bpsSet(bpsNew);
 }
 function effectSongTPB(indexChannel, arg1, tpbNew) {
-    songCurrent.tpbSet(tpbNew);
+    APU.songCurrent.tpbSet(tpbNew);
 }
