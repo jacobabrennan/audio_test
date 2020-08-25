@@ -21,7 +21,7 @@ export class Instrument {
         this.loopStart = data.loopStart;
         this.loopEnd = data.loopEnd;
         this.envelopeDuration = data.envelopeDuration.slice();
-        this.envelopeVolume = data.envelopeDuration.slice();
+        this.envelopeVolume = data.envelopeVolume.slice();
     }
     envelopePointGet(indexPoint) {
         return [
@@ -41,7 +41,7 @@ export class Instrument {
             return;
         }
         while(this.envelopeLengthGet() < lengthNew) {
-            this.envelopeDuration.push(this.envelopeDuration.length? 25 : 0);
+            this.envelopeDuration.push(this.envelopeDuration.length? 250 : 0);
             this.envelopeVolume.push(0.5);
         }
     }

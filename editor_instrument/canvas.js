@@ -25,7 +25,7 @@ export const DISPLAY_INSTRUMENT_HEIGHT = 256;
 
 //-- Module State --------------------------------
 let context;
-let zoomSampleWidth = 1024;
+let zoomSampleWidth = 2048;
 let pointSprites = [];
 
 //------------------------------------------------
@@ -149,17 +149,6 @@ function drawPoint(posX, posY, color) {
     context.fill();
 }
 
-
-
-
-
-
-
-
-
-
-
-
 //------------------------------------------------
 export function instrumentPointSelect(selection) {
     const instrument = instrumentGet();
@@ -178,7 +167,7 @@ export function instrumentZoomGet() {
 }
 export function instrumentZoomAdjust(direction) {
     // const zoomLevels = [90,128,181,256,362,512,724,1024,1448,2048,2896,4096];
-    const zoomLevels = [64,128,256,512,1024,2048,4096,8192];
+    const zoomLevels = [256,512,1024,2048,4096,8192,16384,32768];
     let indexZoom = zoomLevels.indexOf(zoomSampleWidth);
     if(indexZoom === -1) {
         indexZoom = 8;

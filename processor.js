@@ -291,7 +291,12 @@ class Channel extends AudioProcessor {
             delete this.effect;
         }
         this.wave.noteSet(note);
+        let volumeOld = 0;
+        if(this.note) {
+            volumeOld = this.note.volume;
+        }
         this.note = new Note(instrument, note);
+        this.note.volume = volumeOld;
     }
     noteEnd() {
         if(!this.note) { return;}
@@ -593,6 +598,7 @@ function effectLoop(indexChannel, arg1, repeatTimes) {
     // Cleanup for next loop
     else {
         delete theChannel.repeat;
+        return false;
     }
     // Indicate a jump
     return true;
