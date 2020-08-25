@@ -446,7 +446,7 @@ class Note extends AudioProcessor {
             this.duration = this.instrument.envelopeDuration[this.nodeIndexCurrent];
         }
         //
-        this.volume += (this.volumeGoal - this.volume) / this.duration;
+        this.volume += (this.volumeGoal - this.volume) / Math.max(1, this.duration);
         return this.volume;
     }
     cut() {
