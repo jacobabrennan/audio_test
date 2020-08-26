@@ -2,22 +2,30 @@
 
 //==============================================================================
 
+//-- Dependencies --------------------------------
 import Vue from '../libraries/vue.esm.browser.js';
 import '../controls/button.js';
 import { songSave, songLoad } from '../file_management/controls.js';
 
 //------------------------------------------------
 const template = `<div>
-    <button-bar actions="this.actions" />
+    <button-bar :actions="actions" />
 </div>`;
+const actions = [
+    {
+        label: 'Save',
+        action: songSave
+    },
+    {
+        label: 'Load',
+        action: songLoad,
+    },
+];
 
 //------------------------------------------------
-Vue.component('client-controls', {
+export default Vue.component('client-controls', {
     template: template,
-    data: {
-        actions: {
-            ['Save']: songSave,
-            ['Load']: songLoad,
-        }
-    }
+    data() {
+        return { actions: actions};
+    },
 });

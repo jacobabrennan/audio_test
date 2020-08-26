@@ -34,7 +34,7 @@ Vue.component('button-bar', {
     ),
     props: {
         actions: {
-            type: Object,
+            type: Array,
             required: true,
         },
     },

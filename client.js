@@ -4,20 +4,21 @@
 
 //-- Dependencies --------------------------------
 import Vue from './libraries/vue.esm.browser.js';
+import './pane/pane_control.js';
 import {
     DOM_STYLE_DYNAMIC,
-    EDITOR_PANE_PATTERN,
+    // EDITOR_PANE_PATTERN,
     contextConfigure,
     CHAR_HEART,
     FONT_SIZE,
 } from './utilities.js';
-import { setup as setupEditorPattern } from './editor_pattern/index.js';
-import { setup as setupEditorInstrument } from './editor_instrument/index.js';
-import { setup as setupControls } from './pane/pane_control.js';
-import {
-    setup as setupEditor,
-    paneSelect,
-} from './pane/pane_editor.js';
+// import { setup as setupEditorPattern } from './editor_pattern/index.js';
+// import { setup as setupEditorInstrument } from './editor_instrument/index.js';
+// import { setup as setupControls } from './pane/pane_control.js';
+// import {
+//     setup as setupEditor,
+//     paneSelect,
+// } from './pane/pane_editor.js';
 
 //-- Constants -----------------------------------
 const DOM_ID_CLIENT = 'client';
@@ -40,17 +41,17 @@ export async function setup() {
         data: {},
         methods: {},
     });
-    client=  app.$el;
-    // Create Editor and Control Group panes
-    const controls = await setupControls();
-    const editor = await setupEditor();
-    client.append(editor, controls);
-    // Setup Editors
-    await setupEditorPattern();
-    await setupEditorInstrument();
-    // Display default pane
-    paneSelect(EDITOR_PANE_PATTERN);
-    // Return DOM container
+    // client=  app.$el;
+    // // Create Editor and Control Group panes
+    // const controls = await setupControls();
+    // const editor = await setupEditor();
+    // client.append(editor, controls);
+    // // Setup Editors
+    // await setupEditorPattern();
+    // await setupEditorInstrument();
+    // // Display default pane
+    // paneSelect(EDITOR_PANE_PATTERN);
+    // // Return DOM container
 }
 
 
