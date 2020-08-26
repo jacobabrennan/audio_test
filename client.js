@@ -3,6 +3,7 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
+import Vue from './libraries/vue.esm.browser.js';
 import {
     DOM_STYLE_DYNAMIC,
     EDITOR_PANE_PATTERN,
@@ -26,8 +27,20 @@ export async function setup() {
     // Load custom font
     await loadFont();
     // Create DOM container
-    const client = document.createElement('div');
+    let client = document.createElement('div');
     client.id = DOM_ID_CLIENT;
+    client.innerHTML = `
+        <client-controls />
+        <client-editor />
+    `;
+    document.body.append(client);
+    //
+    const app = new Vue({
+        el: client,
+        data: {},
+        methods: {},
+    });
+    client=  app.$el;
     // Create Editor and Control Group panes
     const controls = await setupControls();
     const editor = await setupEditor();
@@ -38,7 +51,6 @@ export async function setup() {
     // Display default pane
     paneSelect(EDITOR_PANE_PATTERN);
     // Return DOM container
-    document.body.append(client);
 }
 
 

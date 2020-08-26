@@ -2,31 +2,40 @@
 
 //==============================================================================
 
-//------------------------------------------------
-export default class Button {
-    constructor(elementParent, label, onClick) {
-        this.element = document.createElement('button');
-        this.element.innerText = label;
-        this.element.addEventListener('click', onClick);
-        elementParent.append(this.element);
-    }
-}
+//-- Dependencies --------------------------------
+import Vue from '../libraries/vue.esm.browser.js';
 
 //------------------------------------------------
-export class ButtonBar {
-    constructor(elementParent, buttons) {
-        this.buttons = {};
-        this.element = document.createElement('div');
-        this.element.className = 'button_group';
-        for(let label in buttons) {
-            const buttonNew = new Button(this.element, label, buttons[label]);
-            this.buttons[label] = buttonNew;
-        }
-        if(elementParent) {
-            elementParent.append(this.element);
-        }
-    }
-    buttonGet(label) {
-        return this.buttons[label];
-    }
-}
+Vue.component('button-action', {
+    template: '<button @click="action">{{label}}</button>',
+    props: {
+        label: {
+            type: String, 
+            required: true,
+        },
+        action: {
+            type: Function,
+            required: true,
+        },
+    },
+});
+
+//------------------------------------------------
+Vue.component('button-bar', {
+    template: (
+        `<div>
+            <button
+                type="button"
+                v-for="data in actions"
+                :key="data.label"
+                @click="data.action"
+            >{{data.label}}</button>
+        </div>`
+    ),
+    props: {
+        actions: {
+            type: Object,
+            required: true,
+        },
+    },
+});
