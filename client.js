@@ -4,7 +4,10 @@
 
 //-- Dependencies --------------------------------
 import Vue from './libraries/vue.esm.browser.js';
+import './controls/button.js';
 import './pane/pane_control.js';
+import './pane/pane_editor.js';
+import './editor_pattern/index.js';
 import {
     DOM_STYLE_DYNAMIC,
     // EDITOR_PANE_PATTERN,
@@ -31,12 +34,13 @@ export async function setup() {
     let client = document.createElement('div');
     client.id = DOM_ID_CLIENT;
     client.innerHTML = `
-        <client-controls />
-        <client-editor />
+        <client-editor id="editor"></client-editor>
+        <client-controls id="controls"></client-controls>
     `;
     document.body.append(client);
+    console.log(client.outerHTML)
     //
-    const app = new Vue({
+    new Vue({
         el: client,
         data: {},
         methods: {},

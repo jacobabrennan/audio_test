@@ -4,7 +4,6 @@
 
 //-- Dependencies --------------------------------
 import Vue from '../libraries/vue.esm.browser.js';
-import '../controls/button.js';
 import { songSave, songLoad } from '../file_management/controls.js';
 
 //------------------------------------------------
@@ -23,7 +22,7 @@ const actions = [
 ];
 
 //------------------------------------------------
-export default Vue.component('client-controls', {
+Vue.component('client-controls', {
     template: template,
     data() {
         return { actions: actions};
