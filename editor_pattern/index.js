@@ -13,27 +13,18 @@ import {
     handleWheel,
 } from './input.js';
 import {
+    setup as setupCanvas,
     DISPLAY_PIXEL_WIDTH,
     DISPLAY_HEIGHT,
     patternDisplay,
     patternGridConstruct,
 } from './canvas.js';
-import {
-    contextConfigure,
-    FONT_SIZE,
-} from '../utilities.js';
 // import {
 //     cursorHighlight,
 // } from './cursor.js';
 // import {
 //     setup as setupInput,
 // } from './input.js';
-// import {
-//     setup as setupCanvas,
-//     patternDisplay,
-//     DISPLAY_HEIGHT,
-//     canvasHeightSet,
-// } from './canvas.js';
 // import {
 //     patternSelect
 // } from './pattern.js';
@@ -61,9 +52,17 @@ Vue.component('editor-pattern', {
     />`,
     props: {
         pattern: Array,
-        cursor: Object,
-        selection: Object,
-        scrollY: Number
+    },
+    data() {
+        return {
+            patternGrid: null,
+            cursor: {
+                posX: 0,
+                posY: 0,
+            },
+            selection: null,
+            scrollY: 48,
+        };
     },
     methods: {
         handleMouseDown: handleMouseDown,
@@ -71,36 +70,28 @@ Vue.component('editor-pattern', {
         handleMouseMove: handleMouseMove,
         handleWheel: handleWheel,
         draw() {
-            const patternGrid = patternGridConstruct(this.pattern);
-            patternDisplay(this.context, patternGrid);
-        }
+            patternDisplay(
+                this.context,
+                this.patternGrid,
+                this.cursor,
+                this.selection,
+                this.scrollY
+            );
+        },
     },
     mounted() {
-        const canvas = this.$el;
-        canvas.imTheDrawCanvas = true;
-        //
-        canvas.width  = DISPLAY_PIXEL_WIDTH;
-        canvas.height = DISPLAY_HEIGHT*FONT_SIZE;
-        //
-        this.context = canvas.getContext('2d');
-        contextConfigure(this.context);
-        //
-        canvas.tabIndex = 1;
-        setTimeout(() => {
-            canvas.focus();
-        }, 1);
-        const patternGrid = patternGridConstruct(this.pattern);
-        patternDisplay(this.context, patternGrid);
+        this.context = setupCanvas(this.$el);
+        this.patternGrid = patternGridConstruct(this.pattern);
     },
     watch: {
-        scrollY: function () {
-            console.log('scrolly')
-            this.draw();
-        },
+        scrollY: 'draw',
+        patternGrid: 'draw',
         pattern: {
             deep: true,
-            handler: 'draw',
-        }
+            handler: function (valueNew) {
+                this.patternGrid = patternGridConstruct(valueNew);
+            },
+        },
     }
 });
 

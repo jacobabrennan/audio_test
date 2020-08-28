@@ -3,7 +3,6 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-// import Vue from '../libraries/vue.esm.browser.js';
 import {
     cellParse,
     CHANNELS_NUMBER,
@@ -14,22 +13,16 @@ import {
 } from '../processor.js';
 import {
     noteNumberToName,
-    // contextConfigure,
+    contextConfigure,
     FONT_SIZE,
-    // COLOR_FG_HIGHLIGHT,
-    // COLOR_BG_HIGHLIGHT,
+    COLOR_FG_HIGHLIGHT,
+    COLOR_BG_HIGHLIGHT,
     COLOR_FG,
     COLOR_BG,
 } from '../utilities.js';
 // import {
-//     getSelection,
-//     getCursor,
 //     scrollCheck
 // } from './cursor.js';
-// import {
-//     dataGet,
-//     lengthGet,
-// } from './pattern.js';
 
 //-- Constants -----------------------------------
 export const CELL_WIDTH = 9;
@@ -37,6 +30,23 @@ export const DISPLAY_HEIGHT = 40;
 export const WIDTH_LINE_NUMBER = 3;
 const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
 export const DISPLAY_PIXEL_WIDTH = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE;
+
+//-- Setup ---------------------------------------
+export function setup(canvas) {
+    // Enable mouse / keyboard controls on canvas
+    canvas.tabIndex = 1;
+    setTimeout(() => {
+        canvas.focus();
+    }, 1);
+    // Set canvas drawing size
+    canvas.width  = DISPLAY_PIXEL_WIDTH;
+    canvas.height = DISPLAY_HEIGHT*FONT_SIZE;
+    // Create context and set defaults
+    const context = canvas.getContext('2d');
+    contextConfigure(context);
+    // Return context
+    return context;
+}
 
 //-- Pattern Grid --------------------------------
 export function patternGridConstruct(data) {
@@ -94,7 +104,7 @@ function placeChar(patternGrid, char, posX, posY) {
 }
 
 //-- Pattern Display -----------------------------
-export function patternDisplay(context, patternGrid) {
+export function patternDisplay(context, patternGrid, cursor, selection, scrollY) {
     // if(drawWaiting) { return true;}
     // drawWaiting = true;
     // requestAnimationFrame(() => {
@@ -105,9 +115,6 @@ export function patternDisplay(context, patternGrid) {
     context.save();
     // Get pattern and interface state
     const rows = patternGrid.length / (CELL_WIDTH*CHANNELS_NUMBER);
-    // const selection = getSelection();
-    // const cursor = getCursor();
-    const scrollY = 0;//getScroll();
     // Draw character grid (the whole big deal)
     context.fillStyle = COLOR_BG;
     context.fillRect(0,0,context.canvas.width, context.canvas.height);
@@ -123,41 +130,40 @@ export function patternDisplay(context, patternGrid) {
         // }
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
             const offsetChannel = channel*CELL_WIDTH;
-            drawGridPos(context, patternGrid, offsetChannel+0, row, '#fff', background);
-            drawGridPos(context, patternGrid, offsetChannel+1, row, '#fff', background);
-            drawGridPos(context, patternGrid, offsetChannel+2, row, '#fff', background);
-            drawGridPos(context, patternGrid, offsetChannel+3, row, '#f88', background);
-            drawGridPos(context, patternGrid, offsetChannel+4, row, '#6bf', background);
-            drawGridPos(context, patternGrid, offsetChannel+5, row, '#6bf', background);
-            drawGridPos(context, patternGrid, offsetChannel+6, row, '#86f', background);
-            drawGridPos(context, patternGrid, offsetChannel+7, row, '#86f', background);
-            drawGridPos(context, patternGrid, offsetChannel+8, row, '#86f', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+0, row, '#fff', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+1, row, '#fff', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+2, row, '#fff', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+3, row, '#f88', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+4, row, '#6bf', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+5, row, '#6bf', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+6, row, '#86f', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+7, row, '#86f', background);
+            drawGridPos(context, patternGrid, scrollY, offsetChannel+8, row, '#86f', background);
         }
     }
-    // // Draw Selection box
-    // if(selection) {
-    //     const posYMax = Math.min(rows-1, selection.posEndY);
-    //     for(let posY = selection.posStartY; posY <= posYMax; posY++) {
-    //         for(let posX = selection.posStartX; posX <= selection.posEndX; posX++) {
-    //             drawGridPos(context, posX, posY, COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT);
-    //         }
-    //     }
-    // }
-    // // Draw Cursor
-    // if(cursor) {
-    //     drawGridPos(context, cursor.posX, cursor.posY, COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT);
-    //     drawString(context, 
-    //         cursor.posY.toString(HEX).padStart(2,'0')+' ',
-    //         0, cursor.posY-scrollY,
-    //         COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT,
-    //     );
-    // }
+    // Draw Selection box
+    if(selection) {
+        const posYMax = Math.min(rows-1, selection.posEndY);
+        for(let posY = selection.posStartY; posY <= posYMax; posY++) {
+            for(let posX = selection.posStartX; posX <= selection.posEndX; posX++) {
+                drawGridPos(context, patternGrid, scrollY, posX, posY, COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT);
+            }
+        }
+    }
+    // Draw Cursor
+    if(cursor) {
+        drawGridPos(context, patternGrid, scrollY, cursor.posX, cursor.posY, COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT);
+        drawString(context, 
+            cursor.posY.toString(HEX).padStart(2,'0')+' ',
+            0, cursor.posY-scrollY,
+            COLOR_FG_HIGHLIGHT, COLOR_BG_HIGHLIGHT,
+        );
+    }
     // Cleanup context
     context.restore();
 }
-function drawGridPos(context, patternGrid, posX, posY, color=COLOR_FG, background=COLOR_BG) {
+function drawGridPos(context, patternGrid, scrollY, posX, posY, color=COLOR_FG, background=COLOR_BG) {
     const compoundIndex = posY*DISPLAY_CHAR_WIDTH+posX;
-    let scrollY = 0;//getScroll();
     posY -= scrollY;
     posX += WIDTH_LINE_NUMBER;
     drawChar(context, patternGrid[compoundIndex], posX, posY, color, background);

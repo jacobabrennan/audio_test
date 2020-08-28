@@ -42,28 +42,26 @@ import {
 } from '../utilities.js';
 
 //-- Mouse Utilities -----------------------------
-function getEventCoords(event) {
-    // const scrollY = getScroll();
-    // if(!event.target || !event.target.imTheDrawCanvas) { return;}
-    // const clientRect = event.target.getClientRects()[0];
-    // let posX = event.clientX - clientRect.left;
-    // let posY = event.clientY - clientRect.top;
-    // posX = Math.floor(posX/FONT_SIZE);
-    // posY = Math.floor(posY/FONT_SIZE);
-    // posY += scrollY;
-    // posX = Math.max(0, posX - WIDTH_LINE_NUMBER);
-    // // posX -= WIDTH_LINE_NUMBER;
-    // return {
-    //     x: posX,
-    //     y: posY,
-    // };
+function getEventCoords(event, scrollY) {
+    const clientRect = event.target.getClientRects()[0];
+    let posX = event.clientX - clientRect.left;
+    let posY = event.clientY - clientRect.top;
+    posX = Math.floor(posX/FONT_SIZE);
+    posY = Math.floor(posY/FONT_SIZE);
+    posY += scrollY;
+    posX = Math.max(0, posX - WIDTH_LINE_NUMBER);
+    // posX -= WIDTH_LINE_NUMBER;
+    return {
+        x: posX,
+        y: posY,
+    };
 }
 
 //-- Event Handlers ------------------------------
 export function handleMouseDown(eventMouse) {
-    // const coordsMouse = getEventCoords(eventMouse);
-    // this.posDownX = coordsMouse.x;
-    // this.posDownY = coordsMouse.y;
+    const coordsMouse = getEventCoords(eventMouse, this.scrollY);
+    this.posDownX = coordsMouse.x;
+    this.posDownY = coordsMouse.y;
 }
 export function handleMouseUp(eventMouse) {
     // const coordsMouse = getEventCoords(eventMouse);
