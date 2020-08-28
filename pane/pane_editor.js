@@ -26,8 +26,21 @@ import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
 
 Vue.component('client-editor', {
     template: `<div style="width:${DISPLAY_PIXEL_WIDTH}">
-        <editor-pattern />
+        <editor-pattern :pattern="patternCurrent" />
     </div>`,
+    data() {
+        return {
+            patterns: [
+                [0,0,0,0,0],
+            ],
+            patternCurrentIndex: 0,
+        };
+    },
+    computed: {
+        patternCurrent() {
+            return this.patterns[this.patternCurrentIndex];
+        }
+    },
 });
 
 // //-- Module State --------------------------------

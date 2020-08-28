@@ -38,7 +38,6 @@ export async function setup() {
         <client-controls id="controls"></client-controls>
     `;
     document.body.append(client);
-    console.log(client.outerHTML)
     //
     new Vue({
         el: client,

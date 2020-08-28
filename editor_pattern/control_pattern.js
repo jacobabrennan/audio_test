@@ -15,10 +15,6 @@ import {
 import Adjuster from '../controls/adjuster.js';
 import Selector from '../controls/selector.js';
 
-//-- Module State --------------------------------
-let patternSelector;
-let lengthAdjuster;
-let patternCountAdjuster;
 
 //-- Setup ---------------------------------------
 export async function setup() {

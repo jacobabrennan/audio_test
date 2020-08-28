@@ -15,12 +15,6 @@ import {
     lengthGet,
 } from './pattern.js';
 
-//-- Module State --------------------------------
-let scrollY = 0;
-let cursorX = 0;
-let cursorY = 0;
-let selection;
-
 //-- Cursor Querying -----------------------------
 export function getScroll() {
     return scrollY;

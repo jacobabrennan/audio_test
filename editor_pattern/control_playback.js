@@ -19,14 +19,6 @@ import { ButtonBar } from '../controls/button.js';
 import Adjuster from '../controls/adjuster.js';
 import { instrumentDataCompile } from '../editor_instrument/instrument.js';
 
-//-- Module State --------------------------------
-let adjusterVolume;
-let adjusterBPS;
-let adjusterTPB;
-let beatsPerSecond = BPS_DEFAULT;
-let ticksPerBeat = TPB_DEFAULT;
-let volume = 16;
-
 //-- Setup ---------------------------------------
 export async function setup() {
     //

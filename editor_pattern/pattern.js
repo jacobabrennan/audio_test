@@ -21,10 +21,6 @@ import { instrumentIndexGet } from '../editor_instrument/instrument.js';
 //-- Constants -----------------------------------
 export const DEFAULT_ROWS = 32;
 
-//-- Module State --------------------------------
-const patterns = [];
-let patternCurrent;
-
 //-- Saving / Loading ----------------------------
 export function populateFromData(data) {
     patterns.splice(0);
