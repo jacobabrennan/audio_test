@@ -19,6 +19,9 @@ export const FONT_FAMILY = 'press_start_k_regular';
 export const FONT_SIZE = 16;
 export const CHAR_HEART = 'Œ';
 
+//------------------------------------------------
+export const DISPLAY_HEIGHT_DEFAULT = 40;
+
 //-- Edit & Control Group IDs --------------------
 export const EDITOR_PANE_PATTERN = 'editor_pane_pattern';
 export const EDITOR_PANE_INSTRUMENT = 'editor_pane_instrument';

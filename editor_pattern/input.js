@@ -7,16 +7,7 @@ import {
     // CELL_WIDTH,
     // DISPLAY_HEIGHT,
     WIDTH_LINE_NUMBER,
-} from './canvas.js'
-// import {
-//     // getCursor,
-//     // cursorMove,
-//     // cursorSelect,
-//     // cursorPosition,
-//     // getScroll,
-//     // scrollBy,
-//     // getSelection,
-// } from './cursor.js';
+} from './canvas.js';
 // import {
 //     // cellGet,
 //     // editCell,
@@ -26,15 +17,7 @@ import {
 //     // editCellEffects,
 //     // lengthGet,
 // } from './pattern.js';
-import {
-    // cell,
-    // cellParse,
-    // MASK_CELL_NOTE_STOP,
-    // CHANNEL_NOISE,
-    // NOTE_NOISE_MAX,
-    // HEX,
-    // CHANNELS_NUMBER,
-} from '../processor.js';
+import { CHANNELS_NUMBER } from '../processor.js';
 import {
     // noteNameToNumber,
     // noteNumberToName,
@@ -50,7 +33,6 @@ function getEventCoords(event, scrollY) {
     posY = Math.floor(posY/FONT_SIZE);
     posY += scrollY;
     posX = Math.max(0, posX - WIDTH_LINE_NUMBER);
-    // posX -= WIDTH_LINE_NUMBER;
     return {
         x: posX,
         y: posY,
@@ -60,118 +42,129 @@ function getEventCoords(event, scrollY) {
 //-- Event Handlers ------------------------------
 export function handleMouseDown(eventMouse) {
     const coordsMouse = getEventCoords(eventMouse, this.scrollY);
-    this.posDownX = coordsMouse.x;
-    this.posDownY = coordsMouse.y;
+    this.mouseStart = coordsMouse;
+    this.cursorPosition(coordsMouse.x, coordsMouse.y);
 }
 export function handleMouseUp(eventMouse) {
-    // const coordsMouse = getEventCoords(eventMouse);
-    // const posUpX = coordsMouse.x;
-    // const posUpY = coordsMouse.y;
-    // if(posUpX === this.posDownX && posUpY === this.posDownY) {
-    //     cursorPosition(this.posDownX, this.posDownY);
-    // } else {
-    //     cursorSelect(this.posDownX, this.posDownY, posUpX, posUpY);
-    // }
-    // this.posDownX = undefined;
-    // this.posDownY = undefined;
+    const coordsStart = this.mouseStart;
+    delete this.mouseStart;
+    if(!this.cursor) { return;}
+    const coordsMouse = getEventCoords(eventMouse, this.scrollY);
+    const posUpX = coordsMouse.x;
+    const posUpY = coordsMouse.y;
+    if(posUpX === coordsStart.x && posUpY === coordsStart.y) {
+        return;
+    }
+    this.cursorSelect(coordsStart.x, coordsStart.y, posUpX, posUpY);
 }
 export function handleMouseMove(eventMouse) {
-    // if(this.posDownX === undefined || this.posDownY === undefined) { return;}
-    // const coordsMouse = getEventCoords(eventMouse);
-    // if(!coordsMouse) { return;}
-    // const posUpX = coordsMouse.x;
-    // const posUpY = coordsMouse.y;
-    // if(posUpX === this.posDownX && posUpY === this.posDownY) { return;}
-    // cursorSelect(this.posDownX, this.posDownY, posUpX, posUpY);
+    if(!this.mouseStart) { return;}
+    if(!this.cursor && !this.selection) { return;}
+    const coordsMouse = getEventCoords(eventMouse, this.scrollY);
+    if(!coordsMouse) { return;}
+    const posUpX = coordsMouse.x;
+    const posUpY = coordsMouse.y;
+    const posDownX = this.mouseStart.x;
+    const posDownY = this.mouseStart.y;
+    if(posUpX === this.posDownX && posUpY === this.posDownY) { return;}
+    this.cursorSelect(posDownX, posDownY, posUpX, posUpY);
+}
+export function handleMouseLeave() {
+    delete this.mouseStart;
 }
 export function handleWheel(eventWheel) {
-    // let scrollLines;
-    // switch(eventWheel.deltaMode) {
-    //     case 0:
-    //         scrollLines = eventWheel.deltaY / FONT_SIZE;
-    //         break;
-    //     case 1:
-    //         scrollLines = eventWheel.deltaY;
-    //         break;
-    //     case 0:
-    //     default:
-    //         scrollLines = eventWheel.deltaY * DISPLAY_HEIGHT;
-    //         break;
-    // }
-    // scrollBy(scrollLines);
+    const DOM_DELTA_PIXEL = 0;
+    const DOM_DELTA_LINE = 1;
+    const DOM_DELTA_PAGE = 2;
+    let scrollLines;
+    switch(eventWheel.deltaMode) {
+        case DOM_DELTA_PIXEL:
+            scrollLines = eventWheel.deltaY / FONT_SIZE;
+            break;
+        case DOM_DELTA_LINE:
+            scrollLines = eventWheel.deltaY;
+            break;
+        case DOM_DELTA_PAGE:
+        default:
+            scrollLines = eventWheel.deltaY * this.height;
+            break;
+    }
+    this.scrollBy(scrollLines);
 }
 export function handleKeyDown(eventKeyboard) {
-    //     const key = eventKeyboard.key.toLowerCase();
-    //     const cursor = getCursor();
-    //     // Handle Copy / Paste
-    //     if(eventKeyboard.ctrlKey) {
-    //         switch(key) {
-    //             case 'c':
-    //                 commandCopy();
-    //                 break;
-    //             case 'v':
-    //                 commandPaste();
-    //                 break;
-    //             case 'x':
-    //                 commandCopy(true);
-    //                 break;
-    //         }
-    //         return;
-    //     }
-    //     // Handle Movement, and special values
+    const key = eventKeyboard.key.toLowerCase();
+    // Handle Copy / Paste
+    // if(eventKeyboard.ctrlKey) {
     //     switch(key) {
-    //         case 'delete':
-    //         case 'backspace':
-    //             parseDeleteInput();
-    //             return;
-    //         case 'enter':
-    //             if(!cursor) { break;}
-    //             editCellNote(
-    //                 cursor.posY,
-    //                 Math.floor(cursor.posX/CELL_WIDTH),
-    //                 MASK_CELL_NOTE_STOP,
-    //             );
-    //             return;
-    //         case 'arrowup':
-    //             cursorMove(0, -1);
-    //             return;
-    //         case 'arrowdown':
-    //             cursorMove(0, 1);
-    //             return;
-    //         case 'arrowleft':
-    //             cursorMove(-1, 0);
-    //             return;
-    //         case 'arrowright':
-    //             cursorMove(1, 0);
-    //             return;
-    //         case 'pageup':
-    //             if(!cursor) { break;}
-    //             cursorMove(0, Math.floor(-DISPLAY_HEIGHT/2), cursor.posY == 0);
-    //             return;
-    //         case 'pagedown':
-    //             if(!cursor) { break;}
-    //             cursorMove(0, Math.floor(DISPLAY_HEIGHT/2), cursor.posY == lengthGet()-1);
-    //             return;
+    //         case 'c':
+    //             commandCopy();
+    //             break;
+    //         case 'v':
+    //             commandPaste();
+    //             break;
+    //         case 'x':
+    //             commandCopy(true);
+    //             break;
     //     }
-    //     //
-    //     if(!cursor) { return;}
-    //     //
-    //     if(key.length !== 1) { return;}
-    //     // Handle Note Entry
-    //     let indexDigit = cursor.posX%CELL_WIDTH;
-    //     if(indexDigit < 3) {
-    //         parseNoteInput(key);
-    //         return;
-    //     }
-    //     // Handle entry of digits
-    //     let digit = (key.length === 1)? key.match(/[0-9a-f]/i) : null;
-    //     digit = digit? digit[0] : null;
-    //     if(digit) {
-    //         parseCellInput(digit, cursor.posX, cursor.posY);
-    //         return;
-    //     }
-    //     //
+    //     return;
+    // }
+    // Handle Movement, and special values
+    switch(key) {
+        // case 'delete':
+        // case 'backspace':
+        //     parseDeleteInput();
+        //     return;
+        // case 'enter':
+        //     if(!cursor) { break;}
+        //     editCellNote(
+        //         cursor.posY,
+        //         Math.floor(cursor.posX/CELL_WIDTH),
+        //         MASK_CELL_NOTE_STOP,
+        //     );
+        //     return;
+        case 'arrowup':
+            this.cursorMove(0, -1);
+            return;
+        case 'arrowdown':
+            this.cursorMove(0, 1);
+            return;
+        case 'arrowleft':
+            this.cursorMove(-1, 0);
+            return;
+        case 'arrowright':
+            this.cursorMove(1, 0);
+            return;
+        case 'pageup':
+            if(!this.cursor) { break;}
+            this.cursorMove(0, Math.floor(-this.height/2), this.cursor.posY == 0);
+            return;
+        case 'pagedown': {
+            if(!this.cursor) { break;}
+            const length = this.pattern.length / CHANNELS_NUMBER;
+            this.cursorMove(0, Math.floor(this.height/2), this.cursor.posY == length-1);
+            return;
+        }
+    }
+    // //
+    // if(!this.cursor) { return;}
+    // //
+    // if(key.length !== 1) { return;}
+    // // Handle Note Entry
+    // let indexDigit = cursor.posX%CELL_WIDTH;
+    // if(indexDigit < 3) {
+    //     parseNoteInput(key);
+    //     return;
+    // }
+    // // Handle entry of digits
+    // let digit = (key.length === 1)? key.match(/[0-9a-f]/i) : null;
+    // digit = digit? digit[0] : null;
+    // if(digit) {
+    //     parseCellInput(digit, cursor.posX, cursor.posY);
+    //     return;
+    // }
 }
+
+
 
 // //-- Input Interpretors --------------------------
 // function parseNoteInput(key) {

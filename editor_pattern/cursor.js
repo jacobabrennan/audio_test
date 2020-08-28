@@ -8,99 +8,78 @@ import {
 } from '../processor.js';
 import {
     patternDisplay,
-    canvasHeightGet,
     CELL_WIDTH,
-} from './canvas.js'
-import {
-    lengthGet,
-} from './pattern.js';
-
-//-- Cursor Querying -----------------------------
-export function getScroll() {
-    return scrollY;
-}
-export function getCursor() {
-    if(cursorX === undefined || cursorY === undefined) { return undefined;}
-    return {
-        posX: cursorX,
-        posY: cursorY,
-    };
-}
-export function getSelection() {
-    return selection;
-}
+} from './canvas.js';
 
 //-- Cursor Movement -----------------------------
 export function cursorPosition(posX, posY) {
-    selection = undefined;
-    cursorX = posX;
-    cursorY = posY;
-    scrollCheck();
-    patternDisplay();
+    this.selection = null;
+    this.cursor = {
+        posX: posX,
+        posY: posY,
+    };
+    this.scrollCheck();
 }
 export function cursorSelect(posDownX, posDownY, posUpX, posUpY) {
-    cursorX = undefined;
-    cursorY = undefined;
-    selection = {
+    this.cursor = null;
+    this.selection = {
         posStartX: Math.min(posDownX, posUpX),
         posStartY: Math.min(posDownY, posUpY),
         posEndX: Math.max(posDownX, posUpX),
         posEndY: Math.max(posDownY, posUpY),
     };
-    patternDisplay();
 }
 export function cursorHighlight(indexRow) {
-    cursorY = indexRow;
-    scrollCheck();
+    this.cursor.posY = indexRow;
+    this.scrollCheck();
 }
 export function cursorMove(deltaX, deltaY, wrap=true) {
-    if(cursorX === undefined || cursorY === undefined) { return;}
-    cursorX += deltaX;
-    cursorY += deltaY;
-    if(cursorX < 0) {
-        cursorX = CHANNELS_NUMBER*CELL_WIDTH -1;
+    if(!this.cursor) { return;}
+    let posXNew = this.cursor.posX + deltaX;
+    let posYNew = this.cursor.posY + deltaY;
+    if(posXNew < 0) {
+        posXNew = CHANNELS_NUMBER*CELL_WIDTH -1;
     }
-    else if(cursorX >= CHANNELS_NUMBER*CELL_WIDTH) {
-        cursorX = 0;
+    else if(posXNew >= CHANNELS_NUMBER*CELL_WIDTH) {
+        posXNew = 0;
     }
-    if(cursorY < 0) {
+    const length = this.pattern.length / CHANNELS_NUMBER;
+    if(posYNew < 0) {
         if(wrap) {
-            cursorY = lengthGet()-1;
+            posYNew = length-1;
         } else {
-            cursorY = 0;
+            posYNew = 0;
         }
     }
-    else if(cursorY >= lengthGet()) {
+    else if(posYNew >= length) {
         if(wrap) {
-            cursorY = 0;
+            posYNew = 0;
         } else {
-            cursorY = lengthGet()-1;
+            posYNew = length-1;
         }
     }
-    scrollCheck();
-    patternDisplay();
+    this.cursorPosition(posXNew, posYNew);
 }
 
 //-- Scrolling -----------------------------------
 export function scrollTo(posY) {
-    scrollY = posY;
-    patternDisplay();
+    this.scrollY = posY;
 }
 export function scrollBy(deltaY) {
-    let scrollYOld = scrollY;
-    scrollY += deltaY;
-    scrollY = Math.max(0, Math.min(lengthGet()-canvasHeightGet(), scrollY));
-    if(scrollY !== scrollYOld) {
-        patternDisplay();
-    }
+    const rows = this.pattern.length / CHANNELS_NUMBER;
+    let scrollYNew = this.scrollY + deltaY;
+    scrollYNew = Math.max(0, Math.min(rows-this.height, scrollYNew));
+    this.scrollY = scrollYNew;
 }
 export function scrollCheck() {
-    if(cursorY < scrollY) {
-        scrollTo(cursorY);
+    // Check against lower bound (top of display)
+    if(this.cursor.posY < this.scrollY) {
+        this.scrollTo(this.cursor.posY);
         return;
     }
-    const canvasHeight = canvasHeightGet();
-    if(cursorY >= canvasHeight+scrollY) {
-        scrollTo(cursorY - (canvasHeight-1));
+    // Check against upper bound (bottom of display)
+    const canvasHeight = this.height;
+    if(this.cursor.posY >= canvasHeight+this.scrollY) {
+        this.scrollTo(this.cursor.posY - (canvasHeight-1));
     }
 }

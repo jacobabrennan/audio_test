@@ -6,6 +6,7 @@
 import Vue from '../libraries/vue.esm.browser.js';
 import '../editor_pattern/index.js';
 import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
+import { DISPLAY_HEIGHT_DEFAULT } from '../utilities.js';
 // import {
 //     groupHideAll,
 //     groupShow,
@@ -26,7 +27,7 @@ import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
 
 Vue.component('client-editor', {
     template: `<div style="width:${DISPLAY_PIXEL_WIDTH}">
-        <editor-pattern :pattern="patternCurrent" />
+        <editor-pattern :pattern="patternCurrent" :height="${DISPLAY_HEIGHT_DEFAULT}" />
     </div>`,
     data() {
         return {

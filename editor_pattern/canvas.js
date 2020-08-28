@@ -26,13 +26,12 @@ import {
 
 //-- Constants -----------------------------------
 export const CELL_WIDTH = 9;
-export const DISPLAY_HEIGHT = 40;
 export const WIDTH_LINE_NUMBER = 3;
 const DISPLAY_CHAR_WIDTH = CELL_WIDTH*CHANNELS_NUMBER;
 export const DISPLAY_PIXEL_WIDTH = (DISPLAY_CHAR_WIDTH+WIDTH_LINE_NUMBER)*FONT_SIZE;
 
 //-- Setup ---------------------------------------
-export function setup(canvas) {
+export function setup(canvas, rows) {
     // Enable mouse / keyboard controls on canvas
     canvas.tabIndex = 1;
     setTimeout(() => {
@@ -40,7 +39,7 @@ export function setup(canvas) {
     }, 1);
     // Set canvas drawing size
     canvas.width  = DISPLAY_PIXEL_WIDTH;
-    canvas.height = DISPLAY_HEIGHT*FONT_SIZE;
+    canvas.height = rows*FONT_SIZE;
     // Create context and set defaults
     const context = canvas.getContext('2d');
     contextConfigure(context);
@@ -190,15 +189,3 @@ function drawChar(context, char, posX, posY, color=COLOR_FG, background=COLOR_BG
     context.fillText(char, textX, textY);
     context.restore();
 }
-
-// //-- Canvas Size ---------------------------------
-// export function canvasHeightSet(heightNew) {
-//     context.canvas.height = heightNew*FONT_SIZE;
-//     heightCanvas = heightNew;
-//     contextConfigure(context);
-//     patternDisplay();
-//     scrollCheck();
-// }
-// export function canvasHeightGet() {
-//     return heightCanvas;
-// }

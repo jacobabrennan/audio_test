@@ -9,14 +9,7 @@ let ticksPerBeat = TPB_DEFAULT;
 const patterns = [];
 
 //-- Editor State --------------------------------
-let patternCurrent;
-let posDownX;
-let posDownY;
 let clipBoard;
-let scrollY = 0;
-let cursorX = 0;
-let cursorY = 0;
-let selection;
 
 //-- House Keeping -------------------------------
 //
