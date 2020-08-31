@@ -7,7 +7,6 @@ import {
     CHANNELS_NUMBER,
 } from '../processor.js';
 import {
-    patternDisplay,
     CELL_WIDTH,
 } from './canvas.js';
 

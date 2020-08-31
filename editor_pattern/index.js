@@ -87,13 +87,18 @@ Vue.component('editor-pattern', {
         handleWheel: handleWheel,
         handleKeyDown: handleKeyDown,
         draw() {
-            patternDisplay(
-                this.context,
-                this.patternGrid,
-                this.cursor,
-                this.selection,
-                this.scrollY
-            );
+            if(this.drawWaiting) { return true;}
+            this.drawWaiting = true;
+            requestAnimationFrame(() => {
+                patternDisplay(
+                    this.context,
+                    this.patternGrid,
+                    this.cursor,
+                    this.selection,
+                    this.scrollY
+                );
+                this.drawWaiting = false;
+            });
         },
         cursorPosition: cursorPosition,
         cursorSelect: cursorSelect,

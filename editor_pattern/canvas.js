@@ -9,7 +9,6 @@ import {
     HEX,
     CHANNEL_NOISE,
     MASK_CELL_NOTE_STOP,
-    // PATTERNS_MAX,
 } from '../processor.js';
 import {
     noteNumberToName,
@@ -20,9 +19,6 @@ import {
     COLOR_FG,
     COLOR_BG,
 } from '../utilities.js';
-// import {
-//     scrollCheck
-// } from './cursor.js';
 
 //-- Constants -----------------------------------
 export const CELL_WIDTH = 9;
@@ -104,12 +100,6 @@ function placeChar(patternGrid, char, posX, posY) {
 
 //-- Pattern Display -----------------------------
 export function patternDisplay(context, patternGrid, cursor, selection, scrollY) {
-    // if(drawWaiting) { return true;}
-    // drawWaiting = true;
-    // requestAnimationFrame(() => {
-    //     drawPatternGrid(context);
-    //    drawWaiting = false;
-    // });
     // Ensure context changes don't bleed into other functions
     context.save();
     // Get pattern and interface state
