@@ -23,7 +23,7 @@ Vue.component('button-action', {
 //------------------------------------------------
 Vue.component('button-bar', {
     template: (
-        `<div>
+        `<div class="button_group">
             <button
                 type="button"
                 v-for="data in actions"

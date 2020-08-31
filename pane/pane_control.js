@@ -9,6 +9,7 @@ import { songSave, songLoad } from '../file_management/controls.js';
 //------------------------------------------------
 const template = `<div>
     <button-bar :actions="actions" />
+    <slot />
 </div>`;
 const actions = [
     {

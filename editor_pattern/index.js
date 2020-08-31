@@ -80,12 +80,23 @@ Vue.component('editor-pattern', {
         };
     },
     methods: {
+        // Interaction Handles
         handleMouseDown: handleMouseDown,
         handleMouseUp: handleMouseUp,
         handleMouseMove: handleMouseMove,
         handleMouseLeave: handleMouseLeave,
         handleWheel: handleWheel,
         handleKeyDown: handleKeyDown,
+        // Cursor / Selection positioning
+        cursorPosition: cursorPosition,
+        cursorSelect: cursorSelect,
+        cursorHighlight: cursorHighlight,
+        cursorMove: cursorMove,
+        // Scrolling
+        scrollBy: scrollBy,
+        scrollTo: scrollTo,
+        scrollCheck: scrollCheck,
+        // Drawing
         draw() {
             if(this.drawWaiting) { return true;}
             this.drawWaiting = true;
@@ -100,13 +111,6 @@ Vue.component('editor-pattern', {
                 this.drawWaiting = false;
             });
         },
-        cursorPosition: cursorPosition,
-        cursorSelect: cursorSelect,
-        cursorHighlight: cursorHighlight,
-        cursorMove: cursorMove,
-        scrollBy: scrollBy,
-        scrollTo: scrollTo,
-        scrollCheck: scrollCheck,
     },
     mounted() {
         this.context = setupCanvas(this.$el, this.height);
@@ -137,13 +141,13 @@ Vue.component('editor-pattern', {
 //     canvasHeightSet(DISPLAY_HEIGHT);
 // }
 
-//-- Pattern Display -----------------------------
-export function highlightRow(indexRow, indexPattern, scroll) {
-    if(indexPattern !== undefined) {
-        patternSelect(indexPattern);
-        patternListUpdate();
-    }
-    cursorHighlight(indexRow);
-    patternDisplay();
-    return true;
-}
+// //-- Pattern Display -----------------------------
+// export function highlightRow(indexRow, indexPattern, scroll) {
+//     if(indexPattern !== undefined) {
+//         patternSelect(indexPattern);
+//         patternListUpdate();
+//     }
+//     cursorHighlight(indexRow);
+//     patternDisplay();
+//     return true;
+// }

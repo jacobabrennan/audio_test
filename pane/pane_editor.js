@@ -7,6 +7,7 @@ import Vue from '../libraries/vue.esm.browser.js';
 import '../editor_pattern/index.js';
 import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
 import { DISPLAY_HEIGHT_DEFAULT } from '../utilities.js';
+import { BPS_DEFAULT, TPB_DEFAULT } from '../processor.js';
 // import {
 //     groupHideAll,
 //     groupShow,
@@ -31,6 +32,10 @@ Vue.component('client-editor', {
     </div>`,
     data() {
         return {
+            volume: 4,
+            beatsPerSecond: BPS_DEFAULT,
+            ticksPer: TPB_DEFAULT,
+            patternCurrentIndex: 0,
             patterns: [
                 [
                     0,0,0,0,0,
@@ -99,7 +104,8 @@ Vue.component('client-editor', {
                     0,0,0,0,0,
                 ],
             ],
-            patternCurrentIndex: 0,
+            instrumentCurrentIndex: 0,
+            instruments: [],
         };
     },
     computed: {
