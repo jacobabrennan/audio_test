@@ -3,8 +3,13 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
+// Framework
 import Vue from './libraries/vue.esm.browser.js';
+// Standard Components (must be preloaded)
+import './controls/adjuster.js';
+import './controls/button.js';
 import './client.js';
+// Font Loading Utilities
 import {
     contextConfigure,
     CHAR_HEART,
@@ -59,6 +64,8 @@ async function loadFont() {
         }, 10);
     });
 }
+
+//-- Load Status Checker -------------------------
 function checkFontStatus(context) {
     context.fillStyle = '#000';
     context.fillRect(0,0,FONT_SIZE,FONT_SIZE);
