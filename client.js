@@ -139,7 +139,16 @@ Vue.component('song-editor', {
                 },
                 {
                     label: 'Del P.',
-                    action: () => undefined,
+                    action: () => {
+                        this.patterns.splice(this.patternCurrentIndex, 1);
+                        if(!this.patterns.length) {
+                            this.patterns.push(new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT));
+                        }
+                        if(this.patternCurrentIndex >= this.patterns.length) {
+                            this.patternCurrentIndex = this.patterns.length - 1;
+                        }
+                        this.patternCurrent = this.patterns[this.patternCurrentIndex];
+                    },
                 },
             ];
         },
