@@ -14,6 +14,7 @@ import {
     VOLUME_MAX,
     BPS_MAX,
     TPB_MAX,
+    PATTERNS_MAX,
 } from './processor.js';
 import {
     DISPLAY_HEIGHT_DEFAULT,
@@ -53,24 +54,29 @@ const TEMPLATE_EDITOR = `
             <div class="control_group">
                 <value-adjuster
                     label="Volume"
-                    :width="15"
                     :value="volume"
                     :max="${VOLUME_MAX}"
                     @${EVENT_ADJUST}="volume = $event"
                 />
                 <value-adjuster
                     label="Beats/Sec"
-                    :width="15"
                     :value="beatsPerSecond"
                     :max="${BPS_MAX}"
                     @${EVENT_ADJUST}="beatsPerSecond = $event"
                 />
                 <value-adjuster
                     label="Ticks/Beat"
-                    :width="15"
                     :value="ticksPerBeat"
                     :max="${TPB_MAX}"
                     @${EVENT_ADJUST}="tickPerBeat = $event"
+                />
+            </div>
+            <div class="control_group">
+                <value-adjuster
+                    label="Patterns"
+                    :value="patterns.length"
+                    :max="${PATTERNS_MAX}"
+                    @${EVENT_ADJUST}=""
                 />
             </div>
         </div>

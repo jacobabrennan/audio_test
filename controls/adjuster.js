@@ -31,7 +31,7 @@ Vue.component('value-adjuster', {
         },
         width: {
             type: Number,
-            required: true,
+            default: 15,
         },
         value: {
             type: Number,
