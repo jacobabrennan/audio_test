@@ -41,6 +41,7 @@ const TEMPLATE_EDITOR = `
                 <editor-pattern
                     :pattern="patternCurrent"
                     :height="${DISPLAY_HEIGHT_DEFAULT}"
+                    :instrument="instrumentCurrentIndex"
                     @cell-edit="handleCellEdit"
                 />
             </keep-alive>

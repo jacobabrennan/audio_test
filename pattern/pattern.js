@@ -133,8 +133,7 @@ export function cellEditNote(row, channel, noteNew) {
             noteNew = Math.max(0, Math.min(NOTE_NOISE_MAX, noteNew));
         }
         if(instrument === undefined) {
-            // instrument = instrumentIndexGet();
-            instrument = 0;
+            instrument = this.instrument;
         }
     }
     noteNew &= Math.pow(2, MASK_CELL_NOTE_WIDTH)-1;
@@ -143,23 +142,21 @@ export function cellEditNote(row, channel, noteNew) {
 }
 export function cellEditInstrument(row, channel, instrument) {
     const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(patternCurrent.data[indexCell]);
+    let cellData = cellParse(this.pattern[indexCell]);
     cellData = cell(cellData[0], instrument, cellData[2], cellData[3]);
-    cellEdit(row, channel, cellData);
+    this.cellEdit(row, channel, cellData);
 }
 export function cellEditVolume(row, channel, volume) {
     const volumeMax = Math.pow(2, MASK_CELL_VOLUME_WIDTH)-1;
     volume = Math.max(0, Math.min(volumeMax, volume));
     const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(patternCurrent.data[indexCell]);
+    let cellData = cellParse(this.pattern[indexCell]);
     cellData = cell(cellData[0], cellData[1], volume, cellData[3]);
-    patternCurrent.data[indexCell] = cellData;
-    cellEdit(row, channel, cellData);
+    this.cellEdit(row, channel, cellData);
 }
 export function cellEditEffects(row, channel, effects) {
     const indexCell = row*CHANNELS_NUMBER + channel;
-    let cellData = cellParse(patternCurrent.data[indexCell]);
+    let cellData = cellParse(this.pattern[indexCell]);
     cellData = cell(cellData[0], cellData[1], cellData[2], effects);
-    patternCurrent.data[indexCell] = cellData;
-    cellEdit(row, channel, cellData);
+    this.cellEdit(row, channel, cellData);
 }

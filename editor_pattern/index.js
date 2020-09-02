@@ -16,6 +16,7 @@ import {
     parseInputDelete,
     parseNoteInput,
     parseNoiseInput,
+    parseCellInput,
 } from './input.js';
 import {
     setup as setupCanvas,
@@ -52,7 +53,14 @@ import {
 //     CONTROL_GROUP_FILE_MANAGEMENT,
 } from '../utilities.js';
 import { CHANNELS_NUMBER } from '../processor.js';
-import { cellGet, cellEdit, cellEditNote } from '../pattern/pattern.js';
+import {
+    cellGet,
+    cellEdit,
+    cellEditNote,
+    cellEditInstrument,
+    cellEditVolume,
+    cellEditEffects,
+} from '../pattern/pattern.js';
 // import { groupRegister } from '../pane/pane_control.js';
 
 //------------------------------------------------
@@ -67,11 +75,18 @@ Vue.component('editor-pattern', {
         @keydown = "handleKeyDown"
     />`,
     props: {
-        pattern: Array,
+        pattern: {
+            Array,
+            required: true,
+        },
         height: {
             type: Number,
             required: true,
-        }
+        },
+        instrument: {
+            type: Number,
+            require: true,
+        },
     },
     data() {
         return {
@@ -103,12 +118,16 @@ Vue.component('editor-pattern', {
         scrollCheck: scrollCheck,
         // Input Parsing
         parseInputDelete: parseInputDelete,
+        parseNoteInput: parseNoteInput,
+        parseNoiseInput: parseNoiseInput,
+        parseCellInput: parseCellInput,
         // Pattern Editing
         cellGet: cellGet,
         cellEdit: cellEdit,
         cellEditNote: cellEditNote,
-        parseNoteInput: parseNoteInput,
-        parseNoiseInput: parseNoiseInput,
+        cellEditInstrument: cellEditInstrument,
+        cellEditVolume: cellEditVolume,
+        cellEditEffects: cellEditEffects,
         // Drawing
         draw() {
             if(this.drawWaiting) { return true;}

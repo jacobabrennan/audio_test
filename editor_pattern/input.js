@@ -20,9 +20,10 @@ import {
 import {
     cell,
     cellParse,
-    CHANNELS_NUMBER,
-    MASK_CELL_NOTE_STOP,
     CHANNEL_NOISE,
+    CHANNELS_NUMBER,
+    HEX,
+    MASK_CELL_NOTE_STOP,
 } from '../processor.js';
 import {
     noteNameToNumber,
@@ -163,13 +164,13 @@ export function handleKeyDown(eventKeyboard) {
         this.parseNoteInput(key);
         return;
     }
-    // // Handle entry of digits
-    // let digit = (key.length === 1)? key.match(/[0-9a-f]/i) : null;
-    // digit = digit? digit[0] : null;
-    // if(digit) {
-    //     parseCellInput(digit, cursor.posX, cursor.posY);
-    //     return;
-    // }
+    // Handle entry of digits
+    let digit = (key.length === 1)? key.match(/[0-9a-f]/i) : null;
+    digit = digit? digit[0] : null;
+    if(digit) {
+        this.parseCellInput(digit, this.cursor.posX, this.cursor.posY);
+        return;
+    }
 }
 
 
@@ -270,55 +271,55 @@ export function parseInputDelete() {
         }
     }
 }
-// function parseCellInput(digit, posX, posY) {
-//     const value = parseInt(digit, HEX);
-//     const indexRow = posY;
-//     const indexChannel = Math.floor(posX/CELL_WIDTH);
-//     const indexDigit = posX%CELL_WIDTH;
-//     //
-//     const dataCell = cellGet(indexRow, indexChannel);
-//     let [note, instrument, volume, effect] = cellParse(dataCell);
-//     note = note || 0;
-//     instrument = instrument || 0;
-//     volume = volume || 0;
-//     effect = effect || 0;
-//     //
-//     switch(indexDigit) {
-//         case 3:
-//             cellEditInstrument(indexRow, indexChannel, value);
-//             break;
-//         case 4: {
-//             let sV = volume.toString(HEX).padStart(2,'0');
-//             sV = `${digit}${sV[1]}`;
-//             cellEditVolume(indexRow, indexChannel, parseInt(sV, HEX));
-//             break;
-//         }
-//         case 5: {
-//             let sV = volume.toString(HEX).padStart(2,'0');
-//             sV = `${sV[0]}${digit}`;
-//             cellEditVolume(indexRow, indexChannel, parseInt(sV, HEX));
-//             break;
-//         }
-//         case 6: {
-//             let sE = effect.toString(HEX).padStart(3,'0');
-//             sE = `${digit}${sE[1]}${sE[2]}`;
-//             cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
-//             break;
-//         }
-//         case 7: {
-//             let sE = effect.toString(HEX).padStart(3,'0');
-//             sE = `${sE[0]}${digit}${sE[2]}`;
-//             cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
-//             break;
-//         }
-//         case 8: {
-//             let sE = effect.toString(HEX).padStart(3,'0');
-//             sE = `${sE[0]}${sE[1]}${digit}`;
-//             cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
-//             break;
-//         }
-//     }
-// }
+export function parseCellInput(digit, posX, posY) {
+    const value = parseInt(digit, HEX);
+    const indexRow = posY;
+    const indexChannel = Math.floor(posX/CELL_WIDTH);
+    const indexDigit = posX%CELL_WIDTH;
+    //
+    const dataCell = this.cellGet(indexRow, indexChannel);
+    let [note, instrument, volume, effect] = cellParse(dataCell);
+    note = note || 0;
+    instrument = instrument || 0;
+    volume = volume || 0;
+    effect = effect || 0;
+    //
+    switch(indexDigit) {
+        case 3:
+            this.cellEditInstrument(indexRow, indexChannel, value);
+            break;
+        case 4: {
+            let sV = volume.toString(HEX).padStart(2,'0');
+            sV = `${digit}${sV[1]}`;
+            this.cellEditVolume(indexRow, indexChannel, parseInt(sV, HEX));
+            break;
+        }
+        case 5: {
+            let sV = volume.toString(HEX).padStart(2,'0');
+            sV = `${sV[0]}${digit}`;
+            this.cellEditVolume(indexRow, indexChannel, parseInt(sV, HEX));
+            break;
+        }
+        case 6: {
+            let sE = effect.toString(HEX).padStart(3,'0');
+            sE = `${digit}${sE[1]}${sE[2]}`;
+            this.cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
+            break;
+        }
+        case 7: {
+            let sE = effect.toString(HEX).padStart(3,'0');
+            sE = `${sE[0]}${digit}${sE[2]}`;
+            this.cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
+            break;
+        }
+        case 8: {
+            let sE = effect.toString(HEX).padStart(3,'0');
+            sE = `${sE[0]}${sE[1]}${digit}`;
+            this.cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
+            break;
+        }
+    }
+}
 // function commandCopy(clear) {
 //     //
 //     let posXStart;
