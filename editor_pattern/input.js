@@ -70,7 +70,9 @@ export function handleMouseMove(eventMouse) {
     const posUpY = coordsMouse.y;
     const posDownX = this.mouseStart.x;
     const posDownY = this.mouseStart.y;
-    if(posUpX === this.posDownX && posUpY === this.posDownY) { return;}
+    if(this.cursor && posUpX === posDownX && posUpY === posDownY) {
+        return;
+    }
     this.cursorSelect(posDownX, posDownY, posUpX, posUpY);
 }
 export function handleMouseLeave() {
