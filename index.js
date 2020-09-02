@@ -8,6 +8,8 @@ import Vue from './libraries/vue.esm.browser.js';
 // Standard Components (must be preloaded)
 import './controls/adjuster.js';
 import './controls/button.js';
+import './controls/selector.js';
+// Client
 import './client.js';
 // Font Loading Utilities
 import {

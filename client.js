@@ -5,7 +5,6 @@
 
 //-- Dependencies --------------------------------
 import Vue from './libraries/vue.esm.browser.js';
-// import './pane/pane_editor.js';
 import './editor_pattern/index.js';
 import {
     BPS_DEFAULT,
@@ -20,6 +19,7 @@ import {
 import {
     DISPLAY_HEIGHT_DEFAULT,
 } from './utilities.js';
+import { EVENT_OPTION_SELECT } from './controls/selector.js';
 import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
 import { EVENT_ADJUST } from './controls/adjuster.js';
 import { songSave, songLoad } from './file_management/controls.js';
@@ -79,6 +79,12 @@ const TEMPLATE_EDITOR = `
                     :max="${PATTERNS_MAX}"
                     @${EVENT_ADJUST}=""
                 />
+                <option-selector
+                    :value="patternCurrentIndex"
+                    :height="8"
+                    :options="patternNames"
+                    @${EVENT_OPTION_SELECT}="handlePatternSelect"
+                />
                 <value-adjuster
                     label="Length"
                     :value="patternCurrent.length / ${CHANNELS_NUMBER}"
@@ -112,6 +118,11 @@ Vue.component('song-editor', {
     created() {
         this.patternCurrent = this.patterns[this.patternCurrentIndex];
     },
+    computed: {
+        patternNames() {
+            return this.patterns.map((pattern, index) => `Pattern ${index}`);
+        }
+    },
     methods: {
         handleCellEdit(event) {
             const compoundIndex = event.channel + (event.row * CHANNELS_NUMBER);
@@ -137,6 +148,11 @@ Vue.component('song-editor', {
             }
             this.patterns[this.patternCurrentIndex] = patternNew;
             this.patternCurrent = patternNew;
+        },
+        handlePatternSelect(indexNew) {
+            if(indexNew < 0 || indexNew >= this.patterns.length) { return;}
+            this.patternCurrentIndex = indexNew;
+            this.patternCurrent = this.patterns[this.patternCurrentIndex];
         }
     },
 });

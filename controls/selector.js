@@ -3,64 +3,75 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
+import Vue from '../libraries/vue.esm.browser.js';
 import {
-    FONT_SIZE, FONT_FAMILY, COLOR_BG
+    FONT_SIZE,
+    FONT_FAMILY,
+    COLOR_BG,
 } from '../utilities.js';
 
+//-- Constants -----------------------------------
+export const EVENT_OPTION_SELECT = 'option-select';
+
+// <!-- Option derp is a hack to get around the lack of css option colors -->
 //------------------------------------------------
-export default class Selector {
-    constructor(elementParent, width, height, onChange) {
-        this.element = document.createElement('select');
-        this.element.className = 'selector';
-        this.element.setAttribute('size', height);
-        this.element.style.width = `${width*FONT_SIZE}px`
-        this.element.style.fontFamily = FONT_FAMILY;
-        this.element.style.fontSize = FONT_SIZE+'px';
-        this.element.style.background = COLOR_BG;
-        if(elementParent) {
-            elementParent.append(this.element);
-        }
-        //
-        this.onChange = onChange;
-        this.element.addEventListener('change', () => {
-            onChange(Number(this.element.value));
-        });
-    }
-    optionsUpdate(patternList) {
-        // Clear old values
-        while (this.element.firstChild) {
-            this.element.removeChild(this.element.lastChild);
-        }
-        // Populate with new data
-        this.options = [];
-        for(let indexPattern = 0; indexPattern < patternList.length; indexPattern++) {
-            const option = document.createElement('option');
-            option.setAttribute('value', indexPattern);
-            option.innerText = patternList.names[indexPattern];
-            option.value = indexPattern;
-            if(indexPattern == patternList.indexCurrent) {
-                option.selected = true;
+Vue.component('option-selector', {
+    template: (`
+        <select
+            class="selector"
+            :size="height"
+            @change="select"
+            :style="style"
+        >
+            <option
+                v-for="(label, index) in options"
+                :key="index"
+                :class="{ selected: index === value }"
+                :value="index"
+            >
+                {{label}}
+            </option>
+        </select>
+    `),
+    props: {
+        value: {
+            type: Number,
+            require: true,
+        },
+        height: {
+            type: Number,
+            required: true,
+        },
+        width: {
+            type: Number,
+            default: 15,
+        },
+        options: {
+            type: Array,
+            require: true,
+        },
+    },
+    data: function () {
+        return {
+            style: {
+                width: `${this.width*FONT_SIZE}px`,
+                fontFamily: FONT_FAMILY,
+                fontSize: FONT_SIZE+'px',
+                background: COLOR_BG,
+            },
+        };
+    },
+    mounted() {
+        this.$el.value = null;
+    },
+    methods: {
+        select() {
+            for(let option of this.$el.selectedOptions) {
+                option.blur();
             }
-            this.options.push(option);
-            // Option derp is a hack to get around the lack of css option colors
-            const optionDerp = document.createElement('option');
-            optionDerp.setAttribute('value', `${indexPattern}_derp`);
-            optionDerp.style.display = 'none';
-            this.options.push(optionDerp);
+            this.$el.blur();
+            this.$emit(EVENT_OPTION_SELECT, parseInt(this.$el.value));
+            this.$el.value = null;
         }
-        this.element.append(...this.options);
-        this.fixColors();
     }
-    fixColors() {
-        for(let option of this.options) {
-            if(option.value === this.element.value) {
-                option.classList.add('selected');
-                option.scrollIntoView();
-            } else{
-                option.classList.remove('selected');
-            }
-        }
-        this.element.value = `${this.element.value}_derp`;
-        this.element.blur();
-    }
-}
+});
