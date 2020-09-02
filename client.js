@@ -35,39 +35,42 @@ const ACTIONS_FILE_MANAGEMENT = [
     },
 ];
 const TEMPLATE_EDITOR = `
-<div id=${DOM_ID_CLIENT}>
-    <div id="editor" style="width:${DISPLAY_PIXEL_WIDTH}">
-        <editor-pattern
-            :pattern="patternCurrent"
-            :height="${DISPLAY_HEIGHT_DEFAULT}"
-        />
-    </div>
-    <div id="controls">
-        <div class="control_group">
-            <button-bar :actions="actionsFile" />
-        </div>
-        <div class="control_group">
-            <value-adjuster
-                label="Volume"
-                :width="15"
-                :value="volume"
-                @${EVENT_ADJUST}="handleAdjustVolume"
-            />
-            <value-adjuster
-                label="Beats/Sec"
-                :width="15"
-                :value="beatsPerSecond"
-                @${EVENT_ADJUST}="handleAdjustBPS"
-            />
-            <value-adjuster
-                label="Ticks/Beat"
-                :width="15"
-                :value="ticksPerBeat"
-                @${EVENT_ADJUST}="handleAdjustTPB"
+    <div id=${DOM_ID_CLIENT}>
+        <div id="editor" style="width:${DISPLAY_PIXEL_WIDTH}">
+            <editor-pattern
+                :pattern="patternCurrent"
+                :height="${DISPLAY_HEIGHT_DEFAULT}"
             />
         </div>
+        <div id="controls">
+            <div class="control_group">
+                <button-bar :actions="actionsFile" />
+            </div>
+            <div class="control_group">
+                <value-adjuster
+                    label="Volume"
+                    :width="15"
+                    :value="volume"
+                    :max="${VOLUME_MAX}"
+                    @${EVENT_ADJUST}="volume = $event"
+                />
+                <value-adjuster
+                    label="Beats/Sec"
+                    :width="15"
+                    :value="beatsPerSecond"
+                    :max="${BPS_MAX}"
+                    @${EVENT_ADJUST}="beatsPerSecond = $event"
+                />
+                <value-adjuster
+                    label="Ticks/Beat"
+                    :width="15"
+                    :value="ticksPerBeat"
+                    :max="${TPB_MAX}"
+                    @${EVENT_ADJUST}="tickPerBeat = $event"
+                />
+            </div>
+        </div>
     </div>
-</div>
 `;
 
 //------------------------------------------------

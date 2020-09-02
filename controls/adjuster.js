@@ -37,6 +37,13 @@ Vue.component('value-adjuster', {
             type: Number,
             require: true,
         },
+        max: {
+            type: Number,
+        },
+        min: {
+            type: Number,
+            default: 0,
+        },
     },
     data: function() {
         return {
@@ -52,6 +59,10 @@ Vue.component('value-adjuster', {
     },
     methods: {
         valueChange(valueNew) {
+            valueNew = Math.max(this.min, valueNew);
+            if(Number.isFinite(this.max)) {
+                valueNew = Math.min(this.max, valueNew);
+            }
             this.$emit(EVENT_ADJUST, valueNew);
         },
         handleClick(eventClick) {
