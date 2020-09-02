@@ -13,6 +13,7 @@ import {
     handleMouseLeave,
     handleWheel,
     handleKeyDown,
+    parseInputDelete,
 } from './input.js';
 import {
     setup as setupCanvas,
@@ -48,6 +49,7 @@ import {
 //     CONTROL_GROUP_INSTRUMENT_SELECT,
 //     CONTROL_GROUP_FILE_MANAGEMENT,
 } from '../utilities.js';
+import { CHANNELS_NUMBER } from '../processor.js';
 // import { groupRegister } from '../pane/pane_control.js';
 
 //------------------------------------------------
@@ -96,6 +98,13 @@ Vue.component('editor-pattern', {
         scrollBy: scrollBy,
         scrollTo: scrollTo,
         scrollCheck: scrollCheck,
+        // Input Parsing
+        parseInputDelete: parseInputDelete,
+        // Pattern Editing
+        cellGet(row, channel) {
+            const compoundIndex = channel + (row*CHANNELS_NUMBER);
+            return this.pattern[compoundIndex];
+        },
         // Drawing
         draw() {
             if(this.drawWaiting) { return true;}

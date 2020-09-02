@@ -4,20 +4,24 @@
 
 //-- Dependencies --------------------------------
 import {
-    // CELL_WIDTH,
+    CELL_WIDTH,
     // DISPLAY_HEIGHT,
     WIDTH_LINE_NUMBER,
 } from './canvas.js';
 // import {
 //     // cellGet,
-//     // editCell,
-//     // editCellNote,
-//     // editCellInstrument,
-//     // editCellVolume,
-//     // editCellEffects,
+//     // cellEdit,
+//     // cellEditNote,
+//     // cellEditInstrument,
+//     // cellEditVolume,
+//     // cellEditEffects,
 //     // lengthGet,
 // } from './pattern.js';
-import { CHANNELS_NUMBER } from '../processor.js';
+import {
+    cell,
+    cellParse,
+    CHANNELS_NUMBER,
+} from '../processor.js';
 import {
     // noteNameToNumber,
     // noteNumberToName,
@@ -110,13 +114,13 @@ export function handleKeyDown(eventKeyboard) {
     // }
     // Handle Movement, and special values
     switch(key) {
-        // case 'delete':
-        // case 'backspace':
-        //     parseDeleteInput();
-        //     return;
+        case 'delete':
+        case 'backspace':
+            this.parseInputDelete();
+            return;
         // case 'enter':
         //     if(!cursor) { break;}
-        //     editCellNote(
+        //     cellEditNote(
         //         cursor.posY,
         //         Math.floor(cursor.posX/CELL_WIDTH),
         //         MASK_CELL_NOTE_STOP,
@@ -182,11 +186,11 @@ export function handleKeyDown(eventKeyboard) {
 //         note = noteNameToNumber('C 2');
 //     }
 //     if(key === ']') {
-//         editCellNote(indexRow, indexChannel, note+1);
+//         cellEditNote(indexRow, indexChannel, note+1);
 //         return;
 //     }
 //     if(key === '[') {
-//         editCellNote(indexRow, indexChannel, note-1);
+//         cellEditNote(indexRow, indexChannel, note-1);
 //         return;
 //     }
 //     note = noteNumberToName(note);
@@ -200,7 +204,7 @@ export function handleKeyDown(eventKeyboard) {
 //         value = noteNameToNumber(`${key} ${octave}`);
 //     }
 //     if(Number.isFinite(value)) {
-//         editCellNote(indexRow, indexChannel, value);
+//         cellEditNote(indexRow, indexChannel, value);
 //     }
 // }
 // function parseNoiseInput(key) {
@@ -215,57 +219,63 @@ export function handleKeyDown(eventKeyboard) {
 //     if(key === ']') {
 //         note++;
 //         if(note > NOTE_NOISE_MAX) { note = 0;}
-//         editCellNote(indexRow, indexChannel, note);
+//         cellEditNote(indexRow, indexChannel, note);
 //         return;
 //     }
 //     if(key === '[') {
 //         note--;
 //         if(note < 0) { note = NOTE_NOISE_MAX;}
-//         editCellNote(indexRow, indexChannel, note);
+//         cellEditNote(indexRow, indexChannel, note);
 //         return;
 //     }
 //     note = parseInt(key, HEX);
 //     if(!Number.isFinite(note)) { return;}
-//     editCellNote(indexRow, indexChannel, note);
+//     cellEditNote(indexRow, indexChannel, note);
 // }
-// function parseDeleteInput() {
-//     const cursor = getCursor();
-//     if(cursor) {
-//         const indexRow = cursor.posY;
-//         const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
-//         const indexDigit = cursor.posX%CELL_WIDTH;
-//         const dataCellOld = cellGet(indexRow, indexChannel);
-//         let [note, instrument, volume, effect] = cellParse(dataCellOld);
-//         switch(indexDigit) {
-//             case 0: case 1: case 2:
-//                 note = undefined;
-//                 break;
-//             case 3:
-//                 instrument = undefined;
-//                 break;
-//             case 4: case 5:
-//                 volume = undefined;
-//                 break;
-//             case 6: case 7: case 8:
-//                 effect = undefined;
-//                 break;
-//         }
-//         const dataCellNew = cell(note, instrument, volume, effect);
-//         editCell(indexRow, indexChannel, dataCellNew);
-//     }
-//     const selection = getSelection()
-//     if(selection) {
-//         const posXStart = Math.floor(selection.posStartX / CELL_WIDTH);
-//         const posYStart = selection.posStartY;
-//         const posXEnd = Math.floor(selection.posEndX / CELL_WIDTH);
-//         const posYEnd = selection.posEndY;
-//         for(let posY = posYStart; posY <= posYEnd; posY++) {
-//             for(let posX = posXStart; posX <= posXEnd; posX++) {
-//                 editCell(posY, posX, 0);
-//             }
-//         }
-//     }
-// }
+export function parseInputDelete() {
+    if(this.cursor) {
+        const indexRow = this.cursor.posY;
+        const indexChannel = Math.floor(this.cursor.posX/CELL_WIDTH);
+        const indexDigit = this.cursor.posX%CELL_WIDTH;
+        const dataCellOld = this.cellGet(indexRow, indexChannel);
+        let [note, instrument, volume, effect] = cellParse(dataCellOld);
+        switch(indexDigit) {
+            case 0: case 1: case 2:
+                note = undefined;
+                break;
+            case 3:
+                instrument = undefined;
+                break;
+            case 4: case 5:
+                volume = undefined;
+                break;
+            case 6: case 7: case 8:
+                effect = undefined;
+                break;
+        }
+        const dataCellNew = cell(note, instrument, volume, effect);
+        this.$emit('cell-edit', {
+            row: indexRow,
+            channel: indexChannel,
+            value: dataCellNew,
+        });
+    }
+    if(this.selection) {
+        const posXStart = Math.floor(this.selection.posStartX / CELL_WIDTH);
+        const posYStart = this.selection.posStartY;
+        const posXEnd = Math.floor(this.selection.posEndX / CELL_WIDTH);
+        const posYEnd = this.selection.posEndY;
+        for(let posY = posYStart; posY <= posYEnd; posY++) {
+            for(let posX = posXStart; posX <= posXEnd; posX++) {
+                this.$emit('cell-edit', {
+                    row: posY,
+                    channel: posX,
+                    value: 0,
+                });
+            }
+        }
+    }
+}
 // function parseCellInput(digit, posX, posY) {
 //     const value = parseInt(digit, HEX);
 //     const indexRow = posY;
@@ -281,36 +291,36 @@ export function handleKeyDown(eventKeyboard) {
 //     //
 //     switch(indexDigit) {
 //         case 3:
-//             editCellInstrument(indexRow, indexChannel, value);
+//             cellEditInstrument(indexRow, indexChannel, value);
 //             break;
 //         case 4: {
 //             let sV = volume.toString(HEX).padStart(2,'0');
 //             sV = `${digit}${sV[1]}`;
-//             editCellVolume(indexRow, indexChannel, parseInt(sV, HEX));
+//             cellEditVolume(indexRow, indexChannel, parseInt(sV, HEX));
 //             break;
 //         }
 //         case 5: {
 //             let sV = volume.toString(HEX).padStart(2,'0');
 //             sV = `${sV[0]}${digit}`;
-//             editCellVolume(indexRow, indexChannel, parseInt(sV, HEX));
+//             cellEditVolume(indexRow, indexChannel, parseInt(sV, HEX));
 //             break;
 //         }
 //         case 6: {
 //             let sE = effect.toString(HEX).padStart(3,'0');
 //             sE = `${digit}${sE[1]}${sE[2]}`;
-//             editCellEffects(indexRow, indexChannel, parseInt(sE, HEX));
+//             cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
 //             break;
 //         }
 //         case 7: {
 //             let sE = effect.toString(HEX).padStart(3,'0');
 //             sE = `${sE[0]}${digit}${sE[2]}`;
-//             editCellEffects(indexRow, indexChannel, parseInt(sE, HEX));
+//             cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
 //             break;
 //         }
 //         case 8: {
 //             let sE = effect.toString(HEX).padStart(3,'0');
 //             sE = `${sE[0]}${sE[1]}${digit}`;
-//             editCellEffects(indexRow, indexChannel, parseInt(sE, HEX));
+//             cellEditEffects(indexRow, indexChannel, parseInt(sE, HEX));
 //             break;
 //         }
 //     }
@@ -345,7 +355,7 @@ export function handleKeyDown(eventKeyboard) {
 //         for(let posX = posXStart; posX <= posXEnd; posX++) {
 //             clipBoard[posY-posYStart][posX-posXStart] = cellGet(posY, posX);
 //             if(clear) {
-//                 editCell(posY, posX, 0);
+//                 cellEdit(posY, posX, 0);
 //             }
 //         }
 //     }
@@ -366,7 +376,7 @@ export function handleKeyDown(eventKeyboard) {
 //     for(let posY = posYStart; posY <= posYEnd; posY++) {
 //         for(let posX = posXStart; posX <= posXEnd; posX++) {
 //             const cellData = clipBoard[posY-posYStart][posX-posXStart];
-//             editCell(posY, posX, cellData);
+//             cellEdit(posY, posX, cellData);
 //         }
 //     }
 // }

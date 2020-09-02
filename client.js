@@ -37,10 +37,13 @@ const ACTIONS_FILE_MANAGEMENT = [
 const TEMPLATE_EDITOR = `
     <div id=${DOM_ID_CLIENT}>
         <div id="editor" style="width:${DISPLAY_PIXEL_WIDTH}">
-            <editor-pattern
-                :pattern="patternCurrent"
-                :height="${DISPLAY_HEIGHT_DEFAULT}"
-            />
+            <keep-alive>
+                <editor-pattern
+                    :pattern="patternCurrent"
+                    :height="${DISPLAY_HEIGHT_DEFAULT}"
+                    @cell-edit="handleCellEdit"
+                />
+            </keep-alive>
         </div>
         <div id="controls">
             <div class="control_group">
@@ -85,28 +88,23 @@ Vue.component('song-editor', {
             patterns: [
                 Array.from(new Uint32Array(CHANNELS_NUMBER*64)),
             ],
+            patternCurrent: null,
             instrumentCurrentIndex: 0,
             instruments: [],
             actionsFile: ACTIONS_FILE_MANAGEMENT,
         };
     },
-    computed: {
-        patternCurrent() {
-            return this.patterns[this.patternCurrentIndex];
-        }
+    created() {
+        this.patternCurrent = this.patterns[this.patternCurrentIndex];
     },
     methods: {
-        handleAdjustVolume(valueNew) {
-            valueNew = Math.max(0, Math.min(VOLUME_MAX, valueNew));
-            this.volume = valueNew;
-        },
-        handleAdjustBPS(valueNew) {
-            valueNew = Math.max(0, Math.min(BPS_MAX, valueNew));
-            this.beatsPerSecond = valueNew;
-        },
-        handleAdjustTPB(valueNew) {
-            valueNew = Math.max(0, Math.min(TPB_MAX, valueNew));
-            this.ticksPerBeat = valueNew;
-        },
+        handleCellEdit(event) {
+            const compoundIndex = event.channel + (event.row * CHANNELS_NUMBER);
+            const patternOld = this.patterns[this.patternCurrentIndex];
+            const patternNew = patternOld.slice();
+            patternNew[compoundIndex] = event.value;
+            this.patterns[this.patternCurrentIndex] = patternNew;
+            this.patternCurrent = patternNew;
+        }
     },
 });

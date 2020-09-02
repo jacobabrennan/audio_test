@@ -118,11 +118,11 @@ export function cellGet(indexRow, indexChannel) {
     const compoundIndex = indexRow*CHANNELS_NUMBER+indexChannel;
     return patternCurrent.data[compoundIndex];
 }
-export function editCell(row, channel, cellData) {
+export function cellEdit(row, channel, cellData) {
     patternCurrent.data[(row*CHANNELS_NUMBER)+channel] = cellData;
     patternDisplay();
 }
-export function editCellNote(row, channel, noteNew) {
+export function cellEditNote(row, channel, noteNew) {
     const indexCell = row*CHANNELS_NUMBER + channel;
     let [noteOld, instrument, volume, effects] = cellParse(patternCurrent.data[indexCell]);
     if(noteNew !== MASK_CELL_NOTE_STOP) {
@@ -136,27 +136,27 @@ export function editCellNote(row, channel, noteNew) {
     noteNew &= Math.pow(2, MASK_CELL_NOTE_WIDTH)-1;
     const cellData = cell(noteNew, instrument, volume, effects);
     patternCurrent.data[indexCell] = cellData;
-    editCell(row, channel, cellData);
+    cellEdit(row, channel, cellData);
 }
-export function editCellInstrument(row, channel, instrument) {
+export function cellEditInstrument(row, channel, instrument) {
     const indexCell = row*CHANNELS_NUMBER + channel;
     let cellData = cellParse(patternCurrent.data[indexCell]);
     cellData = cell(cellData[0], instrument, cellData[2], cellData[3]);
-    editCell(row, channel, cellData);
+    cellEdit(row, channel, cellData);
 }
-export function editCellVolume(row, channel, volume) {
+export function cellEditVolume(row, channel, volume) {
     const volumeMax = Math.pow(2, MASK_CELL_VOLUME_WIDTH)-1;
     volume = Math.max(0, Math.min(volumeMax, volume));
     const indexCell = row*CHANNELS_NUMBER + channel;
     let cellData = cellParse(patternCurrent.data[indexCell]);
     cellData = cell(cellData[0], cellData[1], volume, cellData[3]);
     patternCurrent.data[indexCell] = cellData;
-    editCell(row, channel, cellData);
+    cellEdit(row, channel, cellData);
 }
-export function editCellEffects(row, channel, effects) {
+export function cellEditEffects(row, channel, effects) {
     const indexCell = row*CHANNELS_NUMBER + channel;
     let cellData = cellParse(patternCurrent.data[indexCell]);
     cellData = cell(cellData[0], cellData[1], cellData[2], effects);
     patternCurrent.data[indexCell] = cellData;
-    editCell(row, channel, cellData);
+    cellEdit(row, channel, cellData);
 }
