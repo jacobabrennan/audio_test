@@ -26,16 +26,6 @@ import { songSave, songLoad } from './file_management/controls.js';
 
 //-- Constants -----------------------------------
 const DOM_ID_CLIENT = 'client';
-const ACTIONS_FILE_MANAGEMENT = [
-    {
-        label: 'Save',
-        action: songSave
-    },
-    {
-        label: 'Load',
-        action: songLoad,
-    },
-];
 const TEMPLATE_EDITOR = `
     <div id=${DOM_ID_CLIENT}>
         <div id="editor" style="width:${DISPLAY_PIXEL_WIDTH}">
@@ -73,12 +63,15 @@ const TEMPLATE_EDITOR = `
                 />
             </div>
             <div class="control_group">
-                <value-adjuster
+                <div class="control_group">
+                    <button-bar :actions="actionsPattern" />
+                </div>
+                <!--<value-adjuster
                     label="Patterns"
                     :value="patterns.length"
                     :max="${PATTERNS_MAX}"
                     @${EVENT_ADJUST}=""
-                />
+                />-->
                 <option-selector
                     :value="patternCurrentIndex"
                     :height="8"
@@ -112,7 +105,6 @@ Vue.component('song-editor', {
             patternCurrent: null,
             instrumentCurrentIndex: 0,
             instruments: [],
-            actionsFile: ACTIONS_FILE_MANAGEMENT,
         };
     },
     created() {
@@ -121,7 +113,36 @@ Vue.component('song-editor', {
     computed: {
         patternNames() {
             return this.patterns.map((pattern, index) => `Pattern ${index}`);
-        }
+        },
+        actionsFile() {
+            return [
+                {
+                    label: 'Save',
+                    action: () => undefined,
+                },
+                {
+                    label: 'Load',
+                    action: () => undefined,
+                },
+            ];
+        },
+        actionsPattern() {
+            return [
+                {
+                    label: 'New P.',
+                    action: () => {
+                        const patternNew = new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT);
+                        this.patterns.push(patternNew);
+                        this.patternCurrent = patternNew;
+                        this.patternCurrentIndex = this.patterns.length-1;
+                    },
+                },
+                {
+                    label: 'Del P.',
+                    action: () => undefined,
+                },
+            ];
+        },
     },
     methods: {
         handleCellEdit(event) {
@@ -153,6 +174,6 @@ Vue.component('song-editor', {
             if(indexNew < 0 || indexNew >= this.patterns.length) { return;}
             this.patternCurrentIndex = indexNew;
             this.patternCurrent = this.patterns[this.patternCurrentIndex];
-        }
+        },
     },
 });
