@@ -5,7 +5,6 @@
 
 //-- Dependencies --------------------------------
 import Vue from './libraries/vue.esm.browser.js';
-// import './pane/pane_control.js';
 // import './pane/pane_editor.js';
 import './editor_pattern/index.js';
 import {
