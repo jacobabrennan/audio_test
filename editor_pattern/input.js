@@ -21,10 +21,12 @@ import {
     cell,
     cellParse,
     CHANNELS_NUMBER,
+    MASK_CELL_NOTE_STOP,
+    CHANNEL_NOISE,
 } from '../processor.js';
 import {
-    // noteNameToNumber,
-    // noteNumberToName,
+    noteNameToNumber,
+    noteNumberToName,
     FONT_SIZE,
 } from '../utilities.js';
 
@@ -120,14 +122,14 @@ export function handleKeyDown(eventKeyboard) {
         case 'backspace':
             this.parseInputDelete();
             return;
-        // case 'enter':
-        //     if(!cursor) { break;}
-        //     cellEditNote(
-        //         cursor.posY,
-        //         Math.floor(cursor.posX/CELL_WIDTH),
-        //         MASK_CELL_NOTE_STOP,
-        //     );
-        //     return;
+        case 'enter':
+            if(!this.cursor) { break;}
+            this.cellEditNote(
+                this.cursor.posY,
+                Math.floor(this.cursor.posX/CELL_WIDTH),
+                MASK_CELL_NOTE_STOP,
+            );
+            return;
         case 'arrowup':
             this.cursorMove(0, -1);
             return;
@@ -151,16 +153,16 @@ export function handleKeyDown(eventKeyboard) {
             return;
         }
     }
-    // //
-    // if(!this.cursor) { return;}
-    // //
-    // if(key.length !== 1) { return;}
-    // // Handle Note Entry
-    // let indexDigit = cursor.posX%CELL_WIDTH;
-    // if(indexDigit < 3) {
-    //     parseNoteInput(key);
-    //     return;
-    // }
+    //
+    if(!this.cursor) { return;}
+    //
+    if(key.length !== 1) { return;}
+    // Handle Note Entry
+    let indexDigit = this.cursor.posX%CELL_WIDTH;
+    if(indexDigit < 3) {
+        this.parseNoteInput(key);
+        return;
+    }
     // // Handle entry of digits
     // let digit = (key.length === 1)? key.match(/[0-9a-f]/i) : null;
     // digit = digit? digit[0] : null;
@@ -172,68 +174,66 @@ export function handleKeyDown(eventKeyboard) {
 
 
 
-// //-- Input Interpretors --------------------------
-// function parseNoteInput(key) {
-//     key = key.toUpperCase();
-//     const cursor = getCursor();
-//     if(!cursor) { return;}
-//     const indexRow = cursor.posY;
-//     const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
-//     if(indexChannel === CHANNEL_NOISE) {
-//         return parseNoiseInput(key);
-//     }
-//     const dataCell = cellGet(indexRow, indexChannel);
-//     let note = cellParse(dataCell)[0];
-//     if(note === undefined) {
-//         note = noteNameToNumber('C 2');
-//     }
-//     if(key === ']') {
-//         cellEditNote(indexRow, indexChannel, note+1);
-//         return;
-//     }
-//     if(key === '[') {
-//         cellEditNote(indexRow, indexChannel, note-1);
-//         return;
-//     }
-//     note = noteNumberToName(note);
-//     let octave = note[2];
-//     let letter = note[0];
-//     let keyNumber = parseInt(key);
-//     let value;
-//     if(Number.isFinite(keyNumber)) {
-//         value = noteNameToNumber(`${letter} ${keyNumber}`);
-//     } else {
-//         value = noteNameToNumber(`${key} ${octave}`);
-//     }
-//     if(Number.isFinite(value)) {
-//         cellEditNote(indexRow, indexChannel, value);
-//     }
-// }
-// function parseNoiseInput(key) {
-//     key = key.toUpperCase();
-//     const cursor = getCursor();
-//     if(!cursor) { return;}
-//     const indexRow = cursor.posY;
-//     const indexChannel = Math.floor(cursor.posX/CELL_WIDTH);
-//     const dataCell = cellGet(indexRow, indexChannel);
-//     let note = cellParse(dataCell)[0];
-//     if(note === undefined) { note = 0;}
-//     if(key === ']') {
-//         note++;
-//         if(note > NOTE_NOISE_MAX) { note = 0;}
-//         cellEditNote(indexRow, indexChannel, note);
-//         return;
-//     }
-//     if(key === '[') {
-//         note--;
-//         if(note < 0) { note = NOTE_NOISE_MAX;}
-//         cellEditNote(indexRow, indexChannel, note);
-//         return;
-//     }
-//     note = parseInt(key, HEX);
-//     if(!Number.isFinite(note)) { return;}
-//     cellEditNote(indexRow, indexChannel, note);
-// }
+//-- Input Interpretors --------------------------
+export function parseNoteInput(key) {
+    key = key.toUpperCase();
+    if(!this.cursor) { return;}
+    const indexRow = this.cursor.posY;
+    const indexChannel = Math.floor(this.cursor.posX/CELL_WIDTH);
+    if(indexChannel === CHANNEL_NOISE) {
+        return this.parseNoiseInput(key);
+    }
+    const dataCell = this.cellGet(indexRow, indexChannel);
+    let note = cellParse(dataCell)[0];
+    if(note === undefined) {
+        note = noteNameToNumber('C 2');
+    }
+    if(key === ']') {
+        this.cellEditNote(indexRow, indexChannel, note+1);
+        return;
+    }
+    if(key === '[') {
+        this.cellEditNote(indexRow, indexChannel, note-1);
+        return;
+    }
+    note = noteNumberToName(note);
+    let octave = note[2];
+    let letter = note[0];
+    let keyNumber = parseInt(key);
+    let value;
+    if(Number.isFinite(keyNumber)) {
+        value = noteNameToNumber(`${letter} ${keyNumber}`);
+    } else {
+        value = noteNameToNumber(`${key} ${octave}`);
+    }
+    if(Number.isFinite(value)) {
+        this.cellEditNote(indexRow, indexChannel, value);
+    }
+}
+export function parseNoiseInput(key) {
+    key = key.toUpperCase();
+    if(!this.cursor) { return;}
+    const indexRow = this.cursor.posY;
+    const indexChannel = Math.floor(this.cursor.posX/CELL_WIDTH);
+    const dataCell = this.cellGet(indexRow, indexChannel);
+    let note = cellParse(dataCell)[0];
+    if(note === undefined) { note = 0;}
+    if(key === ']') {
+        note++;
+        if(note > NOTE_NOISE_MAX) { note = 0;}
+        this.cellEditNote(indexRow, indexChannel, note);
+        return;
+    }
+    if(key === '[') {
+        note--;
+        if(note < 0) { note = NOTE_NOISE_MAX;}
+        this.cellEditNote(indexRow, indexChannel, note);
+        return;
+    }
+    note = parseInt(key, HEX);
+    if(!Number.isFinite(note)) { return;}
+    this.cellEditNote(indexRow, indexChannel, note);
+}
 export function parseInputDelete() {
     if(this.cursor) {
         const indexRow = this.cursor.posY;
@@ -256,11 +256,7 @@ export function parseInputDelete() {
                 break;
         }
         const dataCellNew = cell(note, instrument, volume, effect);
-        this.$emit('cell-edit', {
-            row: indexRow,
-            channel: indexChannel,
-            value: dataCellNew,
-        });
+        this.cellEdit(indexRow, indexChannel, dataCellNew);
     }
     if(this.selection) {
         const posXStart = Math.floor(this.selection.posStartX / CELL_WIDTH);
@@ -269,11 +265,7 @@ export function parseInputDelete() {
         const posYEnd = this.selection.posEndY;
         for(let posY = posYStart; posY <= posYEnd; posY++) {
             for(let posX = posXStart; posX <= posXEnd; posX++) {
-                this.$emit('cell-edit', {
-                    row: posY,
-                    channel: posX,
-                    value: 0,
-                });
+                this.cellEdit(posY, posX, 0);
             }
         }
     }

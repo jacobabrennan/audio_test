@@ -14,6 +14,8 @@ import {
     handleWheel,
     handleKeyDown,
     parseInputDelete,
+    parseNoteInput,
+    parseNoiseInput,
 } from './input.js';
 import {
     setup as setupCanvas,
@@ -50,6 +52,7 @@ import {
 //     CONTROL_GROUP_FILE_MANAGEMENT,
 } from '../utilities.js';
 import { CHANNELS_NUMBER } from '../processor.js';
+import { cellGet, cellEdit, cellEditNote } from '../pattern/pattern.js';
 // import { groupRegister } from '../pane/pane_control.js';
 
 //------------------------------------------------
@@ -101,10 +104,11 @@ Vue.component('editor-pattern', {
         // Input Parsing
         parseInputDelete: parseInputDelete,
         // Pattern Editing
-        cellGet(row, channel) {
-            const compoundIndex = channel + (row*CHANNELS_NUMBER);
-            return this.pattern[compoundIndex];
-        },
+        cellGet: cellGet,
+        cellEdit: cellEdit,
+        cellEditNote: cellEditNote,
+        parseNoteInput: parseNoteInput,
+        parseNoiseInput: parseNoiseInput,
         // Drawing
         draw() {
             if(this.drawWaiting) { return true;}
