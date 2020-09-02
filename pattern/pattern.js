@@ -15,8 +15,6 @@ import {
     MASK_CELL_NOTE_STOP,
     HEX,
 } from '../processor.js';
-// import { patternDisplay } from './canvas.js';
-// import { instrumentIndexGet } from '../editor_instrument/instrument.js';
 
 //-- Constants -----------------------------------
 export const DEFAULT_ROWS = 32;

@@ -76,7 +76,7 @@ Vue.component('editor-pattern', {
     />`,
     props: {
         pattern: {
-            Array,
+            Uint32Array,
             required: true,
         },
         height: {

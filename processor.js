@@ -16,6 +16,7 @@ export const VOLUME_MAX = 63;
 export const CHANNELS_NUMBER = 5;
 export const CHANNEL_NOISE = 4;
 export const PATTERNS_MAX = 16;
+export const PATTERN_LENGTH_MAX = 256;
 // Pattern cell data masking
 // 0b NIVE NNNNNN IIII VVVVVV EEEEEEEEEEEE 
 export const MASK_CELL_FLAG_NOTE       = 0b10000000000000000000000000000000;
