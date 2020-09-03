@@ -7,6 +7,9 @@
 import Vue from './libraries/vue.esm.browser.js';
 import './editor_pattern/index.js';
 import {
+    ACTION_SONG,
+    ACTION_PLAYBACK_PLAY,
+    ACTION_PLAYBACK_STOP,
     BPS_DEFAULT,
     TPB_DEFAULT,
     CHANNELS_NUMBER,
@@ -23,6 +26,9 @@ import { EVENT_OPTION_SELECT } from './controls/selector.js';
 import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
 import { EVENT_ADJUST } from './controls/adjuster.js';
 import { songSave, songLoad } from './file_management/controls.js';
+import {
+    messageSend,
+} from './worklet_interface.js';
 
 //-- Constants -----------------------------------
 const DOM_ID_CLIENT = 'client';
@@ -41,6 +47,9 @@ const TEMPLATE_EDITOR = `
         <div id="controls">
             <div class="control_group">
                 <button-bar :actions="actionsFile" />
+            </div>
+            <div class="control_group">
+                <button-bar :actions="actionsPlayback" />
             </div>
             <div class="control_group">
                 <value-adjuster
@@ -114,6 +123,23 @@ Vue.component('song-editor', {
         patternNames() {
             return this.patterns.map((pattern, index) => `Pattern ${index}`);
         },
+        actionsPlayback() {
+            return [
+                {
+                    label: 'Play',
+                    action: async () => {
+                        await messageSend(ACTION_SONG, this.songCompile());
+                        await messageSend(ACTION_PLAYBACK_PLAY, {/* Currently empty */});
+                    }
+                },
+                {
+                    label: 'Stop',
+                    action: () => {
+                        messageSend(ACTION_PLAYBACK_STOP, {/* Currently empty */});
+                    }
+                },
+            ]
+        },
         actionsFile() {
             return [
                 {
@@ -154,6 +180,15 @@ Vue.component('song-editor', {
         },
     },
     methods: {
+        songCompile() {
+            return {
+                volume: this.volume,
+                bps: this.beatsPerSecond,
+                tpb: this.ticksPerBeat,
+                patterns: this.patterns,
+                instruments: this.instruments,
+            };
+        },
         handleCellEdit(event) {
             const compoundIndex = event.channel + (event.row * CHANNELS_NUMBER);
             const patternOld = this.patternCurrent;
@@ -163,7 +198,6 @@ Vue.component('song-editor', {
             this.patternCurrent = patternNew;
         },
         handlePatternLength(rowsNew) {
-            console.log(rowsNew)
             const patternOld = this.patternCurrent;
             const rowsOld = this.patternCurrent.length / CHANNELS_NUMBER;
             if(rowsOld === rowsNew) { return;}

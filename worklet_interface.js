@@ -8,7 +8,7 @@ import {
     RESPONSE_PATTERN_ROW,
     RESPONSE_SONG_END,
 } from './processor.js';
-import { highlightRow } from './editor_pattern/index.js';
+// import { highlightRow } from './editor_pattern/index.js';
 
 //-- Module State --------------------------------
 let processor;
@@ -48,7 +48,7 @@ export async function messageSend(action, data) {
 export async function messageReceive(action, data) {
     switch(action) {
         case RESPONSE_PATTERN_ROW: {
-            highlightRow(data.row, data.patternId, true);
+            // highlightRow(data.row, data.patternId, true);
             break;
         }
         case RESPONSE_SONG_END: {
