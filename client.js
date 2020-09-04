@@ -18,6 +18,8 @@ import {
     TPB_MAX,
     PATTERNS_MAX,
     PATTERN_LENGTH_MAX,
+    RESPONSE_PATTERN_ROW,
+    RESPONSE_SONG_END,
 } from './processor.js';
 import {
     DISPLAY_HEIGHT_DEFAULT,
@@ -26,14 +28,19 @@ import { EVENT_OPTION_SELECT } from './controls/selector.js';
 import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
 import { EVENT_ADJUST } from './controls/adjuster.js';
 import { songSave, songLoad } from './file_management/controls.js';
-import {
-    messageSend,
-} from './worklet_interface.js';
-
+import AudioProcessor from './worklet_interface.js';
+Vue.component('derp-derp', {
+    render() {
+        return;
+    }
+});
 //-- Constants -----------------------------------
 const DOM_ID_CLIENT = 'client';
 const TEMPLATE_EDITOR = `
     <div id=${DOM_ID_CLIENT}>
+        <keep-alive>
+            <derp-derp />
+        </keep-alive>
         <div id="editor" style="width:${DISPLAY_PIXEL_WIDTH}">
             <keep-alive>
                 <editor-pattern
@@ -112,6 +119,9 @@ Vue.component('song-editor', {
     },
     created() {
         this.patternCurrent = this.patterns[this.patternCurrentIndex];
+        this.processor = new AudioProcessor((action, data) => {
+            this.handleMessageAudio(action, data);
+        });
     },
     computed: {
         patternNames() {
@@ -122,14 +132,14 @@ Vue.component('song-editor', {
                 {
                     label: 'Play',
                     action: async () => {
-                        await messageSend(ACTION_SONG, this.songCompile());
-                        await messageSend(ACTION_PLAYBACK_PLAY, {/* Currently empty */});
+                        await this.processor.messageSend(ACTION_SONG, this.songCompile());
+                        await this.processor.messageSend(ACTION_PLAYBACK_PLAY, {/* Currently empty */});
                     }
                 },
                 {
                     label: 'Stop',
                     action: () => {
-                        messageSend(ACTION_PLAYBACK_STOP, {/* Currently empty */});
+                        this.processor.messageSend(ACTION_PLAYBACK_STOP, {/* Currently empty */});
                     }
                 },
             ]
@@ -213,5 +223,17 @@ Vue.component('song-editor', {
             this.patternCurrentIndex = indexNew;
             this.patternCurrent = this.patterns[this.patternCurrentIndex];
         },
+        handleMessageAudio(action, data) {
+            switch(action) {
+                case RESPONSE_PATTERN_ROW: {
+                    // highlightRow(data.row, data.patternId, true);
+                    break;
+                }
+                case RESPONSE_SONG_END: {
+                    console.log('Song Ended');
+                    break;
+                }
+            }
+        }
     },
 });

@@ -34,7 +34,6 @@ import {
 import {
     contextConfigure
 } from '../utilities.js';
-// import { CHANNELS_NUMBER } from '../processor.js';
 import {
     cellGet,
     cellEdit,
@@ -148,19 +147,3 @@ Vue.component('editor-pattern', {
         },
     }
 });
-
-//-- Setup ---------------------------------------
-// export function patternEditorShown() {
-//     canvasHeightSet(DISPLAY_HEIGHT);
-// }
-
-// //-- Pattern Display -----------------------------
-// export function highlightRow(indexRow, indexPattern, scroll) {
-//     if(indexPattern !== undefined) {
-//         patternSelect(indexPattern);
-//         patternListUpdate();
-//     }
-//     cursorHighlight(indexRow);
-//     patternDisplay();
-//     return true;
-// }
