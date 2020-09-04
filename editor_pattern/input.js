@@ -93,20 +93,20 @@ export function handleWheel(eventWheel) {
 export function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
     // Handle Copy / Paste
-    // if(eventKeyboard.ctrlKey) {
-    //     switch(key) {
-    //         case 'c':
-    //             commandCopy();
-    //             break;
-    //         case 'v':
-    //             commandPaste();
-    //             break;
-    //         case 'x':
-    //             commandCopy(true);
-    //             break;
-    //     }
-    //     return;
-    // }
+    if(eventKeyboard.ctrlKey) {
+        switch(key) {
+            // case 'c':
+            //     commandCopy();
+            //     break;
+            // case 'v':
+            //     commandPaste();
+            //     break;
+            case 'x':
+                this.commandCopy(true);
+                break;
+        }
+        return;
+    }
     // Handle Movement, and special values
     switch(key) {
         case 'delete':
@@ -310,41 +310,39 @@ export function parseCellInput(digit, posX, posY) {
         }
     }
 }
-// function commandCopy(clear) {
-//     //
-//     let posXStart;
-//     let posXEnd;
-//     let posYStart;
-//     let posYEnd;
-//     const cursor = getCursor();
-//     const selection = getSelection();
-//     if(selection) {
-//         posXStart = selection.posStartX;
-//         posXEnd = selection.posEndX;
-//         posYStart = selection.posStartY;
-//         posYEnd = selection.posEndY;
-//     }
-//     else if(cursor) {
-//         posXStart = cursor.posX;
-//         posXEnd = cursor.posX;
-//         posYStart = cursor.posY;
-//         posYEnd = cursor.posY;
-//     }
-//     else { return;}
-//     posXStart = Math.floor(posXStart / CELL_WIDTH);
-//     posXEnd = Math.floor(posXEnd / CELL_WIDTH);
-//     //
-//     clipBoard = [];
-//     for(let posY = posYStart; posY <= posYEnd; posY++) {
-//         clipBoard[posY-posYStart] = [];
-//         for(let posX = posXStart; posX <= posXEnd; posX++) {
-//             clipBoard[posY-posYStart][posX-posXStart] = cellGet(posY, posX);
-//             if(clear) {
-//                 cellEdit(posY, posX, 0);
-//             }
-//         }
-//     }
-// }
+export function commandCopy(clear) {
+    //
+    let posXStart;
+    let posXEnd;
+    let posYStart;
+    let posYEnd;
+    if(this.selection) {
+        posXStart = this.selection.posStartX;
+        posXEnd = this.selection.posEndX;
+        posYStart = this.selection.posStartY;
+        posYEnd = this.selection.posEndY;
+    }
+    else if(this.cursor) {
+        posXStart = this.cursor.posX;
+        posXEnd = this.cursor.posX;
+        posYStart = this.cursor.posY;
+        posYEnd = this.cursor.posY;
+    }
+    else { return;}
+    posXStart = Math.floor(posXStart / CELL_WIDTH);
+    posXEnd = Math.floor(posXEnd / CELL_WIDTH);
+    //
+    this.clipBoard = [];
+    for(let posY = posYStart; posY <= posYEnd; posY++) {
+        this.clipBoard[posY-posYStart] = [];
+        for(let posX = posXStart; posX <= posXEnd; posX++) {
+            this.clipBoard[posY-posYStart][posX-posXStart] = this.cellGet(posY, posX);
+            if(clear) {
+                this.cellEdit(posY, posX, 0);
+            }
+        }
+    }
+}
 // function commandPaste() {
 //     //
 //     const cursor = getCursor();
