@@ -95,9 +95,9 @@ export function handleKeyDown(eventKeyboard) {
     // Handle Copy / Paste
     if(eventKeyboard.ctrlKey) {
         switch(key) {
-            // case 'c':
-            //     commandCopy();
-            //     break;
+            case 'c':
+                this.commandCopy();
+                break;
             case 'v':
                 this.commandPaste();
                 break;
