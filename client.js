@@ -47,6 +47,7 @@ const TEMPLATE_EDITOR = `
                     :pattern="patternCurrent"
                     :height="${DISPLAY_HEIGHT_DEFAULT}"
                     :instrument="instrumentCurrentIndex"
+                    :highlight-row="highlightRow"
                     @cell-edit="handleCellEdit"
                 />
             </keep-alive>
@@ -108,6 +109,7 @@ Vue.component('song-editor', {
             volume: 4,
             beatsPerSecond: BPS_DEFAULT,
             ticksPerBeat: TPB_DEFAULT,
+            highlightRow: null,
             patternCurrentIndex: 0,
             patterns: [
                 new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT),
@@ -226,7 +228,8 @@ Vue.component('song-editor', {
         handleMessageAudio(action, data) {
             switch(action) {
                 case RESPONSE_PATTERN_ROW: {
-                    // highlightRow(data.row, data.patternId, true);
+                    this.patternCurrentIndex = data.patternId;
+                    this.highlightRow = data.row;
                     break;
                 }
                 case RESPONSE_SONG_END: {

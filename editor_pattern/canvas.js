@@ -104,6 +104,11 @@ export function patternDisplay(context, patternGrid, cursor, selection, scrollY)
     context.save();
     // Get pattern and interface state
     const rows = patternGrid.length / (CELL_WIDTH*CHANNELS_NUMBER);
+    // Determine row highlight, if any
+    let highlightRow;
+    if(cursor && !selection) {
+        highlightRow = cursor.posY;
+    }
     // Draw character grid (the whole big deal)
     context.fillStyle = COLOR_BG;
     context.fillRect(0,0,context.canvas.width, context.canvas.height);
@@ -114,9 +119,9 @@ export function patternDisplay(context, patternGrid, cursor, selection, scrollY)
             0, row-scrollY,
             '#888', background,
         );
-        // if(cursor && row === cursor.posY && !selection) {
-        //     background = '#606';
-        // }
+        if(row === highlightRow) {
+            background = '#606';
+        }
         for(let channel = 0; channel < CHANNELS_NUMBER; channel++) {
             const offsetChannel = channel*CELL_WIDTH;
             drawGridPos(context, patternGrid, scrollY, offsetChannel+0, row, '#fff', background);

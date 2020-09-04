@@ -67,6 +67,7 @@ Vue.component('editor-pattern', {
             type: Number,
             require: true,
         },
+        highlightRow: Number,
     },
     data() {
         return {
