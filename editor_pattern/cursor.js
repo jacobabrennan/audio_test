@@ -21,11 +21,17 @@ export function cursorPosition(posX, posY) {
 }
 export function cursorSelect(posDownX, posDownY, posUpX, posUpY) {
     this.cursor = null;
+    let posStartX = Math.min(posDownX, posUpX);
+    let posStartY = Math.min(posDownY, posUpY);
+    let posEndX = Math.max(posDownX, posUpX);
+    let posEndY = Math.max(posDownY, posUpY);
+    posStartX = posStartX - posStartX%CELL_WIDTH;
+    posEndX = (posEndX - posEndX%CELL_WIDTH) + (CELL_WIDTH-1);
     this.selection = {
-        posStartX: Math.min(posDownX, posUpX),
-        posStartY: Math.min(posDownY, posUpY),
-        posEndX: Math.max(posDownX, posUpX),
-        posEndY: Math.max(posDownY, posUpY),
+        posStartX: posStartX,
+        posStartY: posStartY,
+        posEndX: posEndX,
+        posEndY: posEndY,
     };
 }
 export function cursorHighlight(indexRow) {
