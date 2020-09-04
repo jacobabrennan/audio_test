@@ -5,18 +5,8 @@
 //-- Dependencies --------------------------------
 import {
     CELL_WIDTH,
-    // DISPLAY_HEIGHT,
     WIDTH_LINE_NUMBER,
 } from './canvas.js';
-// import {
-//     // cellGet,
-//     // cellEdit,
-//     // cellEditNote,
-//     // cellEditInstrument,
-//     // cellEditVolume,
-//     // cellEditEffects,
-//     // lengthGet,
-// } from './pattern.js';
 import {
     cell,
     cellParse,

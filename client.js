@@ -51,7 +51,6 @@ const TEMPLATE_EDITOR = `
             <div class="control_group">
                 <button-bar :actions="actionsPlayback" />
             </div>
-            <div @click="patternCurrentIndex = 10">Derp</div>
             <div class="control_group">
                 <value-adjuster
                     label="Volume"
