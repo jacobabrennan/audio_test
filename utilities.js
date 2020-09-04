@@ -52,7 +52,7 @@ export function contextConfigure(context) {
 import {
     MASK_CELL_NOTE_WIDTH,
     MASK_CELL_NOTE_STOP,
-} from './processor.js';
+} from './libraries/audio_processor.js';
 
 //-- Constants -----------------------------------
 const noteLetters = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];

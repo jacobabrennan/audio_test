@@ -14,7 +14,7 @@ import {
     CHANNELS_NUMBER,
     HEX,
     MASK_CELL_NOTE_STOP,
-} from '../processor.js';
+} from '../libraries/audio_processor.js';
 import {
     noteNameToNumber,
     noteNumberToName,
@@ -162,8 +162,6 @@ export function handleKeyDown(eventKeyboard) {
         return;
     }
 }
-
-
 
 //-- Input Interpretors --------------------------
 export function parseNoteInput(key) {

@@ -12,7 +12,7 @@ import {
     CHANNEL_NOISE,
     NOTE_NOISE_MAX,
     MASK_CELL_NOTE_STOP,
-} from '../processor.js';
+} from '../libraries/audio_processor.js';
 
 //-- Cell Data Editing ---------------------------
 export function cellGet(indexRow, indexChannel) {

@@ -9,7 +9,7 @@ import {
     HEX,
     CHANNEL_NOISE,
     MASK_CELL_NOTE_STOP,
-} from '../processor.js';
+} from '../libraries/audio_processor.js';
 import {
     noteNumberToName,
     contextConfigure,

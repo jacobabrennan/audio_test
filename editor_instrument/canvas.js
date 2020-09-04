@@ -3,7 +3,7 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import { TAU } from '../processor.js';
+import { TAU } from '../libraries/audio_processor.js';
 import {
     contextConfigure,
     COLOR_BG,

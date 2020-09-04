@@ -3,7 +3,7 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import { HEX } from '../processor.js';
+import { HEX } from '../libraries/audio_processor.js';
 
 //-- Module State --------------------------------
 const instruments = [];

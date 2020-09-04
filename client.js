@@ -6,7 +6,7 @@
 //-- Dependencies --------------------------------
 import Vue from './libraries/vue.esm.browser.js';
 import './editor_pattern/index.js';
-import {
+import AudioMessageInterface, {
     ACTION_SONG,
     ACTION_PLAYBACK_PLAY,
     ACTION_PLAYBACK_STOP,
@@ -20,7 +20,7 @@ import {
     PATTERN_LENGTH_MAX,
     RESPONSE_PATTERN_ROW,
     RESPONSE_SONG_END,
-} from './processor.js';
+} from './libraries/audio_processor.js';
 import {
     DISPLAY_HEIGHT_DEFAULT,
 } from './utilities.js';
@@ -28,7 +28,6 @@ import { EVENT_OPTION_SELECT } from './controls/selector.js';
 import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
 import { EVENT_ADJUST } from './controls/adjuster.js';
 import { songSave, songLoad } from './file_management/controls.js';
-import AudioProcessor from './worklet_interface.js';
 Vue.component('derp-derp', {
     render() {
         return;
@@ -121,7 +120,7 @@ Vue.component('song-editor', {
     },
     created() {
         this.patternCurrent = this.patterns[this.patternCurrentIndex];
-        this.processor = new AudioProcessor((action, data) => {
+        this.processor = new AudioMessageInterface((action, data) => {
             this.handleMessageAudio(action, data);
         });
     },

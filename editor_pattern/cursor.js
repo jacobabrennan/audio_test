@@ -5,7 +5,7 @@
 //-- Dependencies --------------------------------
 import {
     CHANNELS_NUMBER,
-} from '../processor.js';
+} from '../libraries/audio_processor.js';
 import {
     CELL_WIDTH,
 } from './canvas.js';
