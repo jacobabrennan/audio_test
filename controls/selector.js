@@ -1,6 +1,15 @@
 
 
 //==============================================================================
+/*
+    There are various kludgy solutions in this component, designed to get around
+    default behavior in the <select> element that can't currently be overridden
+    via CSS. The currently selected <option> will always display with system
+    defined colors. In order to display custom colors, the option is deselected
+    and blurred after selection; value management and styles are handled
+    manually. This has the side effect of scrolling the <select> to y=0. For
+    this reason, scrolling after selection is also handled manually.
+*/
 
 //-- Dependencies --------------------------------
 import Vue from '../libraries/vue.esm.browser.js';
@@ -13,7 +22,6 @@ import {
 //-- Constants -----------------------------------
 export const EVENT_OPTION_SELECT = 'option-select';
 
-// <!-- Option derp is a hack to get around the lack of css option colors -->
 //------------------------------------------------
 Vue.component('option-selector', {
     template: (`
@@ -63,15 +71,29 @@ Vue.component('option-selector', {
     },
     mounted() {
         this.$el.value = null;
+        this.scrollTopOld = this.$el.scrollTop;
+    },
+    updated() {
+        const heightLine = this.$el.clientHeight / this.height;
+        const scrollPosSelected = this.value * heightLine;
+        if(this.$el.scrollTop > scrollPosSelected) {
+            this.$el.scrollTo(0, scrollPosSelected);
+        }
+        else if(this.$el.scrollTop+this.$el.clientHeight < (this.value+1)*heightLine) {
+            this.$el.scrollTo(0, (scrollPosSelected-this.$el.clientHeight)+heightLine);
+        }
     },
     methods: {
         select() {
+            const scrollTopOld = this.$el.scrollTop;
             for(let option of this.$el.selectedOptions) {
                 option.blur();
             }
             this.$el.blur();
-            this.$emit(EVENT_OPTION_SELECT, parseInt(this.$el.value));
+            const value = this.$el.value;
             this.$el.value = null;
+            this.$emit(EVENT_OPTION_SELECT, parseInt(value));
+            this.$el.scrollTop = scrollTopOld;
         }
-    }
+    },
 });

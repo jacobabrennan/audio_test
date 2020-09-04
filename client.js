@@ -51,6 +51,7 @@ const TEMPLATE_EDITOR = `
             <div class="control_group">
                 <button-bar :actions="actionsPlayback" />
             </div>
+            <div @click="patternCurrentIndex = 10">Derp</div>
             <div class="control_group">
                 <value-adjuster
                     label="Volume"
@@ -75,12 +76,6 @@ const TEMPLATE_EDITOR = `
                 <div class="control_group">
                     <button-bar :actions="actionsPattern" />
                 </div>
-                <!--<value-adjuster
-                    label="Patterns"
-                    :value="patterns.length"
-                    :max="${PATTERNS_MAX}"
-                    @${EVENT_ADJUST}=""
-                />-->
                 <option-selector
                     :value="patternCurrentIndex"
                     :height="8"
@@ -157,6 +152,7 @@ Vue.component('song-editor', {
                 {
                     label: 'New P.',
                     action: () => {
+                        if(this.patterns.length >= PATTERNS_MAX) { return;}
                         const patternNew = new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT);
                         this.patterns.push(patternNew);
                         this.patternCurrent = patternNew;
