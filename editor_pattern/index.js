@@ -42,6 +42,7 @@ import {
     cellEditVolume,
     cellEditEffects,
 } from './pattern.js';
+import { CHANNELS_NUMBER } from '../processor.js';
 
 //------------------------------------------------
 Vue.component('editor-pattern', {
@@ -133,11 +134,41 @@ Vue.component('editor-pattern', {
         scrollY: 'draw',
         patternGrid: 'draw',
         selection: 'draw',
-        cursor: 'draw',
+        cursor: function(valueNew) {
+            if(!valueNew) {
+                this.draw();
+                return;
+            }
+            if(valueNew.posY < this.scrollY) {
+                this.scrollY = valueNew.posY;
+                this.draw();
+                return;
+            }
+            if(valueNew.posY > (this.height-1) + this.scrollY) {
+                this.scrollY = valueNew.posY - (this.height-1);
+                this.draw();
+                return;
+            }
+            this.draw();
+        },
+        highlightRow: function (valueNew) {
+            if(!Number.isFinite(valueNew)) { return;}
+            this.cursor = {
+                posX: this.cursor.posX,
+                posY: valueNew,
+            };
+        },
         pattern: {
             deep: true,
             handler: function (valueNew) {
                 this.patternGrid = patternGridConstruct(valueNew);
+                const rows = valueNew.length / CHANNELS_NUMBER;
+                if(this.cursor && this.cursor.posY >= rows) {
+                    this.cursor = {
+                        posX: this.cursor.posX,
+                        posY: 0,
+                    };
+                }
             },
         },
         height: function (valueNew) {

@@ -229,11 +229,12 @@ Vue.component('song-editor', {
             switch(action) {
                 case RESPONSE_PATTERN_ROW: {
                     this.patternCurrentIndex = data.patternId;
+                    this.patternCurrent = this.patterns[this.patternCurrentIndex];
                     this.highlightRow = data.row;
                     break;
                 }
                 case RESPONSE_SONG_END: {
-                    console.log('Song Ended');
+                    this.highlightRow = null;
                     break;
                 }
             }
