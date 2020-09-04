@@ -17,6 +17,7 @@ import {
     parseNoiseInput,
     parseCellInput,
     commandCopy,
+    commandPaste,
 } from './input.js';
 import {
     setup as setupCanvas,
@@ -113,6 +114,7 @@ Vue.component('editor-pattern', {
         cellEditEffects: cellEditEffects,
         // Copying, Cut, Paste
         commandCopy: commandCopy,
+        commandPaste: commandPaste,
         // Drawing
         draw() {
             if(this.drawWaiting) { return true;}

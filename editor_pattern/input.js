@@ -98,9 +98,9 @@ export function handleKeyDown(eventKeyboard) {
             // case 'c':
             //     commandCopy();
             //     break;
-            // case 'v':
-            //     commandPaste();
-            //     break;
+            case 'v':
+                this.commandPaste();
+                break;
             case 'x':
                 this.commandCopy(true);
                 break;
@@ -343,23 +343,22 @@ export function commandCopy(clear) {
         }
     }
 }
-// function commandPaste() {
-//     //
-//     const cursor = getCursor();
-//     if(!cursor) { return;}
-//     //
-//     if(!clipBoard) { return;}
-//     //
-//     let posXStart = Math.floor(cursor.posX / CELL_WIDTH);
-//     let posYStart = cursor.posY;
-//     let posYEnd = (posYStart+clipBoard.length)-1;
-//     let posXEnd = (posXStart+clipBoard[0].length)-1;
-//     posXEnd = Math.min(posXEnd, CHANNELS_NUMBER-1);
-//     //
-//     for(let posY = posYStart; posY <= posYEnd; posY++) {
-//         for(let posX = posXStart; posX <= posXEnd; posX++) {
-//             const cellData = clipBoard[posY-posYStart][posX-posXStart];
-//             cellEdit(posY, posX, cellData);
-//         }
-//     }
-// }
+export function commandPaste() {
+    //
+    if(!this.cursor) { return;}
+    //
+    if(!this.clipBoard) { return;}
+    //
+    let posXStart = Math.floor(this.cursor.posX / CELL_WIDTH);
+    let posYStart = this.cursor.posY;
+    let posYEnd = (posYStart+this.clipBoard.length)-1;
+    let posXEnd = (posXStart+this.clipBoard[0].length)-1;
+    posXEnd = Math.min(posXEnd, CHANNELS_NUMBER-1);
+    //
+    for(let posY = posYStart; posY <= posYEnd; posY++) {
+        for(let posX = posXStart; posX <= posXEnd; posX++) {
+            const cellData = this.clipBoard[posY-posYStart][posX-posXStart];
+            this.cellEdit(posY, posX, cellData);
+        }
+    }
+}
