@@ -34,24 +34,26 @@ Vue.component('derp-derp', {
     }
 });
 //-- Constants -----------------------------------
-const DOM_ID_CLIENT = 'client';
 const TEMPLATE_EDITOR = `
-    <div id=${DOM_ID_CLIENT}>
+    <div class="client">
         <keep-alive>
             <derp-derp />
         </keep-alive>
-        <div id="editor" style="width:${DISPLAY_PIXEL_WIDTH}">
+        <div class="editor" style="width:${DISPLAY_PIXEL_WIDTH}">
             <keep-alive>
                 <editor-pattern
                     :pattern="patternCurrent"
-                    :height="${DISPLAY_HEIGHT_DEFAULT}"
+                    :height="instrumentEditorOpen? 20 : ${DISPLAY_HEIGHT_DEFAULT}"
                     :instrument="instrumentCurrentIndex"
                     :highlight-row="highlightRow"
                     @cell-edit="handleCellEdit"
                 />
             </keep-alive>
+            <keep-alive v-if="instrumentEditorOpen">
+                <div>Instrument Editor</div>
+            </keep-alive>
         </div>
-        <div id="controls">
+        <div class="controls">
             <div class="control_group">
                 <button-bar :actions="actionsFile" />
             </div>
@@ -97,6 +99,13 @@ const TEMPLATE_EDITOR = `
                 />
             </div>
             <div class="control_group">
+                <button-action
+                    :class="{ selected: instrumentEditorOpen }"
+                    label="Inst. Editor"
+                    :action="toggleInstrumentEditor"
+                />
+            </div>
+            <div class="control_group">
                 <button-bar :actions="actionsInstrument" />
                 <option-selector
                     :value="instrumentCurrentIndex"
@@ -133,6 +142,7 @@ Vue.component('song-editor', {
                     envelopeDuration: [1],
                 },
             ],
+            instrumentEditorOpen: true,
         };
     },
     created() {
@@ -289,6 +299,9 @@ Vue.component('song-editor', {
                     break;
                 }
             }
-        }
+        },
+        toggleInstrumentEditor() {
+            this.instrumentEditorOpen = !this.instrumentEditorOpen;
+        },
     },
 });

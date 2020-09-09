@@ -17,7 +17,7 @@ body {
     height: 100vh;
     width: 100vw;
 }
-#client {
+.client {
     outline: ridge 16px var(--color-bg-primary);
     background: var(--color-bg-primary);
     box-shadow: 0px 0px 400px rgba(255,255,255,0.25);
@@ -27,20 +27,15 @@ body {
     display: flex;
     flex-direction: row;
 }
-#editor {
-    height: 640PX;
-}
-#controls {
-    border-left: 4px solid var(--color-bg-primary);
-}
-#pattern_display {
-}
-#pane_instrument {
+.editor {
+    height: 640px;
     display: flex;
     flex-direction: column;
-    height: 640PX;
 }
-#pane_instrument > #pattern_display {
+.controls {
+    border-left: 4px solid var(--color-bg-primary);
+}
+.pattern_display {
     margin-bottom: auto;
 }
 #instrument_display {

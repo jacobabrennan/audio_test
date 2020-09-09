@@ -34,7 +34,8 @@ import {
     scrollCheck,
 } from './cursor.js';
 import {
-    contextConfigure
+    contextConfigure,
+    FONT_SIZE,
 } from '../utilities.js';
 import {
     cellGet,
@@ -49,7 +50,7 @@ import { CHANNELS_NUMBER } from '../libraries/audio_processor.js';
 //------------------------------------------------
 Vue.component('editor-pattern', {
     template: `<canvas
-        id="pattern_display"
+        class="pattern_display"
         @mousedown = "handleMouseDown"
         @mouseup = "handleMouseUp"
         @mousemove = "handleMouseMove"

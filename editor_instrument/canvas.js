@@ -10,7 +10,6 @@ import {
     COLOR_BG_HIGHLIGHT,
     COLOR_BG_HINT,
     COLOR_FG_HIGHLIGHT,
-    FONT_SIZE,
 } from '../utilities.js';
 import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
 import { instrumentGet } from './instrument.js';
