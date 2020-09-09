@@ -3,6 +3,7 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
+import Vue from '../libraries/vue.esm.browser.js';
 import {
     contextConfigure,
     CHAR_HEART,
@@ -13,62 +14,69 @@ import {
 } from '../utilities.js';
 
 //-- Constants -----------------------------------
+export const EVENT_RADIO_SELECT = 'radio-select';
 const LINE_HEIGHT = FONT_SIZE+2;
 
 //------------------------------------------------
-export default class Radio {
-    constructor(elementParent, width, options, onChange) {
-        this.element = document.createElement('canvas');
-        this.element.className = 'radio';
-        elementParent.append(this.element);
+Vue.component('value-radio', {
+    template: (`
+        <canvas
+            class="radio"
+            @click="handleClick"
+        />
+    `),
+    props: {
+        width: {
+            type: Number,
+            default: 15,
+        },
+        options: {
+            type: Array,
+            required: true,
+        },
+        value: {
+            type: Number,
+            required: true,
+        },
+    },
+    watch: {
+        width: 'draw',
+        options: 'draw',
+        value: 'draw',
+    },
+    mounted() {
         //
-        this.onChange = onChange;
-        this.element.addEventListener(
-            'click',
-            (eventClick) => this.handleClick(eventClick),
-        );
+        const canvas = this.$el;
+        canvas.width = this.width*FONT_SIZE;
+        canvas.height = this.options.length * LINE_HEIGHT;
         //
-        this.options = options;
-        this.value = options[0];
-        //
-        this.width = width;
-        this.height = options.length;
-        this.element.width = this.width * FONT_SIZE;
-        this.element.height = this.height * LINE_HEIGHT;
-        //
-        this.context = this.element.getContext('2d');
+        this.context = canvas.getContext('2d');
         contextConfigure(this.context);
-    }
-    valueSet(valueNew, override) {
-        if(override) {
-            this.value = valueNew;
-            this.draw();
-            return;
-        }
-        this.value = this.onChange(valueNew);
-    }
-    draw() {
-        this.context.fillStyle = COLOR_BG;
-        this.context.fillRect(0, 0, this.width*FONT_SIZE, this.height*LINE_HEIGHT);
-        this.context.fillStyle = COLOR_FG;
-        for(let indexOption = 0; indexOption < this.options.length; indexOption++) {
+        this.draw();
+    },
+    methods: {
+        handleClick(eventClick) {
+            const clientRect = eventClick.target.getClientRects()[0];
+            let posY = eventClick.clientY - clientRect.top;
+            posY = Math.max(0,
+                Math.min(this.options.length-1,
+                    Math.floor(posY/LINE_HEIGHT)));
+            // const selectedOption = this.options[posY];
+            this.$emit(EVENT_RADIO_SELECT, posY);
+        },
+        draw() {
+            this.context.fillStyle = COLOR_BG;
+            this.context.fillRect(0, 0, this.width*FONT_SIZE, this.options.length*LINE_HEIGHT);
             this.context.fillStyle = COLOR_FG;
-            const option = this.options[indexOption];
-            this.context.fillText(option, FONT_SIZE*2, -2+LINE_HEIGHT*(indexOption+1));
-            if(option === this.value) {
-                this.context.fillStyle = COLOR_BG_HIGHLIGHT;
-                this.context.fillText(CHAR_HEART, 0, -2+LINE_HEIGHT*(indexOption+1));
+            for(let indexOption = 0; indexOption < this.options.length; indexOption++) {
+                this.context.fillStyle = COLOR_FG;
+                const option = this.options[indexOption];
+                this.context.fillText(option, FONT_SIZE*2, -2+LINE_HEIGHT*(indexOption+1));
+                if(indexOption === this.value) {
+                    this.context.fillStyle = COLOR_BG_HIGHLIGHT;
+                    this.context.fillText(CHAR_HEART, 0, -2+LINE_HEIGHT*(indexOption+1));
+                }
             }
         }
-    }
-    handleClick(eventClick) {
-        const clientRect = eventClick.target.getClientRects()[0];
-        let posY = eventClick.clientY - clientRect.top;
-        posY = Math.max(0,
-            Math.min(this.options.length-1,
-                Math.floor(posY/LINE_HEIGHT)));
-        const selectedOption = this.options[posY];
-        this.valueSet(selectedOption);
-        this.draw();
-    }
-}
+    },
+});
