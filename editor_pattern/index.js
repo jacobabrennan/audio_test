@@ -158,10 +158,10 @@ Vue.component('editor-pattern', {
         },
         highlightRow: function (valueNew) {
             if(!Number.isFinite(valueNew)) { return;}
-            this.cursor = {
-                posX: this.cursor.posX,
-                posY: valueNew,
-            };
+            this.cursorPosition(
+                this.cursor? this.cursor.posX : 0,
+                valueNew,
+            );
         },
         pattern: {
             deep: true,

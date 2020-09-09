@@ -81,9 +81,7 @@ const TEMPLATE_EDITOR = `
                 />
             </div>
             <div class="control_group">
-                <div class="control_group">
-                    <button-bar :actions="actionsPattern" />
-                </div>
+                <button-bar :actions="actionsPattern" />
                 <option-selector
                     :value="patternCurrentIndex"
                     :height="8"
@@ -96,6 +94,15 @@ const TEMPLATE_EDITOR = `
                     :min="1"
                     :max="${PATTERN_LENGTH_MAX}"
                     @${EVENT_ADJUST}="handlePatternLength"
+                />
+            </div>
+            <div class="control_group">
+                <button-bar :actions="actionsInstrument" />
+                <option-selector
+                    :value="instrumentCurrentIndex"
+                    :height="8"
+                    :options="instrumentNames"
+                    @${EVENT_OPTION_SELECT}="handleInstrumentSelect"
                 />
             </div>
         </div>
@@ -117,7 +124,15 @@ Vue.component('song-editor', {
             ],
             patternCurrent: null,
             instrumentCurrentIndex: 0,
-            instruments: [],
+            instruments: [
+                {
+                    sustain: 0,
+                    loopEnd: undefined,
+                    loopStart: undefined,
+                    envelopeVolume: [0.5],
+                    envelopeDuration: [1],
+                },
+            ],
         };
     },
     created() {
@@ -129,6 +144,9 @@ Vue.component('song-editor', {
     computed: {
         patternNames() {
             return this.patterns.map((pattern, index) => `Pattern ${index}`);
+        },
+        instrumentNames() {
+            return this.instruments.map((instrument, index) => `instrument ${index}`);
         },
         actionsPlayback() {
             return [
@@ -186,6 +204,33 @@ Vue.component('song-editor', {
                 },
             ];
         },
+        actionsInstrument() {
+            return [
+                {
+                    label: 'New I.',
+                    action: () => {
+                        if(this.patterns.length >= PATTERNS_MAX) { return;}
+                        const patternNew = new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT);
+                        this.patterns.push(patternNew);
+                        this.patternCurrent = patternNew;
+                        this.patternCurrentIndex = this.patterns.length-1;
+                    },
+                },
+                {
+                    label: 'Del I.',
+                    action: () => {
+                        this.patterns.splice(this.patternCurrentIndex, 1);
+                        if(!this.patterns.length) {
+                            this.patterns.push(new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT));
+                        }
+                        if(this.patternCurrentIndex >= this.patterns.length) {
+                            this.patternCurrentIndex = this.patterns.length - 1;
+                        }
+                        this.patternCurrent = this.patterns[this.patternCurrentIndex];
+                    },
+                },
+            ];
+        },
     },
     methods: {
         songCompile() {
@@ -225,6 +270,11 @@ Vue.component('song-editor', {
             if(indexNew < 0 || indexNew >= this.patterns.length) { return;}
             this.patternCurrentIndex = indexNew;
             this.patternCurrent = this.patterns[this.patternCurrentIndex];
+        },
+        handleInstrumentSelect(indexNew) {
+            if(indexNew < 0 || indexNew >= this.instruments.length) { return;}
+            this.instrumentCurrentIndex = indexNew;
+            this.instrumentCurrent = this.instruments[this.instrumentCurrentIndex];
         },
         handleMessageAudio(action, data) {
             switch(action) {

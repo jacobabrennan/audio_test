@@ -360,7 +360,6 @@ export function commandPaste() {
         }
     }
     //
-    delete this.cursor;
     this.cursorSelect(
         posXStart*CELL_WIDTH, posYStart,
         (posXEnd+1)*CELL_WIDTH - 1, posYEnd,
