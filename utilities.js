@@ -22,15 +22,6 @@ export const CHAR_HEART = 'Œ';
 //------------------------------------------------
 export const DISPLAY_HEIGHT_DEFAULT = 40;
 
-//-- Edit & Control Group IDs --------------------
-export const EDITOR_PANE_PATTERN = 'editor_pane_pattern';
-export const EDITOR_PANE_INSTRUMENT = 'editor_pane_instrument';
-export const CONTROL_GROUP_EDITOR_SWAP = 'control_group_editor_swap';
-export const CONTROL_GROUP_PATTERN = 'control_group_pattern';
-export const CONTROL_GROUP_PLAYBACK = 'control_group_playback';
-export const CONTROL_GROUP_INSTRUMENT_SELECT = 'control_group_instrument_select';
-export const CONTROL_GROUP_FILE_MANAGEMENT = 'control_group_file_management';
-
 
 //== Canvas Utilities ==========================================================
 

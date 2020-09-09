@@ -69,13 +69,15 @@ const TEMPLATE_EDITOR = `
                     label="Beats/Sec."
                     :value="beatsPerSecond"
                     :max="${BPS_MAX}"
+                    :min="1"
                     @${EVENT_ADJUST}="beatsPerSecond = $event"
                 />
                 <value-adjuster
                     label="Ticks/Beat"
                     :value="ticksPerBeat"
                     :max="${TPB_MAX}"
-                    @${EVENT_ADJUST}="tickPerBeat = $event"
+                    :min="0"
+                    @${EVENT_ADJUST}="ticksPerBeat = $event"
                 />
             </div>
             <div class="control_group">
