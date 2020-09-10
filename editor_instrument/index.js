@@ -4,6 +4,7 @@
 
 //-- Dependencies --------------------------------
 import Vue from '../libraries/vue.esm.browser.js';
+import './canvas.js';
 import { EVENT_RADIO_SELECT } from '../controls/radio.js';
 import { EVENT_ADJUST } from '../controls/adjuster.js';
 // import { setup as setupCanvas, instrumentDraw } from './canvas.js';
@@ -60,7 +61,7 @@ Vue.component('editor-instrument', {
                     />
                 </div>
             </div>
-            <canvas />
+            <editor-envelope :instrument="instrument" />
         </div>
     `),
     props: {

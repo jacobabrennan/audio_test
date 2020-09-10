@@ -137,11 +137,11 @@ Vue.component('song-editor', {
             instrumentCurrent: null,
             instruments: [
                 {
-                    sustain: 0,
-                    loopEnd: undefined,
-                    loopStart: undefined,
-                    envelopeVolume: [0.5],
-                    envelopeDuration: [1],
+                    sustain: undefined,
+                    loopStart: 1,
+                    loopEnd: 2,
+                    envelopeVolume: [0.5, 0.5, 0.75],
+                    envelopeDuration: [0, 10, 100],
                 },
             ],
             instrumentEditorOpen: true,
