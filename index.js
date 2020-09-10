@@ -9,6 +9,7 @@ import Vue from './libraries/vue.esm.browser.js';
 import './controls/adjuster.js';
 import './controls/button.js';
 import './controls/selector.js';
+import './controls/radio.js';
 // Client
 import './client.js';
 // Font Loading Utilities

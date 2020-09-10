@@ -6,6 +6,7 @@
 //-- Dependencies --------------------------------
 import Vue from './libraries/vue.esm.browser.js';
 import './editor_pattern/index.js';
+import './editor_instrument/index.js';
 import AudioMessageInterface, {
     ACTION_SONG,
     ACTION_PLAYBACK_PLAY,
@@ -50,7 +51,7 @@ const TEMPLATE_EDITOR = `
                 />
             </keep-alive>
             <keep-alive v-if="instrumentEditorOpen">
-                <div>Instrument Editor</div>
+                <editor-instrument :instrument="instrumentCurrent" />
             </keep-alive>
         </div>
         <div class="controls">
@@ -128,11 +129,12 @@ Vue.component('song-editor', {
             ticksPerBeat: TPB_DEFAULT,
             highlightRow: null,
             patternCurrentIndex: 0,
+            patternCurrent: null,
             patterns: [
                 new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT),
             ],
-            patternCurrent: null,
             instrumentCurrentIndex: 0,
+            instrumentCurrent: null,
             instruments: [
                 {
                     sustain: 0,
@@ -147,6 +149,7 @@ Vue.component('song-editor', {
     },
     created() {
         this.patternCurrent = this.patterns[this.patternCurrentIndex];
+        this.instrumentCurrent = this.instruments[this.instrumentCurrentIndex];
         this.processor = new AudioMessageInterface((action, data) => {
             this.handleMessageAudio(action, data);
         });

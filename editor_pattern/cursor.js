@@ -12,11 +12,18 @@ import {
 
 //-- Cursor Movement -----------------------------
 export function cursorPosition(posX, posY) {
+    //
+    const rows = this.pattern.length / CHANNELS_NUMBER;
+    if(posX < 0 || posX >= CELL_WIDTH*CHANNELS_NUMBER) { return;}
+    if(posY < 0 || posY >= rows) { return;}
+    //
     this.selection = null;
+    //
     this.cursor = {
         posX: posX,
         posY: posY,
     };
+    //
     this.scrollCheck();
 }
 export function cursorSelect(posDownX, posDownY, posUpX, posUpY) {

@@ -60,7 +60,7 @@ Vue.component('value-radio', {
             let posY = eventClick.clientY - clientRect.top;
             posY = Math.max(0,
                 Math.min(this.options.length-1,
-                    Math.floor(posY/LINE_HEIGHT)));
+                    Math.floor((posY-4)/LINE_HEIGHT)));
             // const selectedOption = this.options[posY];
             this.$emit(EVENT_RADIO_SELECT, posY);
         },

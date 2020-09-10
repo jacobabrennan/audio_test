@@ -38,17 +38,29 @@ body {
 .pattern_display {
     margin-bottom: auto;
 }
-#instrument_display {
-    margin-top: 3px;
+.instrument_editor {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
 }
-#instrument_controls {
+.instrument_controls {
     display: flex;
     flex-direction: row;
-    /* justify-content: flex-end; */
+    align-items: flex-start;
+    margin-top: 4px;
 }
-#instrument_controls > * {
-    /* margin-left: 4px; */
+.instrument_controls > * {
     margin-right: 4px;
+}
+.adjuster_group {
+    display: flex;
+    flex-direction: column;
+    border: solid 2px var(--color-bg);
+    padding: 0px;
+}
+#instrument_display {
+    margin-top: 3px;
 }
 
 /*----------------------------------------------*/
@@ -120,12 +132,4 @@ option {
 option.selected {
     color: var(--color-fg-highlight);
     background: var(--color-bg-highlight);
-}
-
-/*-- Pattern -----------------------------------*/
-#pattern_selector {
-    width: 20em;
-    background: black;
-    color: white;
-    border-width: 0px;
 }
