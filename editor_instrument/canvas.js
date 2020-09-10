@@ -42,10 +42,27 @@ Vue.component('editor-envelope', {
         this.context = canvas.getContext('2d');
         contextConfigure(this.context);
         //
-        canvas.style.background = 'black'
-        this.draw()
+        this.plotPoints();
+        this.draw();
     },
     methods: {
+        plotPoints() {
+            if(!this.instrument.envelopeVolume.length) {
+                return [];
+            }
+            // Prep for loop
+            let sampleTotal = 0;
+            this.points = [];
+            // Retreive each point and save location information
+            for(let index = 0; index < this.instrument.envelopeVolume.length; index++) {
+                sampleTotal += this.instrument.envelopeDuration[index];
+                const point = {
+                    x: (sampleTotal/this.zoom) * DISPLAY_PIXEL_WIDTH,
+                    y: (1-this.instrument.envelopeVolume[index]) * DISPLAY_INSTRUMENT_HEIGHT,
+                };
+                this.points.push(point);
+            }
+        },
         draw() {
             this.context.save();
             // Blank and fill back color
@@ -70,11 +87,11 @@ Vue.component('editor-envelope', {
                     this.context.fillRect(posX, DISPLAY_INSTRUMENT_HEIGHT-8, 1, 8);
                 }
             }
-            // Plot lines
-            let pointSprites = this.plotLines();
-            // Plot points
-            for(let point of pointSprites) {
-                this.drawPoint(point[0], point[1], COLOR_BG_HIGHLIGHT);
+            // Draw envelope lines
+            this.drawEnvelope();
+            // Draw points
+            for(let point of this.points) {
+                this.drawPoint(point.x, point.y, COLOR_BG_HIGHLIGHT);
             }
             // Draw Selected Point
             // let pointSelection = pointSelectionGet();
@@ -85,58 +102,41 @@ Vue.component('editor-envelope', {
             // Draw Sustain marker
             if(this.instrument.sustain !== undefined) {
                 this.context.fillStyle = COLOR_FG_HIGHLIGHT;
-                const pointSus = pointSprites[this.instrument.sustain];
+                const pointSus = this.points[this.instrument.sustain];
                 this.context.fillText('S', pointSus[0]-7, pointSus[1]+7);
             }
             // Draw Loop markers
             if(this.instrument.loopStart !== undefined) {
                 this.context.fillStyle = COLOR_FG_HIGHLIGHT;
-                const pointLoopStart = pointSprites[this.instrument.loopStart];
+                const pointLoopStart = this.points[this.instrument.loopStart];
                 this.context.fillText('>', pointLoopStart[0]-13, pointLoopStart[1]+7);
-                const pointLoopEnd = pointSprites[this.instrument.loopEnd];
+                const pointLoopEnd = this.points[this.instrument.loopEnd];
                 this.context.fillText('<', pointLoopEnd[0]-1, pointLoopEnd[1]+7);
             }
             //
             this.context.restore();
         },
-        plotLines() {
-            if(!this.instrument.envelopeVolume.length) {
-                return [];
-            }
+        drawEnvelope() {
+            if(!this.points.length) { return [];}
             // Set drawing styles
             this.context.strokeStyle = 'grey';
             this.context.lineWidth = 4;
             // Move path to start of graph
             this.context.beginPath();
             this.context.moveTo(
-                this.instrument.envelopeDuration[0],
-                this.instrument.envelopeVolume[0],
+                this.points[0].x,
+                this.points[0].y,
             );
-            // Prep for loop
-            // const selection = pointSelectionGet();
-            let sampleTotal = 0;
-            const pointSprites = [];
-            // Retreive each point, save location information, and connect path
-            for(let index = 0; index < this.instrument.envelopeVolume.length; index++) {
-                // Retreive points from envelope, and from user selection
-                // if(selection && index === selection.index && selection.point) {
-                //     point = [selection.point[0], selection.point[1]];
-                // }
-                // Save location information
-                sampleTotal += this.instrument.envelopeDuration[index];
-                const pointDrawn = [
-                    (sampleTotal/this.zoom) * DISPLAY_PIXEL_WIDTH,
-                    (1-this.instrument.envelopeVolume[index]) * DISPLAY_INSTRUMENT_HEIGHT,
-                ];
-                pointSprites.push(pointDrawn);
-                // Connect path
-                this.context.lineTo(pointDrawn[0], pointDrawn[1]);
+            // Draw path connecting points
+            for(let index = 0; index < this.points.length; index++) {
+                this.context.lineTo(
+                    this.points[index].x,
+                    this.points[index].y,
+                );
             }
             // Finalize graph / path
             this.context.stroke();
-            // Return location information
-            return pointSprites;
-        },    
+        },
         drawPoint(posX, posY, color) {
             this.context.fillStyle = color;
             this.context.fillRect(posX, 0, 1, DISPLAY_INSTRUMENT_HEIGHT);
