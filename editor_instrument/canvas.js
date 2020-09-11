@@ -9,29 +9,50 @@ import {
     contextConfigure,
     COLOR_BG,
     COLOR_BG_HIGHLIGHT,
-    // COLOR_BG_HINT,
+    COLOR_BG_HINT,
     COLOR_FG_HIGHLIGHT,
 } from '../utilities.js';
 import { DISPLAY_PIXEL_WIDTH } from '../editor_pattern/canvas.js';
+import {
+    handleMouseDown,
+    handleMouseUp,
+    handleMouseMove,
+    handleWheel,
+} from './input.js';
 
 //-- Constants -----------------------------------
 export const GRAPH_POINT_RADIUS = 8;
 export const DISPLAY_INSTRUMENT_HEIGHT = 254;
+export const EVENT_UPDATE_ENVELOPES = 'update-envelopes';
 
 //------------------------------------------------
 Vue.component('editor-envelope', {
     template: (`
-        <canvas />
+        <canvas
+            @mousedown="handleMouseDown"
+            @mouseup="handleMouseUp"
+            @mousemove="handleMouseMove"
+            @mouseleave="handleMouseUp"
+            @wheel="handleWheel"
+        />
     `),
     props: {
-        zoom: {
-            type: Number,
-            default: 200,
-        },
         instrument: {
             type: Object,
             required: true,
         },
+    },
+    data: function () {
+        return {
+            zoom: 2048,
+        };
+    },
+    watch: {
+        instrument: {
+            deep: true,
+            handler: 'refresh',
+        },
+        zoom: 'refresh',
     },
     mounted() {
         //
@@ -42,10 +63,17 @@ Vue.component('editor-envelope', {
         this.context = canvas.getContext('2d');
         contextConfigure(this.context);
         //
-        this.plotPoints();
-        this.draw();
+        this.refresh();
     },
     methods: {
+        handleMouseDown: handleMouseDown,
+        handleMouseUp: handleMouseUp,
+        handleMouseMove: handleMouseMove,
+        handleWheel: handleWheel,
+        refresh() {
+            this.plotPoints();
+            this.draw();
+        },
         plotPoints() {
             if(!this.instrument.envelopeVolume.length) {
                 return [];
@@ -94,11 +122,13 @@ Vue.component('editor-envelope', {
                 this.drawPoint(point.x, point.y, COLOR_BG_HIGHLIGHT);
             }
             // Draw Selected Point
-            // let pointSelection = pointSelectionGet();
-            // if(pointSelection) {
-            //     const selectedPoint = pointSprites[pointSelection.index];
-            //     this.drawPoint(selectedPoint[0], selectedPoint[1], COLOR_BG_HINT);
-            // }
+            if(this.pointSelection) {
+                this.drawPoint(
+                    this.pointSelection.point.x,
+                    this.pointSelection.point.y,
+                    COLOR_BG_HINT,
+                );
+            }
             // Draw Sustain marker
             if(this.instrument.sustain !== undefined) {
                 this.context.fillStyle = COLOR_FG_HIGHLIGHT;
@@ -144,32 +174,33 @@ Vue.component('editor-envelope', {
             this.context.arc(posX, posY, GRAPH_POINT_RADIUS, 0, TAU);
             this.context.stroke();
             this.context.fill();
+        },
+        modifyNode(indexChanged) {
+            //
+            if(!this.points) { return;}
+            // Calculate change in sample duration
+            let samplePosBefore = 0;
+            for(let index=0; index <= indexChanged; index++) {
+                samplePosBefore += this.instrument.envelopeDuration[index];
+            }
+            let samplePosCurrent = (this.points[indexChanged].x/DISPLAY_PIXEL_WIDTH) * this.zoom;
+            let samplePosDelta = samplePosCurrent - samplePosBefore;
+            // Modify duration
+            const envelopeDurationNew = this.instrument.envelopeDuration.slice();
+            envelopeDurationNew[indexChanged] += samplePosDelta;
+            if(indexChanged+1 < this.instrument.envelopeDuration.length) {
+                envelopeDurationNew[indexChanged+1] = this.instrument.envelopeDuration[indexChanged+1];
+                envelopeDurationNew[indexChanged+1] -= samplePosDelta;
+            }
+            // Modify Volume
+            const envelopeVolumeNew = this.instrument.envelopeVolume.slice();
+            const volumeNew = 1-(this.points[indexChanged].y / DISPLAY_INSTRUMENT_HEIGHT);
+            envelopeVolumeNew[indexChanged] = volumeNew;
+            //
+            this.$emit(EVENT_UPDATE_ENVELOPES, {
+                duration: envelopeDurationNew,
+                volume: envelopeVolumeNew,
+            });
         }
     }
 });
-
-// //-- Drawing -------------------------------------
-
-// //------------------------------------------------
-// export function instrumentPointSelect(selection) {
-//     const instrument = instrumentGet();
-//     instrument.envelopePointSet(
-//         selection.index, selection.point[0], selection.point[1],
-//     );
-//     instrumentDraw();
-// }
-
-// //------------------------------------------------
-// export function instrumentZoomAdjust(direction) {
-//     // const zoomLevels = [90,128,181,256,362,512,724,1024,1448,2048,2896,4096];
-//     const zoomLevels = [256,512,1024,2048,4096,8192,16384,32768];
-//     let indexZoom = zoomLevels.indexOf(this.zoom);
-//     if(indexZoom === -1) {
-//         indexZoom = 8;
-//     }
-//     direction = Math.sign(direction);
-//     indexZoom += direction;
-//     if(indexZoom < 0 || indexZoom >= zoomLevels.length) { return;}
-//     this.zoom = zoomLevels[indexZoom];
-//     instrumentDraw();
-// }

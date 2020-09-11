@@ -4,13 +4,11 @@
 
 //-- Dependencies --------------------------------
 import Vue from '../libraries/vue.esm.browser.js';
-import './canvas.js';
 import {
     EVENT_RADIO_SELECT,
     EVENT_ADJUST,
 } from '../base_components/index.js';
-// import { setup as setupCanvas, instrumentDraw } from './canvas.js';
-// import { setup as setupControlStrip } from './control_strip.js';
+import { EVENT_UPDATE_ENVELOPES } from './canvas.js';
 
 //-- Constants -----------------------------------
 const SUSTAIN_ON = 0;
@@ -63,7 +61,10 @@ Vue.component('editor-instrument', {
                     />
                 </div>
             </div>
-            <editor-envelope :instrument="instrument" />
+            <editor-envelope
+                :instrument="instrument"
+                @${EVENT_UPDATE_ENVELOPES}="handleUpdateEnvelopes"
+            />
         </div>
     `),
     props: {
@@ -102,6 +103,10 @@ Vue.component('editor-instrument', {
                     this.instrument.sustain = undefined;
                     break;
             }
-        }
+        },
+        handleUpdateEnvelopes(envelopes) {
+            this.instrument.envelopeDuration = envelopes.duration;
+            this.instrument.envelopeVolume = envelopes.volume;
+        },
     },
 });

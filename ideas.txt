@@ -4,7 +4,6 @@
 
 //-- Bugs-----------------------------------------
 Editing the octave of a note removes accidentals
-After creating a new pattern, scrollY can remain in an invalid position
 Cannot edit Adjusters by setting value directly on the keyboard
 
 //-- Current Focus -------------------------------
