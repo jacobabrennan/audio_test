@@ -61,10 +61,10 @@ export function handleMouseMove(eventMouseMove) {
 export function handleWheel(eventWheel) {
     let direction = Math.sign(eventWheel.deltaY);
     // const zoomLevels = [90,128,181,256,362,512,724,1024,1448,2048,2896,4096];
-    const zoomLevels = [256,512,1024,2048,4096,8192,16384,32768];
+    const zoomLevels = [256,512,1024,2048,4096,8192,16384,32768,65536];
     let indexZoom = zoomLevels.indexOf(this.zoom);
     if(indexZoom === -1) {
-        indexZoom = 8;
+        indexZoom = zoomLevels.length;
     }
     indexZoom += direction;
     if(indexZoom < 0 || indexZoom >= zoomLevels.length) { return;}

@@ -47,7 +47,7 @@ Vue.component('editor-envelope', {
     },
     data: function () {
         return {
-            zoom: 2048,
+            zoom: 8192,
         };
     },
     watch: {
@@ -150,9 +150,9 @@ Vue.component('editor-envelope', {
             if(this.instrument.loopStart !== undefined) {
                 this.context.fillStyle = COLOR_FG_HIGHLIGHT;
                 const pointLoopStart = this.points[this.instrument.loopStart];
-                this.context.fillText('>', pointLoopStart.x-13, pointLoopStart.y+7);
+                this.context.fillText('[', pointLoopStart.x-13, pointLoopStart.y+7);
                 const pointLoopEnd = this.points[this.instrument.loopEnd];
-                this.context.fillText('<', pointLoopEnd.x-1, pointLoopEnd.y+7);
+                this.context.fillText(']', pointLoopEnd.x-1, pointLoopEnd.y+7);
             }
             //
             this.context.restore();

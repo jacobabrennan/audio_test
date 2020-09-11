@@ -33,7 +33,7 @@ Vue.component('editor-instrument', {
                         :max="16"
                         :min="1"
                         :width="12"
-                        @${EVENT_ADJUST}=""
+                        @${EVENT_ADJUST}="handleSetNodeCount"
                     />
                     <value-adjuster
                         v-if="Number.isFinite(instrument.sustain)"
@@ -41,7 +41,7 @@ Vue.component('editor-instrument', {
                         :value="instrument.sustain"
                         :max="instrument.envelopeVolume.length-1"
                         :width="12"
-                        @${EVENT_ADJUST}=""
+                        @${EVENT_ADJUST}="handleSetSustain"
                     />
                     <value-adjuster
                         v-if="Number.isFinite(instrument.loopStart)"
@@ -49,7 +49,7 @@ Vue.component('editor-instrument', {
                         :value="instrument.loopStart"
                         :max="instrument.envelopeVolume.length-1"
                         :width="12"
-                        @${EVENT_ADJUST}=""
+                        @${EVENT_ADJUST}="handleSetLoopStart"
                     />
                     <value-adjuster
                         v-if="Number.isFinite(instrument.loopEnd)"
@@ -57,7 +57,7 @@ Vue.component('editor-instrument', {
                         :value="instrument.loopEnd"
                         :max="instrument.envelopeVolume.length-1"
                         :width="12"
-                        @${EVENT_ADJUST}=""
+                        @${EVENT_ADJUST}="handleSetLoopEnd"
                     />
                 </div>
             </div>
@@ -75,8 +75,19 @@ Vue.component('editor-instrument', {
     },
     data: function () {
         return {
-            sustype: SUSTAIN_ON,
+            sustype: SUSTAIN_OFF,
         };
+    },
+    created() {
+        if(this.instrument.sustain !== undefined) {
+            this.sustype = SUSTAIN_ON;
+        }
+        else if(this.instrument.loopStart !== undefined) {
+            this.sustype = SUSTAIN_LOOP;
+        }
+        else {
+            this.sustype = SUSTAIN_OFF;
+        }
     },
     methods: {
         handleSustype(sustype) {
@@ -107,6 +118,28 @@ Vue.component('editor-instrument', {
         handleUpdateEnvelopes(envelopes) {
             this.instrument.envelopeDuration = envelopes.duration;
             this.instrument.envelopeVolume = envelopes.volume;
+        },
+        handleSetNodeCount(nodeCount) {
+            if(nodeCount < this.instrument.envelopeVolume.length) {
+                this.instrument.envelopeVolume.length = nodeCount;
+                this.instrument.envelopeDuration.length = nodeCount;
+                return;
+            }
+            while(this.instrument.envelopeVolume.length < nodeCount) {
+                this.instrument.envelopeVolume.push(0.5);
+                this.instrument.envelopeDuration.push(1024);
+            }
+        },
+        handleSetSustain(indexSustain) {
+            this.instrument.sustain = indexSustain;
+        },
+        handleSetLoopStart(indexStart) {
+            this.instrument.loopStart = indexStart;
+            this.instrument.loopEnd = Math.max(this.instrument.loopEnd, indexStart);
+        },
+        handleSetLoopEnd(indexEnd) {
+            this.instrument.loopEnd = indexEnd;
+            this.instrument.loopStart = Math.min(this.instrument.loopStart, indexEnd);
         },
     },
 });
