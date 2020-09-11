@@ -44,6 +44,7 @@ export function handleMouseDown(eventMouse) {
 }
 export function handleMouseUp(eventMouse) {
     const coordsStart = this.mouseStart;
+    if(!coordsStart) { return;}
     delete this.mouseStart;
     if(!this.cursor) { return;}
     const coordsMouse = getEventCoords(eventMouse, this.scrollY);
