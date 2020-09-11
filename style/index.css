@@ -5,6 +5,7 @@
 /*-- Aggregation -------------------------------*/
 @import "reset.css";
 @import "theme.css";
+@import "../base_components/index.css";
 
 /*-- Layout ------------------------------------*/
 body {
@@ -35,6 +36,11 @@ body {
 .controls {
     border-left: 4px solid var(--color-bg-primary);
 }
+.controls > * {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+}
 .pattern_display {
     margin-bottom: auto;
 }
@@ -59,41 +65,11 @@ body {
     border: solid 2px var(--color-bg);
     padding: 0px;
 }
-#instrument_display {
-    margin-top: 3px;
-}
 
 /*----------------------------------------------*/
 canvas {
     image-rendering: crisp-edges;
     outline: none;
-}
-
-
-/*== Control Groups ==========================================================*/
-
-/*-- Shared ------------------------------------*/
-.control_group {
-    margin-top: 4px;
-    display: flex;
-    flex-direction: column;
-}
-.control_group h2 {
-    display: block;
-}
-.button_group {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-.button_group button {
-    width: 120px;
-}
-
-/*----------------------------------------------*/
-button.selected {
-    color: var(--color-fg-highlight);
-    background: var(--color-bg-highlight);
 }
 button {
     border: 2px solid black;
@@ -101,35 +77,8 @@ button {
 button:hover {
     color: var(--color-fg-hint);
     background: var(--color-bg-hint);
-    /* border: 2px solid var(--color-fg-hint); */
 }
-
-
-/*-- Control Group Components ------------------*/
-.radio {
-    border: solid 2px var(--color-bg);
-}
-.adjuster, .selector, .selector option {
-    color: var(--color-fg);
-    align-self: flex-start;
-}
-.adjuster {
-    border: solid 2px var(--color-bg);
-    border-top: none;
-}
-.selector {
-    border: none;
-    outline: solid 2px var(--color-bg);
-    margin-left: 2px;
-    padding: 0px;
-}
-option {
-    border: none;
-    outline: none;
-    margin: 0px;
-    padding: 0px;
-}
-option.selected {
+button.selected {
     color: var(--color-fg-highlight);
     background: var(--color-bg-highlight);
 }

@@ -26,7 +26,7 @@ export const EVENT_OPTION_SELECT = 'option-select';
 Vue.component('option-selector', {
     template: (`
         <select
-            class="selector"
+            class="option-selector"
             :size="height"
             @change="select"
             :style="style"

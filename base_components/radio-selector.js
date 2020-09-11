@@ -18,10 +18,10 @@ export const EVENT_RADIO_SELECT = 'radio-select';
 const LINE_HEIGHT = FONT_SIZE+2;
 
 //------------------------------------------------
-Vue.component('value-radio', {
+Vue.component('radio-selector', {
     template: (`
         <canvas
-            class="radio"
+            class="radio-selector"
             @click="handleClick"
         />
     `),

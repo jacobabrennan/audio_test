@@ -19,7 +19,7 @@ export const EVENT_ADJUST = 'adjust';
 //------------------------------------------------
 Vue.component('value-adjuster', {
     template: `<canvas
-        class="adjuster"
+        class="value-adjuster"
         @blur="handleBlur"
         @focus="handleFocus"
         @click="handleClick"

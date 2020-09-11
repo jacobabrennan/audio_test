@@ -5,8 +5,10 @@
 //-- Dependencies --------------------------------
 import Vue from '../libraries/vue.esm.browser.js';
 import './canvas.js';
-import { EVENT_RADIO_SELECT } from '../controls/radio.js';
-import { EVENT_ADJUST } from '../controls/adjuster.js';
+import {
+    EVENT_RADIO_SELECT,
+    EVENT_ADJUST,
+} from '../base_components/index.js';
 // import { setup as setupCanvas, instrumentDraw } from './canvas.js';
 // import { setup as setupControlStrip } from './control_strip.js';
 
@@ -20,7 +22,7 @@ Vue.component('editor-instrument', {
     template: (`
         <div class="instrument_editor">
             <div class="instrument_controls">
-                <value-radio
+                <radio-selector
                     :options="['Sustain', 'Loop', 'No Sustain']"
                     :value="sustype"
                     :width="12"

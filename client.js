@@ -25,10 +25,12 @@ import AudioMessageInterface, {
 import {
     DISPLAY_HEIGHT_DEFAULT,
 } from './utilities.js';
-import { EVENT_OPTION_SELECT } from './controls/selector.js';
-import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
-import { EVENT_ADJUST } from './controls/adjuster.js';
+import {
+    EVENT_OPTION_SELECT,
+    EVENT_ADJUST,
+} from './base_components/index.js';
 import { songSave, songLoad } from './file_management/controls.js';
+import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
 Vue.component('derp-derp', {
     render() {
         return;
@@ -55,13 +57,13 @@ const TEMPLATE_EDITOR = `
             </keep-alive>
         </div>
         <div class="controls">
-            <div class="control_group">
+            <div>
                 <button-bar :actions="actionsFile" />
             </div>
-            <div class="control_group">
+            <div>
                 <button-bar :actions="actionsPlayback" />
             </div>
-            <div class="control_group">
+            <div>
                 <value-adjuster
                     label="Volume"
                     :value="volume"
@@ -83,7 +85,7 @@ const TEMPLATE_EDITOR = `
                     @${EVENT_ADJUST}="ticksPerBeat = $event"
                 />
             </div>
-            <div class="control_group">
+            <div>
                 <button-bar :actions="actionsPattern" />
                 <option-selector
                     :value="patternCurrentIndex"
@@ -99,14 +101,15 @@ const TEMPLATE_EDITOR = `
                     @${EVENT_ADJUST}="handlePatternLength"
                 />
             </div>
-            <div class="control_group">
-                <button-action
+            <div>
+                <button
                     :class="{ selected: instrumentEditorOpen }"
-                    label="Inst. Editor"
-                    :action="toggleInstrumentEditor"
-                />
+                    @click="toggleInstrumentEditor"
+                >
+                    Inst. Editor
+                </button>
             </div>
-            <div class="control_group">
+            <div>
                 <button-bar :actions="actionsInstrument" />
                 <option-selector
                     :value="instrumentCurrentIndex"
