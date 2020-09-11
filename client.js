@@ -21,6 +21,7 @@ import AudioMessageInterface, {
     PATTERN_LENGTH_MAX,
     RESPONSE_PATTERN_ROW,
     RESPONSE_SONG_END,
+    MASK_CELL_INSTRUMENT_WIDTH,
 } from './libraries/audio_processor.js';
 import {
     DISPLAY_HEIGHT_DEFAULT,
@@ -134,19 +135,11 @@ Vue.component('song-editor', {
             patternCurrentIndex: 0,
             patternCurrent: null,
             patterns: [
-                new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT),
+                createBlankPattern(),
             ],
             instrumentCurrentIndex: 0,
             instrumentCurrent: null,
-            instruments: [
-                {
-                    sustain: 0,
-                    loopStart: undefined,
-                    loopEnd: undefined,
-                    envelopeVolume: [0.5],
-                    envelopeDuration: [0],
-                },
-            ],
+            instruments: [createBlankInstrument()],
             instrumentEditorOpen: true,
         };
     },
@@ -199,7 +192,7 @@ Vue.component('song-editor', {
                     label: 'New P.',
                     action: () => {
                         if(this.patterns.length >= PATTERNS_MAX) { return;}
-                        const patternNew = new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT);
+                        const patternNew = createBlankPattern();
                         this.patterns.push(patternNew);
                         this.patternCurrent = patternNew;
                         this.patternCurrentIndex = this.patterns.length-1;
@@ -210,7 +203,7 @@ Vue.component('song-editor', {
                     action: () => {
                         this.patterns.splice(this.patternCurrentIndex, 1);
                         if(!this.patterns.length) {
-                            this.patterns.push(new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT));
+                            this.patterns.push(createBlankPattern());
                         }
                         if(this.patternCurrentIndex >= this.patterns.length) {
                             this.patternCurrentIndex = this.patterns.length - 1;
@@ -225,24 +218,25 @@ Vue.component('song-editor', {
                 {
                     label: 'New I.',
                     action: () => {
-                        if(this.patterns.length >= PATTERNS_MAX) { return;}
-                        const patternNew = new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT);
-                        this.patterns.push(patternNew);
-                        this.patternCurrent = patternNew;
-                        this.patternCurrentIndex = this.patterns.length-1;
+                        const instrumentsMax = Math.pow(2, MASK_CELL_INSTRUMENT_WIDTH);
+                        if(this.instruments.length >= instrumentsMax) { return;}
+                        const instrumentNew = createBlankInstrument();
+                        this.instruments.push(instrumentNew);
+                        this.instrumentCurrent = instrumentNew;
+                        this.instrumentCurrentIndex = this.instruments.length-1;
                     },
                 },
                 {
                     label: 'Del I.',
                     action: () => {
-                        this.patterns.splice(this.patternCurrentIndex, 1);
-                        if(!this.patterns.length) {
-                            this.patterns.push(new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT));
+                        this.instruments.splice(this.instrumentCurrentIndex, 1);
+                        if(!this.instruments.length) {
+                            this.instruments.push(createBlankInstrument());
                         }
-                        if(this.patternCurrentIndex >= this.patterns.length) {
-                            this.patternCurrentIndex = this.patterns.length - 1;
+                        if(this.instrumentCurrentIndex >= this.instruments.length) {
+                            this.instrumentCurrentIndex = this.instruments.length - 1;
                         }
-                        this.patternCurrent = this.patterns[this.patternCurrentIndex];
+                        this.instrumentCurrent = this.instruments[this.instrumentCurrentIndex];
                     },
                 },
             ];
@@ -311,3 +305,17 @@ Vue.component('song-editor', {
         },
     },
 });
+
+//-- Utilities -----------------------------------
+function createBlankPattern() {
+    return new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT);
+}
+function createBlankInstrument() {
+    return {
+        sustain: 0,
+        loopStart: undefined,
+        loopEnd: undefined,
+        envelopeVolume: [0.5],
+        envelopeDuration: [0],
+    };
+}

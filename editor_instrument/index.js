@@ -120,9 +120,10 @@ Vue.component('editor-instrument', {
             this.instrument.envelopeVolume = envelopes.volume;
         },
         handleSetNodeCount(nodeCount) {
-            if(nodeCount < this.instrument.envelopeVolume.length) {
-                this.instrument.envelopeVolume.length = nodeCount;
-                this.instrument.envelopeDuration.length = nodeCount;
+            const delta = nodeCount - this.instrument.envelopeVolume.length;
+            if(delta < 0) {
+                this.instrument.envelopeVolume.splice(delta);
+                this.instrument.envelopeDuration.splice(delta);
                 return;
             }
             while(this.instrument.envelopeVolume.length < nodeCount) {

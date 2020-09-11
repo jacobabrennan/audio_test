@@ -7,17 +7,19 @@ Editing the octave of a note removes accidentals
 Cannot edit Adjusters by setting value directly on the keyboard
 
 //-- Current Focus -------------------------------
-Saving & Loading
+Port to Vue
 
 //-- Interface -----------------------------------
 Interface
     Save / Load work
 Pattern Editor
+    Name Patterns
     Shift+ArrowKey to move left and right one cell (input notes easier)
     Channel labels / Mute a whole channel
     Octave settings
     Control Strip
 Instrument Editor
+    Name Instruments
     Zoom control
     duty control
     Shift+ArrowKey to select
