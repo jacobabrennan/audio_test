@@ -5,7 +5,8 @@
 //-- Dependencies --------------------------------
 import {
     GRAPH_POINT_RADIUS,
-    DISPLAY_INSTRUMENT_HEIGHT,
+    DISPLAY_INSTRUMENT_PADDING,
+    DISPLAY_INSTRUMENT_INNER_HEIGHT,
 } from './canvas.js';
 
 //-- Event Handlers ------------------------------
@@ -53,7 +54,7 @@ export function handleMouseMove(eventMouseMove) {
     }
     //
     this.pointSelection.point.x = Math.max(posXMin, Math.min(posXMax, coord.x));
-    this.pointSelection.point.y = Math.max(0, Math.min(DISPLAY_INSTRUMENT_HEIGHT, coord.y));
+    this.pointSelection.point.y = Math.max(0, Math.min(DISPLAY_INSTRUMENT_INNER_HEIGHT, coord.y));
     //
     this.draw();
 }
@@ -76,6 +77,8 @@ function getEventCoords(event) {
     const clientRect = event.target.getClientRects()[0];
     let posX = event.clientX - clientRect.left;
     let posY = event.clientY - clientRect.top;
+    posX -= DISPLAY_INSTRUMENT_PADDING;
+    posY -= DISPLAY_INSTRUMENT_PADDING;
     return {
         x: posX,
         y: posY,

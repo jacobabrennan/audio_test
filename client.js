@@ -144,7 +144,7 @@ Vue.component('song-editor', {
                     loopStart: 1,
                     loopEnd: 2,
                     envelopeVolume: [0.5, 0.5, 0.75],
-                    envelopeDuration: [0, 10, 100],
+                    envelopeDuration: [0, 100, 1000],
                 },
             ],
             instrumentEditorOpen: true,
@@ -162,7 +162,7 @@ Vue.component('song-editor', {
             return this.patterns.map((pattern, index) => `Pattern ${index}`);
         },
         instrumentNames() {
-            return this.instruments.map((instrument, index) => `instrument ${index}`);
+            return this.instruments.map((instrument, index) => `Instrument ${index}`);
         },
         actionsPlayback() {
             return [

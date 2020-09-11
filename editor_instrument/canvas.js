@@ -23,6 +23,9 @@ import {
 //-- Constants -----------------------------------
 export const GRAPH_POINT_RADIUS = 8;
 export const DISPLAY_INSTRUMENT_HEIGHT = 254;
+export const DISPLAY_INSTRUMENT_PADDING = 8;
+export const DISPLAY_INSTRUMENT_INNER_HEIGHT = DISPLAY_INSTRUMENT_HEIGHT - DISPLAY_INSTRUMENT_PADDING*2;
+export const DISPLAY_INSTRUMENT_INNER_WIDTH = DISPLAY_PIXEL_WIDTH - DISPLAY_INSTRUMENT_PADDING*2;
 export const EVENT_UPDATE_ENVELOPES = 'update-envelopes';
 
 //------------------------------------------------
@@ -62,6 +65,7 @@ Vue.component('editor-envelope', {
         //
         this.context = canvas.getContext('2d');
         contextConfigure(this.context);
+        this.context.translate(DISPLAY_INSTRUMENT_PADDING, DISPLAY_INSTRUMENT_PADDING)
         //
         this.refresh();
     },
@@ -84,9 +88,13 @@ Vue.component('editor-envelope', {
             // Retreive each point and save location information
             for(let index = 0; index < this.instrument.envelopeVolume.length; index++) {
                 sampleTotal += this.instrument.envelopeDuration[index];
+                let durationX = (sampleTotal/this.zoom);
+                let volumeY = (1-this.instrument.envelopeVolume[index]);
+                durationX *= DISPLAY_INSTRUMENT_INNER_WIDTH;
+                volumeY *= DISPLAY_INSTRUMENT_INNER_HEIGHT;
                 const point = {
-                    x: (sampleTotal/this.zoom) * DISPLAY_PIXEL_WIDTH,
-                    y: (1-this.instrument.envelopeVolume[index]) * DISPLAY_INSTRUMENT_HEIGHT,
+                    x: durationX,
+                    y:  volumeY,
                 };
                 this.points.push(point);
             }
@@ -95,24 +103,27 @@ Vue.component('editor-envelope', {
             this.context.save();
             // Blank and fill back color
             this.context.fillStyle = COLOR_BG;
-            this.context.fillRect(0, 0, DISPLAY_PIXEL_WIDTH, DISPLAY_INSTRUMENT_HEIGHT);
+            this.context.fillRect(
+                -DISPLAY_INSTRUMENT_PADDING, -DISPLAY_INSTRUMENT_PADDING,
+                DISPLAY_PIXEL_WIDTH, DISPLAY_INSTRUMENT_HEIGHT,
+            );
             this.context.fillStyle = '#438';
             // Draw graph lines
             for(let volume = 0; volume <= 1; volume += 1/8) {
-                const posY = Math.floor(volume*DISPLAY_INSTRUMENT_HEIGHT);
-                this.context.fillRect(0, posY, DISPLAY_PIXEL_WIDTH, 1);
+                const posY = Math.floor(volume*DISPLAY_INSTRUMENT_INNER_HEIGHT);
+                this.context.fillRect(0, posY, DISPLAY_INSTRUMENT_INNER_WIDTH, 1);
             }
             const sampleWidthFloor = Math.pow(2, Math.floor(Math.log2(this.zoom)));
             for(let sampleX = 0; sampleX <= this.zoom; sampleX += (sampleWidthFloor >> 4)) {
-                const posX = Math.floor((sampleX/this.zoom) * DISPLAY_PIXEL_WIDTH);
-                this.context.fillRect(posX, 0, 1, DISPLAY_INSTRUMENT_HEIGHT);
+                const posX = Math.floor((sampleX/this.zoom) * DISPLAY_INSTRUMENT_INNER_WIDTH);
+                this.context.fillRect(posX, 0, 1, DISPLAY_INSTRUMENT_INNER_HEIGHT);
             }
             // Draw sample markers
-            if(DISPLAY_PIXEL_WIDTH / this.zoom > 2) {
+            if(DISPLAY_INSTRUMENT_INNER_WIDTH / this.zoom > 2) {
                 this.context.fillStyle = 'white';
                 for(let sampleX = 0; sampleX <= this.zoom; sampleX += 2) {
-                    const posX = Math.floor((sampleX/this.zoom) * DISPLAY_PIXEL_WIDTH);
-                    this.context.fillRect(posX, DISPLAY_INSTRUMENT_HEIGHT-8, 1, 8);
+                    const posX = Math.floor((sampleX/this.zoom) * DISPLAY_INSTRUMENT_INNER_WIDTH);
+                    this.context.fillRect(posX, DISPLAY_INSTRUMENT_INNER_HEIGHT-8, 1, 8);
                 }
             }
             // Draw envelope lines
@@ -133,15 +144,15 @@ Vue.component('editor-envelope', {
             if(this.instrument.sustain !== undefined) {
                 this.context.fillStyle = COLOR_FG_HIGHLIGHT;
                 const pointSus = this.points[this.instrument.sustain];
-                this.context.fillText('S', pointSus[0]-7, pointSus[1]+7);
+                this.context.fillText('S', pointSus.x-7, pointSus.y+7);
             }
             // Draw Loop markers
             if(this.instrument.loopStart !== undefined) {
                 this.context.fillStyle = COLOR_FG_HIGHLIGHT;
                 const pointLoopStart = this.points[this.instrument.loopStart];
-                this.context.fillText('>', pointLoopStart[0]-13, pointLoopStart[1]+7);
+                this.context.fillText('>', pointLoopStart.x-13, pointLoopStart.y+7);
                 const pointLoopEnd = this.points[this.instrument.loopEnd];
-                this.context.fillText('<', pointLoopEnd[0]-1, pointLoopEnd[1]+7);
+                this.context.fillText('<', pointLoopEnd.x-1, pointLoopEnd.y+7);
             }
             //
             this.context.restore();
@@ -153,23 +164,17 @@ Vue.component('editor-envelope', {
             this.context.lineWidth = 4;
             // Move path to start of graph
             this.context.beginPath();
-            this.context.moveTo(
-                this.points[0].x,
-                this.points[0].y,
-            );
+            this.context.moveTo(this.points[0].x, this.points[0].y);
             // Draw path connecting points
             for(let index = 0; index < this.points.length; index++) {
-                this.context.lineTo(
-                    this.points[index].x,
-                    this.points[index].y,
-                );
+                this.context.lineTo(this.points[index].x, this.points[index].y);
             }
             // Finalize graph / path
             this.context.stroke();
         },
         drawPoint(posX, posY, color) {
             this.context.fillStyle = color;
-            this.context.fillRect(posX, 0, 1, DISPLAY_INSTRUMENT_HEIGHT);
+            this.context.fillRect(posX, 0, 1, DISPLAY_INSTRUMENT_INNER_HEIGHT);
             this.context.beginPath();
             this.context.arc(posX, posY, GRAPH_POINT_RADIUS, 0, TAU);
             this.context.stroke();
@@ -183,7 +188,7 @@ Vue.component('editor-envelope', {
             for(let index=0; index <= indexChanged; index++) {
                 samplePosBefore += this.instrument.envelopeDuration[index];
             }
-            let samplePosCurrent = (this.points[indexChanged].x/DISPLAY_PIXEL_WIDTH) * this.zoom;
+            let samplePosCurrent = (this.points[indexChanged].x/DISPLAY_INSTRUMENT_INNER_WIDTH) * this.zoom;
             let samplePosDelta = samplePosCurrent - samplePosBefore;
             // Modify duration
             const envelopeDurationNew = this.instrument.envelopeDuration.slice();
@@ -194,7 +199,7 @@ Vue.component('editor-envelope', {
             }
             // Modify Volume
             const envelopeVolumeNew = this.instrument.envelopeVolume.slice();
-            const volumeNew = 1-(this.points[indexChanged].y / DISPLAY_INSTRUMENT_HEIGHT);
+            const volumeNew = 1-(this.points[indexChanged].y / DISPLAY_INSTRUMENT_INNER_HEIGHT);
             envelopeVolumeNew[indexChanged] = volumeNew;
             //
             this.$emit(EVENT_UPDATE_ENVELOPES, {
