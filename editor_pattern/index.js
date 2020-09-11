@@ -45,7 +45,7 @@ import {
     cellEditVolume,
     cellEditEffects,
 } from './pattern.js';
-import { CHANNELS_NUMBER } from '../libraries/audio_processor.js';
+import { CHANNELS_NUMBER } from '../node_modules/@jacobabrennan/apu/apu.single.js';
 
 //------------------------------------------------
 Vue.component('editor-pattern', {

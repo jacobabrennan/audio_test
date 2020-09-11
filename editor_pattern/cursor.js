@@ -5,7 +5,7 @@
 //-- Dependencies --------------------------------
 import {
     CHANNELS_NUMBER,
-} from '../libraries/audio_processor.js';
+} from '../node_modules/@jacobabrennan/apu/apu.single.js';
 import {
     CELL_WIDTH,
 } from './canvas.js';
@@ -84,6 +84,7 @@ export function scrollBy(deltaY) {
     this.scrollY = scrollYNew;
 }
 export function scrollCheck() {
+    if(!this.cursor) { return;}
     // Check against lower bound (top of display)
     if(this.cursor.posY < this.scrollY) {
         this.scrollTo(this.cursor.posY);

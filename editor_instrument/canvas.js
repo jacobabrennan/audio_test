@@ -4,7 +4,7 @@
 
 //-- Dependencies --------------------------------
 import Vue from '../libraries/vue.esm.browser.js';
-import { TAU } from '../libraries/audio_processor.js';
+import { TAU } from '../node_modules/@jacobabrennan/apu/apu.single.js';
 import {
     contextConfigure,
     COLOR_BG,
@@ -189,7 +189,7 @@ Vue.component('editor-envelope', {
                 samplePosBefore += this.instrument.envelopeDuration[index];
             }
             let samplePosCurrent = (this.points[indexChanged].x/DISPLAY_INSTRUMENT_INNER_WIDTH) * this.zoom;
-            let samplePosDelta = samplePosCurrent - samplePosBefore;
+            let samplePosDelta = Math.floor(samplePosCurrent - samplePosBefore);
             // Modify duration
             const envelopeDurationNew = this.instrument.envelopeDuration.slice();
             envelopeDurationNew[indexChanged] += samplePosDelta;

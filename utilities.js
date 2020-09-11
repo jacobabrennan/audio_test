@@ -43,7 +43,7 @@ export function contextConfigure(context) {
 import {
     MASK_CELL_NOTE_WIDTH,
     MASK_CELL_NOTE_STOP,
-} from './libraries/audio_processor.js';
+} from './node_modules/@jacobabrennan/apu/apu.single.js';
 
 //-- Constants -----------------------------------
 const noteLetters = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];

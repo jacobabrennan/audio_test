@@ -4,9 +4,6 @@
 
 
 //-- Dependencies --------------------------------
-import Vue from './libraries/vue.esm.browser.js';
-import './editor_pattern/index.js';
-import './editor_instrument/index.js';
 import AudioMessageInterface, {
     ACTION_SONG,
     ACTION_PLAYBACK_PLAY,
@@ -22,7 +19,10 @@ import AudioMessageInterface, {
     RESPONSE_PATTERN_ROW,
     RESPONSE_SONG_END,
     MASK_CELL_INSTRUMENT_WIDTH,
-} from './libraries/audio_processor.js';
+} from './node_modules/@jacobabrennan/apu/apu.single.js';
+import Vue from './libraries/vue.esm.browser.js';
+import './editor_pattern/index.js';
+import './editor_instrument/index.js';
 import {
     DISPLAY_HEIGHT_DEFAULT,
 } from './utilities.js';
@@ -37,7 +37,9 @@ Vue.component('derp-derp', {
         return;
     }
 });
+
 //-- Constants -----------------------------------
+const URL_APU = '/editor/node_modules/@jacobabrennan/apu/apu.single.js'
 const TEMPLATE_EDITOR = `
     <div class="client">
         <keep-alive>
@@ -148,7 +150,7 @@ Vue.component('song-editor', {
         this.instrumentCurrent = this.instruments[this.instrumentCurrentIndex];
         this.processor = new AudioMessageInterface((action, data) => {
             this.handleMessageAudio(action, data);
-        });
+        }, URL_APU);
     },
     computed: {
         patternNames() {

@@ -12,6 +12,7 @@ Port to Vue
 //-- Interface -----------------------------------
 Interface
     Save / Load work
+    Figure out universal mouse movement event capture
 Pattern Editor
     Name Patterns
     Shift+ArrowKey to move left and right one cell (input notes easier)
