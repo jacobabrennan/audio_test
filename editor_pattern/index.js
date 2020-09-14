@@ -3,7 +3,12 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import Vue from '../libraries/vue.esm.browser.js';
+import Vue from '/libraries/vue.esm.browser.js';
+import {
+    CHANNELS_NUMBER,
+    PATTERN_LENGTH_MAX,
+} from '/libraries/apu.single.js';
+import { EVENT_ADJUST } from '../base_components/index.js';
 import './canvas.js';
 import {
     handleMouseDown,
@@ -45,22 +50,46 @@ import {
     cellEditVolume,
     cellEditEffects,
 } from './pattern.js';
-import { CHANNELS_NUMBER } from '../node_modules/@jacobabrennan/apu/apu.single.js';
 
 //------------------------------------------------
 Vue.component('editor-pattern', {
-    template: `<canvas
-        class="pattern_display"
-        @mousedown = "handleMouseDown"
-        @mouseup = "handleMouseUp"
-        @mousemove = "handleMouseMove"
-        @mouseleave = "handleMouseLeave"
-        @wheel = "handleWheel"
-        @keydown = "handleKeyDown"
-    />`,
+    template: (`
+        <div class="pattern_display">
+            <div class="controls_bar">
+                <div class="manager_buttons">
+                    <button @click="$emit('new')">New</button>
+                    <button @click="$emit('delete')">Del</button>
+                </div>
+                <input
+                    type="text"
+                    :value="pattern.name"
+                    maxlength="14"
+                    @change="handlePatternName"
+                />
+                <value-adjuster
+                    label="Length"
+                    :width="12"
+                    :value="pattern.data.length / ${CHANNELS_NUMBER}"
+                    :min="1"
+                    :max="${PATTERN_LENGTH_MAX}"
+                    @${EVENT_ADJUST}="$emit('adjustlength', $event)"
+                    style="border: solid black 2px; padding-bottom: 2px; background: black;"
+                />
+            </div>
+            <canvas
+                ref="canvas"
+                @mousedown = "handleMouseDown"
+                @mouseup = "handleMouseUp"
+                @mousemove = "handleMouseMove"
+                @mouseleave = "handleMouseLeave"
+                @wheel = "handleWheel"
+                @keydown = "handleKeyDown"
+            />
+        </div>
+    `),
     props: {
         pattern: {
-            Uint32Array,
+            type: Object,
             required: true,
         },
         height: {
@@ -131,10 +160,14 @@ Vue.component('editor-pattern', {
                 this.drawWaiting = false;
             });
         },
+        handlePatternName(eventChange) {
+            const nameNew = eventChange.target.value;
+            this.pattern.name = nameNew;
+        },
     },
     mounted() {
-        this.context = setupCanvas(this.$el, this.height);
-        this.patternGrid = patternGridConstruct(this.pattern);
+        this.context = setupCanvas(this.$refs.canvas, this.height);
+        this.patternGrid = patternGridConstruct(this.pattern.data);
     },
     watch: {
         scrollY: 'draw',
@@ -167,7 +200,7 @@ Vue.component('editor-pattern', {
         pattern: {
             deep: true,
             handler: function (valueNew) {
-                this.patternGrid = patternGridConstruct(valueNew);
+                this.patternGrid = patternGridConstruct(valueNew.data);
                 const rows = valueNew.length / CHANNELS_NUMBER;
                 if(this.cursor && this.cursor.posY >= rows) {
                     this.cursor = {

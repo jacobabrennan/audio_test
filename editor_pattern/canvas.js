@@ -9,7 +9,7 @@ import {
     HEX,
     CHANNEL_NOISE,
     MASK_CELL_NOTE_STOP,
-} from '../node_modules/@jacobabrennan/apu/apu.single.js';
+} from '/libraries/apu.single.js';
 import {
     noteNumberToName,
     contextConfigure,

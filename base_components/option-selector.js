@@ -12,7 +12,7 @@
 */
 
 //-- Dependencies --------------------------------
-import Vue from '../libraries/vue.esm.browser.js';
+import Vue from '/libraries/vue.esm.browser.js';
 import {
     FONT_SIZE,
     FONT_FAMILY,

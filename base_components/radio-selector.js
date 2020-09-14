@@ -3,7 +3,7 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import Vue from '../libraries/vue.esm.browser.js';
+import Vue from '/libraries/vue.esm.browser.js';
 import {
     contextConfigure,
     CHAR_HEART,

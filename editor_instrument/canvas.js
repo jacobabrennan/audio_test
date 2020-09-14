@@ -3,8 +3,8 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import Vue from '../libraries/vue.esm.browser.js';
-import { TAU } from '../node_modules/@jacobabrennan/apu/apu.single.js';
+import Vue from '/libraries/vue.esm.browser.js';
+import { TAU } from '/libraries/apu.single.js';
 import {
     contextConfigure,
     COLOR_BG,
@@ -22,7 +22,7 @@ import {
 
 //-- Constants -----------------------------------
 export const GRAPH_POINT_RADIUS = 8;
-export const DISPLAY_INSTRUMENT_HEIGHT = 254;
+export const DISPLAY_INSTRUMENT_HEIGHT = 212;
 export const DISPLAY_INSTRUMENT_PADDING = 8;
 export const DISPLAY_INSTRUMENT_INNER_HEIGHT = DISPLAY_INSTRUMENT_HEIGHT - DISPLAY_INSTRUMENT_PADDING*2;
 export const DISPLAY_INSTRUMENT_INNER_WIDTH = DISPLAY_PIXEL_WIDTH - DISPLAY_INSTRUMENT_PADDING*2;

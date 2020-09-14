@@ -20,7 +20,7 @@ export const FONT_SIZE = 16;
 export const CHAR_HEART = 'Œ';
 
 //------------------------------------------------
-export const DISPLAY_HEIGHT_DEFAULT = 40;
+export const DISPLAY_HEIGHT_DEFAULT = 37;
 
 
 //== Canvas Utilities ==========================================================
@@ -43,7 +43,7 @@ export function contextConfigure(context) {
 import {
     MASK_CELL_NOTE_WIDTH,
     MASK_CELL_NOTE_STOP,
-} from './node_modules/@jacobabrennan/apu/apu.single.js';
+} from '/libraries/apu.single.js';
 
 //-- Constants -----------------------------------
 const noteLetters = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];

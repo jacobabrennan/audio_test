@@ -3,7 +3,7 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-import Vue from '../libraries/vue.esm.browser.js';
+import Vue from '/libraries/vue.esm.browser.js';
 import {
     EVENT_RADIO_SELECT,
     EVENT_ADJUST,
@@ -19,7 +19,19 @@ const SUSTAIN_OFF = 2;
 Vue.component('editor-instrument', {
     template: (`
         <div class="instrument_editor">
-            <div class="instrument_controls">
+            <div class="controls_bar">
+                <div class="manager">
+                    <div class="manager_buttons">
+                        <button @click="$emit('new')">New</button>
+                        <button @click="$emit('delete')">Del</button>
+                    </div>
+                    <input
+                        type="text"
+                        maxlength="14"
+                        :value="instrument.name"
+                        @change="handleInstrumentName"
+                    />
+                </div>
                 <radio-selector
                     :options="['Sustain', 'Loop', 'No Sustain']"
                     :value="sustype"
@@ -89,6 +101,20 @@ Vue.component('editor-instrument', {
             this.sustype = SUSTAIN_OFF;
         }
     },
+    computed: {
+        actionsManage() {
+            return [
+                {
+                    label: 'New',
+                    action: () => this.$emit('new'),
+                },
+                {
+                    label: 'Del',
+                    action: () => this.$emit('delete'),
+                },
+            ];
+        },
+    },
     methods: {
         handleSustype(sustype) {
             this.sustype = sustype;
@@ -142,5 +168,9 @@ Vue.component('editor-instrument', {
             this.instrument.loopEnd = indexEnd;
             this.instrument.loopStart = Math.min(this.instrument.loopStart, indexEnd);
         },
+        handleInstrumentName(eventChange) {
+            const valueNew = eventChange.target.value;
+            this.instrument.name = valueNew;
+        }
     },
 });

@@ -5,7 +5,7 @@
 //-- Dependencies --------------------------------
 import {
     CHANNELS_NUMBER,
-} from '../node_modules/@jacobabrennan/apu/apu.single.js';
+} from '/libraries/apu.single.js';
 import {
     CELL_WIDTH,
 } from './canvas.js';
@@ -13,7 +13,7 @@ import {
 //-- Cursor Movement -----------------------------
 export function cursorPosition(posX, posY) {
     //
-    const rows = this.pattern.length / CHANNELS_NUMBER;
+    const rows = this.pattern.data.length / CHANNELS_NUMBER;
     if(posX < 0 || posX >= CELL_WIDTH*CHANNELS_NUMBER) { return;}
     if(posY < 0 || posY >= rows) { return;}
     //
@@ -55,7 +55,7 @@ export function cursorMove(deltaX, deltaY, wrap=true) {
     else if(posXNew >= CHANNELS_NUMBER*CELL_WIDTH) {
         posXNew = 0;
     }
-    const length = this.pattern.length / CHANNELS_NUMBER;
+    const length = this.pattern.data.length / CHANNELS_NUMBER;
     if(posYNew < 0) {
         if(wrap) {
             posYNew = length-1;
@@ -78,7 +78,7 @@ export function scrollTo(posY) {
     this.scrollY = posY;
 }
 export function scrollBy(deltaY) {
-    const rows = this.pattern.length / CHANNELS_NUMBER;
+    const rows = this.pattern.data.length / CHANNELS_NUMBER;
     let scrollYNew = this.scrollY + deltaY;
     scrollYNew = Math.max(0, Math.min(rows-this.height, scrollYNew));
     this.scrollY = scrollYNew;

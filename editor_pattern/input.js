@@ -14,7 +14,7 @@ import {
     CHANNELS_NUMBER,
     HEX,
     MASK_CELL_NOTE_STOP,
-} from '../node_modules/@jacobabrennan/apu/apu.single.js';
+} from '/libraries/apu.single.js';
 import {
     noteNameToNumber,
     noteNumberToName,
@@ -79,7 +79,7 @@ export function handleWheel(eventWheel) {
     let scrollLines;
     switch(eventWheel.deltaMode) {
         case DOM_DELTA_PIXEL:
-            scrollLines = eventWheel.deltaY / FONT_SIZE;
+            scrollLines = Math.ceil(eventWheel.deltaY / FONT_SIZE);
             break;
         case DOM_DELTA_LINE:
             scrollLines = eventWheel.deltaY;
@@ -89,7 +89,10 @@ export function handleWheel(eventWheel) {
             scrollLines = eventWheel.deltaY * this.height;
             break;
     }
+    const scrollYOld = this.scrollY;
     this.scrollBy(scrollLines);
+    
+    eventWheel.preventDefault();
 }
 export function handleKeyDown(eventKeyboard) {
     const key = eventKeyboard.key.toLowerCase();
@@ -140,7 +143,7 @@ export function handleKeyDown(eventKeyboard) {
             return;
         case 'pagedown': {
             if(!this.cursor) { break;}
-            const length = this.pattern.length / CHANNELS_NUMBER;
+            const length = this.pattern.data.length / CHANNELS_NUMBER;
             this.cursorMove(0, Math.floor(this.height/2), this.cursor.posY == length-1);
             return;
         }

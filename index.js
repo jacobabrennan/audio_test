@@ -3,83 +3,318 @@
 //==============================================================================
 
 //-- Dependencies --------------------------------
-// Framework
-import Vue from './libraries/vue.esm.browser.js';
-// Standard Components (must be preloaded)
-import './base_components/index.js'
-// Client
-import './client.js';
-// Font Loading Utilities
+import AudioMessageInterface, {
+    ACTION_SONG,
+    ACTION_PLAYBACK_PLAY,
+    ACTION_PLAYBACK_STOP,
+    BPS_DEFAULT,
+    TPB_DEFAULT,
+    CHANNELS_NUMBER,
+    VOLUME_MAX,
+    BPS_MAX,
+    TPB_MAX,
+    PATTERNS_MAX,
+    RESPONSE_PATTERN_ROW,
+    RESPONSE_SONG_END,
+    MASK_CELL_INSTRUMENT_WIDTH,
+} from '/libraries/apu.single.js';
+import Vue from '/libraries/vue.esm.browser.js';
+import loadFont from './font_loader.js';
+import './editor_pattern/index.js';
+import './editor_instrument/index.js';
 import {
-    contextConfigure,
-    CHAR_HEART,
-    DOM_STYLE_DYNAMIC,
-    FONT_SIZE,
+    DISPLAY_HEIGHT_DEFAULT,
 } from './utilities.js';
+import {
+    EVENT_OPTION_SELECT,
+    EVENT_ADJUST,
+} from './base_components/index.js';
+import { songSave, songLoad } from './file_management/controls.js';
+import { DISPLAY_PIXEL_WIDTH } from './editor_pattern/canvas.js';
 
-//-- Initialize Project --------------------------
-(async function () {
-    // Load custom font
-    await loadFont();
-    // Create DOM container
-    let client = document.createElement('song-editor');
-    document.body.append(client);
-    new Vue({
-        el: client,
-    });
-})();
+//-- Constants -----------------------------------
+const TEMPLATE_EDITOR = `
+    <div v-if="fontLoaded" class="editor">
+        <div class="main-panel" style="width:${DISPLAY_PIXEL_WIDTH}">
+            <keep-alive>
+                <editor-pattern
+                    :pattern="patternCurrent"
+                    :height="instrumentEditorOpen? 18 : ${DISPLAY_HEIGHT_DEFAULT}"
+                    :instrument="instrumentCurrentIndex"
+                    :highlight-row="highlightRow"
+                    @cell-edit="handleCellEdit"
+                    @new="handlePatternNew"
+                    @delete="handlePatternDelete"
+                    @adjustlength="handlePatternLength"
+                />
+            </keep-alive>
+            <keep-alive v-if="instrumentEditorOpen">
+                <editor-instrument
+                    :instrument="instrumentCurrent"
+                    @new="handleInstrumentNew"
+                    @delete="handleInstrumentDelete"
+                />
+            </keep-alive>
+        </div>
+        <div class="controls">
+            <div>
+                <button-bar :actions="actionsFile" />
+            </div>
+            <div>
+                <button-bar :actions="actionsPlayback" />
+            </div>
+            <div>
+                <value-adjuster
+                    label="Volume"
+                    :value="volume"
+                    :max="${VOLUME_MAX}"
+                    @${EVENT_ADJUST}="volume = $event"
+                />
+                <value-adjuster
+                    label="Beats/Sec."
+                    :value="beatsPerSecond"
+                    :max="${BPS_MAX}"
+                    :min="1"
+                    @${EVENT_ADJUST}="beatsPerSecond = $event"
+                />
+                <value-adjuster
+                    label="Ticks/Beat"
+                    :value="ticksPerBeat"
+                    :max="${TPB_MAX}"
+                    :min="0"
+                    @${EVENT_ADJUST}="ticksPerBeat = $event"
+                />
+            </div>
+            <div>
+                <option-selector
+                    :value="patternCurrentIndex"
+                    :height="8"
+                    :options="patternNames"
+                    @${EVENT_OPTION_SELECT}="handlePatternSelect"
+                />
+            </div>
+            <div>
+                <button
+                    :class="{ selected: instrumentEditorOpen }"
+                    @click="toggleInstrumentEditor"
+                >
+                    Inst. Editor
+                </button>
+            </div>
+            <div>
+                <option-selector
+                    :value="instrumentCurrentIndex"
+                    :height="8"
+                    :options="instrumentNames"
+                    @${EVENT_OPTION_SELECT}="handleInstrumentSelect"
+                />
+            </div>
+        </div>
+    </div>
+`;
 
-
-//== Font Load Checker =========================================================
-
-/* This font loader is necessary due to Chrome's refusal to load fonts until
-after an attempt is made to use them. This is too late for a call to the canvas
-2D drawing functions. Until FontFace becomes an offical stanard, a kludge like
-this will remain necessary. Switch to Firefox, where this just works. */
-
-//-- Font Loader ---------------------------------
-async function loadFont() {
-    const elementStyle = document.createElement('style');
-    elementStyle.innerText = DOM_STYLE_DYNAMIC;
-    document.head.appendChild(elementStyle);
-    const canvas = document.createElement('canvas');
-    canvas.width = FONT_SIZE;
-    canvas.height = FONT_SIZE;
-    const context = canvas.getContext('2d');
-    contextConfigure(context);
-    let runningTotal = 0;
-    const timeoutFont = 1000; // Give chrome a second to attempt to load the font.
-    return new Promise((resolve, reject) => {
-        const interval = setInterval(() => {
-            const success = checkFontStatus(context);
-            if(success) {
-                clearInterval(interval);
-                resolve();
+//------------------------------------------------
+export default Vue.component('song-editor', {
+    template: TEMPLATE_EDITOR,
+    data: function () {
+        return {
+            fontLoaded: false,
+            volume: 4,
+            beatsPerSecond: BPS_DEFAULT,
+            ticksPerBeat: TPB_DEFAULT,
+            highlightRow: null,
+            patternCurrentIndex: 0,
+            patternCurrent: null,
+            patterns: [
+                createBlankPattern(),
+            ],
+            instrumentCurrentIndex: 0,
+            instrumentCurrent: null,
+            instruments: [createBlankInstrument()],
+            instrumentEditorOpen: true,
+        };
+    },
+    props: {
+        apu: {
+            type: String,
+            required: true,
+        },
+    },
+    created() {
+        this.patternCurrent = this.patterns[this.patternCurrentIndex];
+        this.instrumentCurrent = this.instruments[this.instrumentCurrentIndex];
+        this.processor = new AudioMessageInterface((action, data) => {
+            this.handleMessageAudio(action, data);
+        }, this.apu);
+        loadFont().then(
+            () => this.fontLoaded = true
+        );
+    },
+    computed: {
+        patternNames() {
+            return this.patterns.map((pattern, index) => {
+                if(!pattern.name) {
+                    return `Pattern ${index}`;
+                }
+                return pattern.name;
+            });
+        },
+        instrumentNames() {
+            return this.instruments.map((instrument, index) => {
+                if(!instrument.name) {
+                    return `Instrument ${index}`;
+                }
+                return instrument.name;
+            });
+        },
+        actionsPlayback() {
+            return [
+                {
+                    label: 'Play',
+                    action: async () => {
+                        await this.processor.messageSend(ACTION_SONG, this.songCompile());
+                        await this.processor.messageSend(ACTION_PLAYBACK_PLAY, {/* Currently empty */});
+                    }
+                },
+                {
+                    label: 'Stop',
+                    action: () => {
+                        this.processor.messageSend(ACTION_PLAYBACK_STOP, {/* Currently empty */});
+                    }
+                },
+            ]
+        },
+        actionsFile() {
+            return [
+                {
+                    label: 'Save',
+                    action: () => undefined,
+                },
+                {
+                    label: 'Load',
+                    action: () => undefined,
+                },
+            ];
+        },
+    },
+    methods: {
+        songCompile() {
+            return {
+                volume: this.volume,
+                bps: this.beatsPerSecond,
+                tpb: this.ticksPerBeat,
+                patterns: this.patterns.map(pattern => pattern.data),
+                instruments: this.instruments,
+            };
+        },
+        handleCellEdit(event) {
+            const compoundIndex = event.channel + (event.row * CHANNELS_NUMBER);
+            const patternOld = this.patternCurrent;
+            const patternNew = {
+                name: patternOld.name,
+                data: patternOld.data.slice(),
+            };
+            patternNew.data[compoundIndex] = event.value;
+            this.patterns[this.patternCurrentIndex] = patternNew;
+            this.patternCurrent = patternNew;
+        },
+        handlePatternLength(rowsNew) {
+            const patternOld = this.patternCurrent;
+            const rowsOld = this.patternCurrent.data.length / CHANNELS_NUMBER;
+            if(rowsOld === rowsNew) { return;}
+            let patternNew = {
+                name: patternOld.name,
+            };
+            if(rowsNew < rowsOld) {
+                patternNew.data = patternOld.data.slice(0, rowsNew*CHANNELS_NUMBER);
+            } else {
+                patternNew.data = new Uint32Array(rowsNew*CHANNELS_NUMBER);
+                for(let indexCell = 0; indexCell < patternOld.data.length; indexCell++) {
+                    patternNew.data[indexCell] = patternOld.data[indexCell];
+                }
             }
-            runningTotal += 10;
-            if(runningTotal > timeoutFont) {
-                clearInterval(interval);
-                reject();
+            this.patterns[this.patternCurrentIndex] = patternNew;
+            this.patternCurrent = patternNew;
+        },
+        handlePatternSelect(indexNew) {
+            if(indexNew < 0 || indexNew >= this.patterns.length) { return;}
+            this.patternCurrentIndex = indexNew;
+            this.patternCurrent = this.patterns[this.patternCurrentIndex];
+        },
+        handlePatternNew() {
+            if(this.patterns.length >= PATTERNS_MAX) { return;}
+            const patternNew = createBlankPattern();
+            this.patterns.push(patternNew);
+            this.patternCurrent = patternNew;
+            this.patternCurrentIndex = this.patterns.length-1;
+        },
+        handlePatternDelete() {
+            this.patterns.splice(this.patternCurrentIndex, 1);
+            if(!this.patterns.length) {
+                this.patterns.push(createBlankPattern());
             }
-        }, 10);
-    });
+            if(this.patternCurrentIndex >= this.patterns.length) {
+                this.patternCurrentIndex = this.patterns.length - 1;
+            }
+            this.patternCurrent = this.patterns[this.patternCurrentIndex];
+        },
+        handleInstrumentSelect(indexNew) {
+            if(indexNew < 0 || indexNew >= this.instruments.length) { return;}
+            this.instrumentCurrentIndex = indexNew;
+            this.instrumentCurrent = this.instruments[this.instrumentCurrentIndex];
+        },
+        handleInstrumentNew() {
+            const instrumentsMax = Math.pow(2, MASK_CELL_INSTRUMENT_WIDTH);
+            if(this.instruments.length >= instrumentsMax) { return;}
+            const instrumentNew = createBlankInstrument();
+            this.instruments.push(instrumentNew);
+            this.instrumentCurrent = instrumentNew;
+            this.instrumentCurrentIndex = this.instruments.length-1;
+        },
+        handleInstrumentDelete() {
+            this.instruments.splice(this.instrumentCurrentIndex, 1);
+            if(!this.instruments.length) {
+                this.instruments.push(createBlankInstrument());
+            }
+            if(this.instrumentCurrentIndex >= this.instruments.length) {
+                this.instrumentCurrentIndex = this.instruments.length - 1;
+            }
+            this.instrumentCurrent = this.instruments[this.instrumentCurrentIndex];
+        },
+        handleMessageAudio(action, data) {
+            switch(action) {
+                case RESPONSE_PATTERN_ROW: {
+                    this.patternCurrentIndex = data.patternId;
+                    this.patternCurrent = this.patterns[this.patternCurrentIndex];
+                    this.highlightRow = data.row;
+                    break;
+                }
+                case RESPONSE_SONG_END: {
+                    this.highlightRow = null;
+                    break;
+                }
+            }
+        },
+        toggleInstrumentEditor() {
+            this.instrumentEditorOpen = !this.instrumentEditorOpen;
+        },
+    },
+});
+
+//-- Utilities -----------------------------------
+function createBlankPattern() {
+    return {
+        name: 'New Pattern',
+        data: new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT),
+    };
 }
-
-//-- Load Status Checker -------------------------
-function checkFontStatus(context) {
-    context.fillStyle = '#000';
-    context.fillRect(0,0,FONT_SIZE,FONT_SIZE);
-    context.fillStyle = '#f00';
-    context.fillText(CHAR_HEART, 0, FONT_SIZE);
-    const imageData = context.getImageData(0,0,FONT_SIZE,FONT_SIZE).data;
-    const posY = 8;
-    const colorChannels = 4;
-    let success = true;
-    for(let posX = 4; posX < FONT_SIZE-4; posX++) {
-        const indexRedChannel = ((posY*FONT_SIZE)+posX)*colorChannels;
-        const valueRed = imageData[indexRedChannel];
-        if(valueRed === 255) { continue;}
-        success = false;
-    }
-    return success;
+function createBlankInstrument() {
+    return {
+        name: "New Instrument",
+        sustain: 0,
+        loopStart: undefined,
+        loopEnd: undefined,
+        envelopeVolume: [0.5],
+        envelopeDuration: [0],
+    };
 }
