@@ -2,16 +2,6 @@
 
 /*== Base Components =========================================================*/
 
-/*-- Button & Button Bar -----------------------*/
-.button-bar {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-.button-bar button {
-    width: 120px;
-}
-
 /*-- Option Selector ---------------------------*/
 .option-selector {
     color: var(--color-fg);

@@ -57,13 +57,15 @@ const TEMPLATE_EDITOR = `
             </keep-alive>
         </div>
         <div class="controls">
-            <div>
-                <button-bar :actions="actionsFile" />
+            <div class="button_bar">
+                <button @click="save">{{newData? 'Save*' : 'Save'}}</button>
+                <button @click="$router.push('/')">Close</button>
             </div>
-            <div>
-                <button-bar :actions="actionsPlayback" />
+            <div class="button_bar">
+                <button @click="songPlay">Play</button>
+                <button @click="songStop">Stop</button>
             </div>
-            <div>
+            <div class="control_group">
                 <value-adjuster
                     label="Volume"
                     :value="volume"
@@ -85,30 +87,24 @@ const TEMPLATE_EDITOR = `
                     @${EVENT_ADJUST}="ticksPerBeat = $event"
                 />
             </div>
-            <div>
-                <option-selector
-                    :value="patternCurrentIndex"
-                    :height="8"
-                    :options="patternNames"
-                    @${EVENT_OPTION_SELECT}="handlePatternSelect"
-                />
-            </div>
-            <div>
-                <button
-                    :class="{ selected: instrumentEditorOpen }"
-                    @click="toggleInstrumentEditor"
-                >
-                    Inst. Editor
-                </button>
-            </div>
-            <div>
-                <option-selector
-                    :value="instrumentCurrentIndex"
-                    :height="8"
-                    :options="instrumentNames"
-                    @${EVENT_OPTION_SELECT}="handleInstrumentSelect"
-                />
-            </div>
+            <option-selector
+                :value="patternCurrentIndex"
+                :height="8"
+                :options="patternNames"
+                @${EVENT_OPTION_SELECT}="handlePatternSelect"
+            />
+            <button
+                :class="{ selected: instrumentEditorOpen }"
+                @click="toggleInstrumentEditor"
+            >
+                Inst. Editor
+            </button>
+            <option-selector
+                :value="instrumentCurrentIndex"
+                :height="8"
+                :options="instrumentNames"
+                @${EVENT_OPTION_SELECT}="handleInstrumentSelect"
+            />
         </div>
     </div>
 `;
@@ -132,6 +128,7 @@ export default Vue.component('song-editor', {
             instrumentCurrent: null,
             instruments: [createBlankInstrument()],
             instrumentEditorOpen: true,
+            newData: false,
         };
     },
     props: {
@@ -167,37 +164,9 @@ export default Vue.component('song-editor', {
                 return instrument.name;
             });
         },
-        actionsPlayback() {
-            return [
-                {
-                    label: 'Play',
-                    action: async () => {
-                        await this.processor.messageSend(ACTION_SONG, this.songCompile());
-                        await this.processor.messageSend(ACTION_PLAYBACK_PLAY, {/* Currently empty */});
-                    }
-                },
-                {
-                    label: 'Stop',
-                    action: () => {
-                        this.processor.messageSend(ACTION_PLAYBACK_STOP, {/* Currently empty */});
-                    }
-                },
-            ]
-        },
-        actionsFile() {
-            return [
-                {
-                    label: 'Save',
-                    action: () => undefined,
-                },
-                {
-                    label: 'Load',
-                    action: () => undefined,
-                },
-            ];
-        },
     },
     methods: {
+        // Use splice when dealing with patterns, to ensure Vue watchers fire
         songCompile() {
             return {
                 volume: this.volume,
@@ -215,7 +184,7 @@ export default Vue.component('song-editor', {
                 data: patternOld.data.slice(),
             };
             patternNew.data[compoundIndex] = event.value;
-            this.patterns[this.patternCurrentIndex] = patternNew;
+            this.patterns.splice(this.patternCurrentIndex, 1, patternNew);
             this.patternCurrent = patternNew;
         },
         handlePatternLength(rowsNew) {
@@ -233,7 +202,7 @@ export default Vue.component('song-editor', {
                     patternNew.data[indexCell] = patternOld.data[indexCell];
                 }
             }
-            this.patterns[this.patternCurrentIndex] = patternNew;
+            this.patterns.splice(this.patternCurrentIndex, 1, patternNew);
             this.patternCurrent = patternNew;
         },
         handlePatternSelect(indexNew) {
@@ -298,6 +267,33 @@ export default Vue.component('song-editor', {
         toggleInstrumentEditor() {
             this.instrumentEditorOpen = !this.instrumentEditorOpen;
         },
+        notifySave() {
+            this.newData = true;
+        },
+        save() {
+            this.newData = false;
+        },
+        async songPlay() {
+            await this.processor.messageSend(ACTION_SONG, this.songCompile());
+            await this.processor.messageSend(ACTION_PLAYBACK_PLAY, {/* Currently empty */});
+        },
+        async songStop() {
+            await this.processor.messageSend(ACTION_PLAYBACK_STOP, {/* Currently empty */});
+            
+        },
+    },
+    watch: {
+        volume: 'notifySave',
+        beatsPerSecond: 'notifySave',
+        ticksPerBeat: 'notifySave',
+        patterns: {
+            deep: true,
+            handler: 'notifySave',
+        },
+        instruments: {
+            deep: true,
+            handler: 'notifySave',
+        },
     },
 });
 
@@ -305,7 +301,7 @@ export default Vue.component('song-editor', {
 function createBlankPattern() {
     return {
         name: 'New Pattern',
-        data: new Uint32Array(CHANNELS_NUMBER*DISPLAY_HEIGHT_DEFAULT),
+        data: new Uint32Array(CHANNELS_NUMBER*32),
     };
 }
 function createBlankInstrument() {

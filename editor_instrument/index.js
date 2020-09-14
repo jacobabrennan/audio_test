@@ -101,20 +101,6 @@ Vue.component('editor-instrument', {
             this.sustype = SUSTAIN_OFF;
         }
     },
-    computed: {
-        actionsManage() {
-            return [
-                {
-                    label: 'New',
-                    action: () => this.$emit('new'),
-                },
-                {
-                    label: 'Del',
-                    action: () => this.$emit('delete'),
-                },
-            ];
-        },
-    },
     methods: {
         handleSustype(sustype) {
             this.sustype = sustype;

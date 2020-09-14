@@ -25,9 +25,13 @@
 }
 .controls {
     border-left: 4px solid var(--color-bg-primary);
+    width: 244px;
 }
 .controls > * {
     margin-top: 4px;
+    width: 244px;
+}
+.controls > .control_group {
     display: flex;
     flex-direction: column;
 }
@@ -57,6 +61,16 @@
     flex-direction: column;
     border: solid 2px var(--color-bg);
     padding: 0px;
+}
+
+/*----------------------------------------------*/
+.button_bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.button_bar button {
+    width: 120px;
 }
 
 /*----------------------------------------------*/

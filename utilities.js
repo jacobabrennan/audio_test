@@ -20,7 +20,7 @@ export const FONT_SIZE = 16;
 export const CHAR_HEART = 'Œ';
 
 //------------------------------------------------
-export const DISPLAY_HEIGHT_DEFAULT = 37;
+export const DISPLAY_HEIGHT_DEFAULT = 35;
 
 
 //== Canvas Utilities ==========================================================
