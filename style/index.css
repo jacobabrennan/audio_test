@@ -115,5 +115,5 @@
     width: 228px;
 }
 .manager_buttons button {
-    width: calc((228px - 16px)/2);
+    width: calc((228px - 4px)/2);
 }
