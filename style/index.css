@@ -12,9 +12,12 @@
     background: var(--color-bg-primary);
     box-shadow: var(--glow);
     /* box-shadow: 0px 0px 400px rgba(255,255,255,0.25); */
-    width: 1024px;
     border-top: 2px solid black;
     border-left: 2px solid black;
+    width: 1024px;
+    height: 596px;
+}
+.view-main {
     display: flex;
     flex-direction: row;
 }

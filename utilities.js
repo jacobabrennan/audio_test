@@ -2,6 +2,13 @@
 
 //== Client Global Constants ===================================================
 
+//-- Dependencies --------------------------------
+import {
+    BPS_DEFAULT,
+    TPB_DEFAULT,
+    CHANNELS_NUMBER,
+} from '/libraries/apu.single.js';
+
 //-- Canvas Display ------------------------------
 export const COLOR_FG = 'white';
 export const COLOR_BG = 'black';
@@ -18,8 +25,6 @@ export const DOM_STYLE_DYNAMIC = `
 export const FONT_FAMILY = 'press_start_k_regular';
 export const FONT_SIZE = 16;
 export const CHAR_HEART = 'Œ';
-
-//------------------------------------------------
 export const DISPLAY_HEIGHT_DEFAULT = 35;
 
 
@@ -88,4 +93,118 @@ export function noteNumberToName(note) {
         octave++;
     }
     return letter.padEnd(2,' ') + octave.toString();
+}
+
+//-- Default Data --------------------------------
+export class Song {
+    constructor() {
+        this.id = null;
+        this.name = null;
+        this.author = null;
+        this.volume = 4;
+        this.beatsPerSecond = BPS_DEFAULT;
+        this.ticksPerBeat = TPB_DEFAULT;
+        this.patterns = [
+            new Pattern(),
+        ];
+        this.instruments = [new Instrument()];
+    }
+    toJSON() {
+        return {
+            id: this.id,
+            name: this.name,
+            author: this.author,
+            volume: this.volume,
+            beatsPerSecond: this.beatsPerSecond,
+            ticksPerBeat: this.ticksPerBeat,
+            patterns: this.patterns.map(pattern => pattern.toJSON()),
+            instruments: this.instruments.map(instrument => instrument.toJSON()),
+        };
+    }
+}
+export class Pattern {
+    constructor() {
+        this.name = 'New Pattern';
+        this.data = new Uint32Array(CHANNELS_NUMBER*32);
+    }
+    toJSON() {
+        return {
+            name: this.name,
+            data: Array.from(this.data),
+        };
+    }
+}
+export class Instrument {
+    constructor() {
+        this.name = "New Instrument";
+        this.sustain = 0;
+        this.loopStart = undefined;
+        this.loopEnd = undefined;
+        this.envelopeVolume = [0.5];
+        this.envelopeDuration = [0];
+    }
+    toJSON() {
+        return {
+            name: this.name,
+            sustain: this.sustain,
+            loopStart: this.loopStart,
+            loopend: this.loopEnd,
+            envelopeVolume: this.envelopeVolume,
+            envelopeDuration: this.envelopeDuration,
+        };
+    }
+}
+
+
+//== Font Load Checker =========================================================
+/* This font loader is necessary due to Chrome's refusal to load fonts until
+after an attempt is made to use them. This is too late for a call to the canvas
+2D drawing functions. Until FontFace becomes an offical stanard, a kludge like
+this will remain necessary. Switch to Firefox, where this just works. */
+
+//-- Font Loader ---------------------------------
+export async function loadFont() {
+    const elementStyle = document.createElement('style');
+    elementStyle.innerText = DOM_STYLE_DYNAMIC;
+    document.head.appendChild(elementStyle);
+    const canvas = document.createElement('canvas');
+    canvas.width = FONT_SIZE;
+    canvas.height = FONT_SIZE;
+    const context = canvas.getContext('2d');
+    contextConfigure(context);
+    let runningTotal = 0;
+    const timeoutFont = 1000; // Give chrome a second to attempt to load the font.
+    return new Promise((resolve, reject) => {
+        const interval = setInterval(() => {
+            const success = checkFontStatus(context);
+            if(success) {
+                clearInterval(interval);
+                resolve();
+            }
+            runningTotal += 10;
+            if(runningTotal > timeoutFont) {
+                clearInterval(interval);
+                reject();
+            }
+        }, 10);
+    });
+}
+
+//-- Load Status Checker -------------------------
+function checkFontStatus(context) {
+    context.fillStyle = '#000';
+    context.fillRect(0,0,FONT_SIZE,FONT_SIZE);
+    context.fillStyle = '#f00';
+    context.fillText(CHAR_HEART, 0, FONT_SIZE);
+    const imageData = context.getImageData(0,0,FONT_SIZE,FONT_SIZE).data;
+    const posY = 8;
+    const colorChannels = 4;
+    let success = true;
+    for(let posX = 4; posX < FONT_SIZE-4; posX++) {
+        const indexRedChannel = ((posY*FONT_SIZE)+posX)*colorChannels;
+        const valueRed = imageData[indexRedChannel];
+        if(valueRed === 255) { continue;}
+        success = false;
+    }
+    return success;
 }
