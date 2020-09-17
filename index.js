@@ -23,18 +23,15 @@ import { songSave, songLoad } from './file_management/controls.js';
 export default Vue.component('song-editor', {
     template: (`
         <div v-if="fontLoaded" class="editor">
-            <view-save-modal
-                v-if="saveModalOpen"
-                :song="song"
-                @cancel="saveModalOpen = false"
-            />
-            <editor-main v-else
+            <!-- Space reserved for other modal views -->
+            <editor-main
                 :song="song"
                 :highlightRow="highlightRow"
                 :highlightPattern="highlightPattern"
                 @play="songPlay"
                 @stop="songStop"
-                @save="saveModalOpen = true"
+                @save="save"
+                @load="load"
             />
         </div>
     `),
@@ -93,5 +90,36 @@ export default Vue.component('song-editor', {
         async songStop() {
             await this.processor.messageSend(ACTION_PLAYBACK_STOP, {/* Currently empty */});
         },
+        save() {
+            //
+            const songString = JSON.stringify(this.song.toJSON())
+            const songData = new Blob(
+                [songString],
+                {type : 'application/json'},
+            );
+            //
+            const link = document.createElement('a');
+            link.download = `${this.song.name}.json`;
+            link.href = URL.createObjectURL(songData);
+            //
+            link.click();
+            //
+            this.newData = false;
+        },
+        load() {
+            //
+            const reader = new FileReader();
+            reader.addEventListener('loadend', () => {
+                const songJSON = JSON.parse(reader.result);
+                this.song = new Song(songJSON);
+            })
+            //
+            const fileSelector = document.createElement('input');
+            fileSelector.type = 'file';
+            fileSelector.click();
+            fileSelector.addEventListener('change', () => {
+                reader.readAsText(fileSelector.files[0]);
+            });
+        }
     },
 });

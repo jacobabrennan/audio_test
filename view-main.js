@@ -52,10 +52,10 @@ export default Vue.component('editor-main', {
             </div>
             <div class="controls">
                 <div class="button_bar">
-                    <a href="#" @click="save">
-                        <button>{{newData? 'Save*' : 'Save'}}</button>
-                    </a>
-                    <button @click="$router.push('/')">Close</button>
+                    <button @click="$emit('save'); newData = false">
+                        {{newData? 'Save*' : 'Save'}}
+                    </button>
+                    <button @click="$emit('load')">Load</button>
                 </div>
                 <div class="button_bar">
                     <button @click="$emit('play')">Play</button>
@@ -152,7 +152,6 @@ export default Vue.component('editor-main', {
         handleHighlightPattern(patternNew) {
             if(!Number.isFinite(patternNew)) { return;}
             this.patternCurrentIndex = patternNew;
-            console.log(patternNew)
             this.patternCurrent = this.song.patterns[this.patternCurrentIndex];
         },
         handleCellEdit(event) {
@@ -230,19 +229,15 @@ export default Vue.component('editor-main', {
         toggleInstrumentEditor() {
             this.instrumentEditorOpen = !this.instrumentEditorOpen;
         },
-        notifySave() {
-            this.newData = true;
-        },
-        save(eventClick) {
-            const link = eventClick.currentTarget;
-            const songString = JSON.stringify(this.song.toJSON())
-            const songData = new Blob(
-                [songString],
-                {type : 'application/json'},
-            );
-            link.download = `${this.song.name}.json`;
-            link.href = URL.createObjectURL(songData);
-            this.newData = false;
+        notifySave(songNew, songOld) {
+            // Handle Edits
+            if(songNew === songOld) {
+                this.newData = true;
+                return;
+            }
+            // Handle Song Loading
+            this.handleInstrumentSelect(0);
+            this.handlePatternSelect(0);
         },
     },
     watch: {

@@ -97,17 +97,32 @@ export function noteNumberToName(note) {
 
 //-- Default Data --------------------------------
 export class Song {
-    constructor() {
-        this.id = null;
-        this.name = null;
-        this.author = null;
-        this.volume = 4;
-        this.beatsPerSecond = BPS_DEFAULT;
-        this.ticksPerBeat = TPB_DEFAULT;
-        this.patterns = [
-            new Pattern(),
-        ];
-        this.instruments = [new Instrument()];
+    constructor(data) {
+        if(!data) {
+            this.id = null;
+            this.name = null;
+            this.author = null;
+            this.volume = 4;
+            this.beatsPerSecond = BPS_DEFAULT;
+            this.ticksPerBeat = TPB_DEFAULT;
+            this.patterns = [
+                new Pattern(),
+            ];
+            this.instruments = [new Instrument()];
+            return;
+        }
+        this.id = data.id;
+        this.name = data.name;
+        this.author = data.author;
+        this.volume = data.volume;
+        this.beatsPerSecond = data.beatsPerSecond;
+        this.ticksPerBeat = data.ticksPerBeat;
+        this.patterns = data.patterns.map(
+            patternData => new Pattern(patternData)
+        );
+        this.instruments = data.instruments.map(
+            instrumentData => new Instrument(instrumentData)
+        );
     }
     toJSON() {
         return {
@@ -123,9 +138,14 @@ export class Song {
     }
 }
 export class Pattern {
-    constructor() {
-        this.name = 'New Pattern';
-        this.data = new Uint32Array(CHANNELS_NUMBER*32);
+    constructor(data) {
+        if(!data) {
+            this.name = 'New Pattern';
+            this.data = new Uint32Array(CHANNELS_NUMBER*32);
+            return;
+        }
+        this.name = data.name;
+        this.data = Uint32Array.from(data.data);
     }
     toJSON() {
         return {
@@ -135,13 +155,22 @@ export class Pattern {
     }
 }
 export class Instrument {
-    constructor() {
-        this.name = "New Instrument";
-        this.sustain = 0;
-        this.loopStart = undefined;
-        this.loopEnd = undefined;
-        this.envelopeVolume = [0.5];
-        this.envelopeDuration = [0];
+    constructor(data) {
+        if(!data) {
+            this.name = "New Instrument";
+            this.sustain = 0;
+            this.loopStart = undefined;
+            this.loopEnd = undefined;
+            this.envelopeVolume = [0.5];
+            this.envelopeDuration = [0];
+            return;
+        }
+        this.name = data.name;
+        this.sustain = data.sustain;
+        this.loopStart = data.loopStart;
+        this.loopEnd = data.loopend;
+        this.envelopeVolume = data.envelopeVolume;
+        this.envelopeDuration = data.envelopeDuration;
     }
     toJSON() {
         return {
