@@ -52,7 +52,9 @@ export default Vue.component('editor-main', {
             </div>
             <div class="controls">
                 <div class="button_bar">
-                    <button @click="$emit('save')">{{newData? 'Save*' : 'Save'}}</button>
+                    <a href="#" @click="save">
+                        <button>{{newData? 'Save*' : 'Save'}}</button>
+                    </a>
                     <button @click="$router.push('/')">Close</button>
                 </div>
                 <div class="button_bar">
@@ -231,7 +233,15 @@ export default Vue.component('editor-main', {
         notifySave() {
             this.newData = true;
         },
-        save() {
+        save(eventClick) {
+            const link = eventClick.currentTarget;
+            const songString = JSON.stringify(this.song.toJSON())
+            const songData = new Blob(
+                [songString],
+                {type : 'application/json'},
+            );
+            link.download = `${this.song.name}.json`;
+            link.href = URL.createObjectURL(songData);
             this.newData = false;
         },
     },
